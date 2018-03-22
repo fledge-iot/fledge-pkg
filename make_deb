@@ -29,7 +29,6 @@ Arguments:
  arm - Build an armv7l package"
 
 GIT_ROOT=`pwd`    # The script must be executed from the root git directory
-echo "The package root directory is ${GIT_ROOT}"
 
 # Check FOGLAMP_ROOT
 if [ -z ${FOGLAMP_ROOT+x} ]; then
@@ -48,10 +47,10 @@ BUILD_ROOT="${GIT_ROOT}/packages/Debian/build"
 
 case "$1" in
     x86)
-        platform="x86_64"
+        architecture="x86_64"
         ;;
     arm)
-        platform="armhf"
+        architecture="armhf"
         ;;
     *)
         echo "${usage}"
@@ -63,11 +62,13 @@ esac
 package_name="foglamp-${version}-${architecture}"
 
 # Print the summary of findings
-echo "The FogLAMP directory is     : ${FOGLAMP_ROOT}"
-echo "The FogLAMP version is       : ${version}"
-echo "The Package will be built in : ${BUILD_ROOT}"
-echo "The architecture is set as   : ${architecture}"
-echo "The package name is          : ${package_name}"
+echo "The package root directory is : ${GIT_ROOT}"
+echo "The FogLAMP directory is      : ${FOGLAMP_ROOT}"
+echo "The FogLAMP version is        : ${version}"
+echo "The Package will be built in  : ${BUILD_ROOT}"
+echo "The architecture is set as    : ${architecture}"
+echo "The package name is           : ${package_name}"
+echo
 
 # Create the package directory. If a directory with the same name exists,
 # it is copied with a version number.
@@ -91,8 +92,8 @@ mkdir "${package_name}"
 # First with files common to all pla
 echo -n "Populating the package..."
 cd "${package_name}"
-cp -R ${GIT_ROOT}/packages/Debian/DEBIAN_import/common/* 
-cp -R ${GIT_ROOT}/packages/Debian/DEBIAN_import/${architecture}/* .
+cp -R ${GIT_ROOT}/packages/Debian/common/* .
+cp -R ${GIT_ROOT}/packages/Debian/${architecture}/* .
 
 mkdir -p usr/local/foglamp
 cd usr/local/foglamp
@@ -100,13 +101,13 @@ cp -R ${FOGLAMP_ROOT}/* .
 echo "Done."
 
 # Add customised files
-echo -n "Adding FogLAMP customization..."
+#echo -n "Adding FogLAMP customization..."
 
-cp -R ${GIT_ROOT}/share/* share/postgresql/.
-cd ${BUILD_ROOT}/${package_name}/usr/local/foglamp/plugins/storage/postgres
-mkdir bin
-cp ${GIT_ROOT}/scripts/* bin/.
-echo "Done."
+#cp -R ${GIT_ROOT}/share/* share/postgresql/.
+#cd ${BUILD_ROOT}/${package_name}/usr/local/foglamp/plugins/storage/postgres
+#mkdir bin
+#cp ${GIT_ROOT}/scripts/* bin/.
+#echo "Done."
 
 # Build the package
 cd "${BUILD_ROOT}"
