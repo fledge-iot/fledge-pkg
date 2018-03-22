@@ -1,5 +1,25 @@
 #!/bin/bash
 
+##--------------------------------------------------------------------
+## Copyright (c) 2018 OSIsoft, LLC
+##
+## Licensed under the Apache License, Version 2.0 (the "License");
+## you may not use this file except in compliance with the License.
+## You may obtain a copy of the License at
+##
+##     http://www.apache.org/licenses/LICENSE-2.0
+##
+## Unless required by applicable law or agreed to in writing, software
+## distributed under the License is distributed on an "AS IS" BASIS,
+## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+## See the License for the specific language governing permissions and
+## limitations under the License.
+##--------------------------------------------------------------------
+##
+## Author: Ivan Zoratti
+##
+
+
 set -e
 
 usage="$(basename "$0") {x86|arm}
@@ -17,16 +37,14 @@ if [ -z ${FOGLAMP_ROOT+x} ]; then
     if [ -d "/usr/local/foglamp" ]; then
       FOGLAMP_ROOT="/usr/local/foglamp"
       export FOGLAMP_ROOT
-      echo "The FogLAMP directory is ${FOGLAMP_ROOT}"
     else
       echo "No FOGLAMP_ROOT directory found - Program exit."
       exit 1
     fi
 fi
 
-version=`head -1 ${GIT_ROOT}/version`
+version=`cat ${FOGLAMP_ROOT}/VERSION | tr -d ' ' | grep 'foglamp_version=' | head -1 | sed -e 's/\(.*\)=\(.*\)/\2/g'`
 BUILD_ROOT="${GIT_ROOT}/packages/Debian/build"
-echo "The Package will be built in ${BUILD_ROOT}"
 
 case "$1" in
     x86)
@@ -41,11 +59,15 @@ case "$1" in
         ;;
 esac
 
-echo "The architecture is set as ${architecture}"
-
 # Final package name
 package_name="foglamp-${version}-${architecture}"
-echo "The package name is ${package_name}"
+
+# Print the summary of findings
+echo "The FogLAMP directory is     : ${FOGLAMP_ROOT}"
+echo "The FogLAMP version is       : ${version}"
+echo "The Package will be built in : ${BUILD_ROOT}"
+echo "The architecture is set as   : ${architecture}"
+echo "The package name is          : ${package_name}"
 
 # Create the package directory. If a directory with the same name exists,
 # it is copied with a version number.
