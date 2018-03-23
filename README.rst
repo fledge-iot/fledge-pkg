@@ -1,3 +1,4 @@
+
 .. |br| raw:: html
 
 .. Links
@@ -18,6 +19,7 @@ Internal Structure
 ==================
 
 The repository contains the following set of files:
+
 - Files named with **make_** prefix, such as ``make_deb``, are the shell scripts used to build the package. |br| The scripts accept the architecture to build as argument (currently *x86* and *arm*).
 - The **packages** folder contains the list package types to build. At the moment, the only package type we provide is *Debian*
   - Inside the *packages/Debian* folder, we have the **architecture** folders, plus a *common* folder containing files that are common to all the architectures. |br| The architectures that we provide at the moment are *armhf* and *x86_64*.
