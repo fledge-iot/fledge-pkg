@@ -1,6 +1,4 @@
 
-.. |br| raw:: html
-
 .. Links
 .. _main repository: https://github.com/foglamp/FogLAMP
 
@@ -20,9 +18,9 @@ Internal Structure
 
 The repository contains the following set of files:
 
-- Files named with **make_** prefix, such as ``make_deb``, are the shell scripts used to build the package. |br| The scripts accept the architecture to build as argument (currently *x86* and *arm*).
+- Files named with **make_** prefix, such as ``make_deb``, are the shell scripts used to build the package. The scripts accept the architecture to build as argument (currently *x86* and *arm*).
 - The **packages** folder contains the list package types to build. At the moment, the only package type we provide is *Debian*
-  - Inside the *packages/Debian* folder, we have the **architecture** folders, plus a *common* folder containing files that are common to all the architectures. |br| The architectures that we provide at the moment are *armhf* and *x86_64*.
+  - Inside the *packages/Debian* folder, we have the **architecture** folders, plus a *common* folder containing files that are common to all the architectures. The architectures that we provide at the moment are *armhf* and *x86_64*.
     - Inside the architecture folder we have the DEBIAN folder, which contains all the Debian-based files, i.e. control, pre/post inst/rm, needed for the creation of the package.
   - After the first build, the *packages/Debian* will also contain a **build** folder. This folder contains a copy of what will be used to build the package (in a directory with the same name of the package) and the package itself.
     - In the *build* folder, folders and files that have a sequence number are a previous package build.
@@ -31,7 +29,9 @@ The repository contains the following set of files:
 Building a Package
 ==================
 
-First, make sure that FogLAMP is properly installed via ``make install`` somewhere on your environment (default is */usr/local/foglamp*). |br| Next, select the architecture to use, *x86* or *arm*. |br| Finally, run the ``make_deb`` command:
+First, make sure that FogLAMP is properly installed via ``make install`` somewhere on your environment (default is */usr/local/foglamp*).
+Next, select the architecture to use, *x86* or *arm*.
+Finally, run the ``make_deb`` command:
 
 .. code-block:: console
 
