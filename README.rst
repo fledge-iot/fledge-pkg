@@ -2,7 +2,6 @@
 .. Links
 .. _main repository: https://github.com/foglamp/FogLAMP
 
-   <br />
 
 *****************************
 Packaging Project for FogLAMP
@@ -49,4 +48,42 @@ Finally, run the ``make_deb`` command:
   Building Complete.
   $
   
+  The result will be:
+  
+.. code-block:: console
+
+  $ ls -l packages/Debian/build/
+   total 564
+   drwxrwxr-x 4 foglamp foglamp   4096 Mar 23 17:35 foglamp-1.2-x86_64
+   -rw-r--r-- 1 foglamp foglamp 572742 Mar 23 17:35 foglamp-1.2-x86_64.deb
+  $
+  
+If you execute the ``make_deb`` command again, you will see:
+
+.. code-block:: console
+
+  $ ./make_deb x86
+   The package root directory is : /home/foglamp/foglamp-pkg
+   The FogLAMP directory is      : /usr/local/foglamp
+   The FogLAMP version is        : 1.2
+   The Package will be built in  : /home/foglamp/foglamp-pkg/packages/Debian/build
+   The architecture is set as    : x86_64
+   The package name is           : foglamp-1.2-x86_64
+
+   Saving the old working environment as foglamp-1.2-x86_64.0001
+   Populating the package...Done.
+   Saving the old package as foglamp-1.2-x86_64.deb.0001
+   Building the new package...
+   dpkg-deb: building package 'foglamp' in 'foglamp-1.2-x86_64.deb'.
+   Building Complete.
+   $ ls -l packages/Debian/build/
+   total 1128
+   drwxrwxr-x 4 foglamp foglamp   4096 Mar 23 17:53 foglamp-1.2-x86_64
+   drwxrwxr-x 4 foglamp foglamp   4096 Mar 23 17:35 foglamp-1.2-x86_64.0001
+   -rw-r--r-- 1 foglamp foglamp 573080 Mar 23 17:54 foglamp-1.2-x86_64.deb
+   -rw-r--r-- 1 foglamp foglamp 572742 Mar 23 17:35 foglamp-1.2-x86_64.deb.0001
+   $
+   
+... where the previous build is now marked with the suffix *.0001*.
+
   
