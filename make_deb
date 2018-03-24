@@ -22,13 +22,55 @@
 
 set -e
 
-usage="$(basename "$0") {x86|arm}
+GIT_ROOT=`pwd`    # The script must be executed from the root git directory
+
+architecture="none"
+usage="$(basename "$0") {x86|arm} [clean|cleanall]
 This script is used to create the Debian package of FogLAMP
 Arguments: 
- x86 - Build an x86_64 package
- arm - Build an armv7l package"
+ x86      - Build an x86_64 package
+ arm      - Build an armv7l package
+ clean    - Remove all the old versions saved in format .XXXX
+ cleanall - Remove all the versions, including the last one"
 
-GIT_ROOT=`pwd`    # The script must be executed from the root git directory
+for i in "$@"
+do
+  case "$i" in
+      x86)
+          architecture="x86_64"
+          shift
+          ;;
+      arm)
+          architecture="armhf"
+          shift
+          ;;
+      clean)
+          echo -n "Cleaning the build folder from older versions..."
+          find "${GIT_ROOT}/packages/Debian/build" -maxdepth 1 | grep '.*\.[0-9][0-9][0-9][0-9]' | xargs rm -rf
+          echo "Done."
+          shift
+          ;;
+      cleanall)
+          if [ -d "${GIT_ROOT}/packages/Debian/build" ]; then
+            echo -n "Cleaning the build folder..."
+            rm -rf ${GIT_ROOT}/packages/Debian/build/*
+            echo "Done."
+          else
+            echo "No build folder, skipping cleanall"
+          fi
+          shift
+          ;;
+      *)
+          echo "${usage}"
+          exit 1
+          ;;
+  esac
+done
+
+# If the architecture has not been defined, then the script is complete
+if [[ "$architecture" == "none" ]]; then
+  exit 0
+fi
 
 # Check FOGLAMP_ROOT
 if [ -z ${FOGLAMP_ROOT+x} ]; then
@@ -44,19 +86,6 @@ fi
 
 version=`cat ${FOGLAMP_ROOT}/VERSION | tr -d ' ' | grep 'foglamp_version=' | head -1 | sed -e 's/\(.*\)=\(.*\)/\2/g'`
 BUILD_ROOT="${GIT_ROOT}/packages/Debian/build"
-
-case "$1" in
-    x86)
-        architecture="x86_64"
-        ;;
-    arm)
-        architecture="armhf"
-        ;;
-    *)
-        echo "${usage}"
-        exit 1
-        ;;
-esac
 
 # Final package name
 package_name="foglamp-${version}-${architecture}"
