@@ -29,6 +29,22 @@ The repository contains the following set of files:
     - In the *build* folder, folders and files that have a sequence number are a previous package build.
 
 
+The make_deb Script
+===================
+
+.. code-block:: console
+
+  $ ./make_deb --help
+  make_deb {x86|arm} [clean|cleanall]
+  This script is used to create the Debian package of FogLAMP
+  Arguments:
+   x86      - Build an x86_64 package
+   arm      - Build an armv7l package
+   clean    - Remove all the old versions saved in format .XXXX
+   cleanall - Remove all the versions, including the last one
+  $
+
+
 Building a Package
 ==================
 
@@ -91,4 +107,9 @@ If you execute the ``make_deb`` command again, you will see:
    
 ... where the previous build is now marked with the suffix *.0001*.
 
-  
+
+Cleaning the Package Folder
+===========================
+
+Use the ``clean`` option to remove all the old packages and the files used to make the package.
+Use the ``cleanall`` option to remove all the packages and the files used to make the package.
