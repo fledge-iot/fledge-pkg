@@ -28,7 +28,7 @@
 set -e
 
 # Set FogLAMP to run as a service
-cp usr/local/foglamp/extras/scripts/foglamp.service /etc/init.d/foglamp
+cp /usr/local/foglamp/extras/scripts/foglamp.service /etc/init.d/foglamp
 
 systemctl enable foglamp
 systemctl start foglamp
