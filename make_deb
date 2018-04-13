@@ -124,10 +124,17 @@ cd "${package_name}"
 cp -R ${GIT_ROOT}/packages/Debian/common/* .
 cp -R ${GIT_ROOT}/packages/Debian/${architecture}/* .
 
+sed -i "s/Version: 0.0/Version: $version/g" DEBIAN/control
 mkdir -p usr/local/foglamp
 cd usr/local/foglamp
 cp -R ${FOGLAMP_ROOT}/* .
 echo "Done."
+
+cd data
+rm -rf core.err
+rm -rf etc/certs/*
+rm -rf foglamp.db
+rm -rf var
 
 # Add customised files
 #echo -n "Adding FogLAMP customization..."
