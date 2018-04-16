@@ -3,7 +3,7 @@ Version: 0.0
 Section: devel
 Priority: optional
 Architecture: amd64
-Depends: postgresql,postgresql-server-dev-9.6,libpq-dev,jq,libboost-dev,libboost-system-dev,libboost-thread-dev,sqlite3,python3-pip
+Depends: postgresql,libpq-dev,jq,libboost-dev,libboost-system-dev,libboost-thread-dev,sqlite3,python3-pip
 Conflicts:
 Maintainer: Dianomic Systems, Inc. <info@dianomic.com>
 Homepage: http://www.dianomic.com

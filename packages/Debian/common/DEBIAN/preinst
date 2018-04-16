@@ -1,0 +1,106 @@
+#!/bin/sh
+
+##--------------------------------------------------------------------
+## Copyright (c) 2018 OSIsoft, LLC
+##
+## Licensed under the Apache License, Version 2.0 (the "License");
+## you may not use this file except in compliance with the License.
+## You may obtain a copy of the License at
+##
+##     http://www.apache.org/licenses/LICENSE-2.0
+##
+## Unless required by applicable law or agreed to in writing, software
+## distributed under the License is distributed on an "AS IS" BASIS,
+## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+## See the License for the specific language governing permissions and
+## limitations under the License.
+##--------------------------------------------------------------------
+
+##--------------------------------------------------------------------
+##
+## @preinst DEBIAN/preinst
+## This script is used to execute pre installation tasks.
+##
+## Author: Ivan Zoratti, Ashwin Gopalakrishnan
+##
+##--------------------------------------------------------------------
+
+set -e
+
+# preinst
+# schema check: Need to check if in preinst the package has been already extracted and in cache. What we need to do is:
+# >>> Check if foglamp is already installed and where (check the dpkg -L foglamp)
+
+
+PKG_NAME="foglamp"
+
+is_foglamp_installed () {
+    set +e
+    current_files_all=$(dpkg -L $PKG_NAME &> /dev/null)
+    rc=$((!$?))
+    echo $rc
+    set -e
+}
+
+get_foglamp_script () {
+    foglamp_script=$(dpkg -L $PKG_NAME | grep 'foglamp/bin/foglamp$')
+    echo $foglamp_script
+}
+
+is_foglamp_running () {
+    set +e
+    foglamp_script=$(get_foglamp_script)
+    foglamp_status_output=$($foglamp_script status 2>&1 | grep 'FogLAMP Uptime')
+    rc=$((!$?))
+    echo $rc
+    set -e
+}
+
+get_current_version_file () {
+    current_version_file=$(dpkg -L $PKG_NAME | grep VERSION)
+    echo $current_version_file
+}
+
+get_schema_version () {
+    version_file=$1
+    schema_version=$(grep foglamp_schema $version_file | awk -F = '{print $2}')
+    echo $schema_version
+}
+
+exists_schema_change_path () {
+    echo 1
+}
+
+# main
+
+# check if foglamp is installed
+IS_FOGLAMP_INSTALLED=$(is_foglamp_installed)
+echo "FINSIHED is_foglamp_installed with result $IS_FOGLAMP_INSTALLED"
+
+# if foglamp is installed...
+if [ "$IS_FOGLAMP_INSTALLED" -eq "1" ]
+then
+    # exit if foglamp is running
+    IS_FOGLAMP_RUNNING=$(is_foglamp_running)
+    echo "FINSIHED is_foglamp_running with return $IS_FOGLAMP_RUNNING"
+    if [ "$IS_FOGLAMP_RUNNING" -eq "1" ]
+    then
+        echo "exit"
+        exit 1
+    fi
+    
+    # check schema version file, exit if schema change path does not exist
+    CURRENT_VERSION_FILE=$(get_current_version_file)
+    echo "FINSIHED get_current_version_file with file $CURRENT_VERSION_FILE"
+    CURRENT_SCHEMA_VERSION=$(get_schema_version $CURRENT_VERSION_FILE)
+    echo "FINSIHED get_schema_version with version $CURRENT_SCHEMA_VERSION"
+    EXISTS_SCHEMA_CHANGE_PATH=$(exists_schema_change_path)
+    echo "FINSIHED exists_schema_change_path with $EXISTS_SCHEMA_CHANGE_PATH"
+    if [ "$EXISTS_SCHEMA_CHANGE_PATH" -eq "1" ]
+    then
+        echo "exit"
+        exit 1
+    fi
+fi
+
+
