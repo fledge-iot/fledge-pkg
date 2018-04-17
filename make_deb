@@ -130,7 +130,8 @@ cd usr/local/foglamp
 cp -R ${FOGLAMP_ROOT}/* .
 echo "Done."
 
-cd data
+mv data data.new
+cd data.new
 rm -rf core.err
 rm -rf etc/certs/*
 rm -rf foglamp.db

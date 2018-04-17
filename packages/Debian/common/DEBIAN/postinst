@@ -50,11 +50,24 @@ set_files_ownership () {
 }
 
 generate_certs () {
-    cd /usr/local/foglamp
-    ./scripts/certificates ${SSL_NAME} ${SSL_DAYS}
+    if [ ! -f /usr/local/foglamp/data/etc/certs/foglamp.cert ]; then
+        cd /usr/local/foglamp
+        ./scripts/certificates ${SSL_NAME} ${SSL_DAYS}
+    fi
+}
+
+copy_new_data () {
+    if [ ! -d /usr/local/foglamp/data ]; then
+        echo "Directory does not exists"
+        mv /usr/local/foglamp/data.new /usr/local/foglamp/data
+    else
+        cp /usr/local/foglamp/data.new/extras/fogbench/fogbench_sensor_coap.template.json /usr/local/foglamp/data/extras/fogbench/fogbench_sensor_coap.template.json
+        rm -rf /usr/local/foglamp/data.new
+    fi
 }
 
 # main
+copy_new_data
 copy_service_file
 generate_certs
 set_files_ownership

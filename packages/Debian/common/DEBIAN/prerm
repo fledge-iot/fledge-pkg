@@ -75,11 +75,7 @@ remove_pycache_files () {
 }
 
 remove_data_files () {
-    rm -rf /usr/local/foglamp/data/core.err
-    rm -rf /usr/local/foglamp/data/etc/certs/*
-    rm -rf /usr/local/foglamp/data/etc/storage.json
-    rm -rf /usr/local/foglamp/data/foglamp.db
-    rm -rf /usr/local/foglamp/data/var
+    rm -rf /usr/local/foglamp/data
 }
 
 # main
