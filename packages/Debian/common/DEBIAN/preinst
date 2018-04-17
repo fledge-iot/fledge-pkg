@@ -27,16 +27,11 @@
 
 set -e
 
-# preinst
-# schema check: Need to check if in preinst the package has been already extracted and in cache. What we need to do is:
-# >>> Check if foglamp is already installed and where (check the dpkg -L foglamp)
-
-
 PKG_NAME="foglamp"
 
 is_foglamp_installed () {
     set +e
-    current_files_all=$(dpkg -L $PKG_NAME &> /dev/null)
+    current_files_all=$(dpkg -L $PKG_NAME | grep 'foglamp/bin/foglamp$')
     rc=$((!$?))
     echo $rc
     set -e
@@ -72,7 +67,6 @@ exists_schema_change_path () {
 }
 
 # main
-
 # check if foglamp is installed
 IS_FOGLAMP_INSTALLED=$(is_foglamp_installed)
 echo "FINSIHED is_foglamp_installed with result $IS_FOGLAMP_INSTALLED"
@@ -96,7 +90,7 @@ then
     echo "FINSIHED get_schema_version with version $CURRENT_SCHEMA_VERSION"
     EXISTS_SCHEMA_CHANGE_PATH=$(exists_schema_change_path)
     echo "FINSIHED exists_schema_change_path with $EXISTS_SCHEMA_CHANGE_PATH"
-    if [ "$EXISTS_SCHEMA_CHANGE_PATH" -eq "1" ]
+    if [ "$EXISTS_SCHEMA_CHANGE_PATH" -eq "0" ]
     then
         echo "exit"
         exit 1
