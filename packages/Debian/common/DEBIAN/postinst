@@ -27,14 +27,40 @@
 
 set -e
 
-# Set FogLAMP to run as a service
-cp /usr/local/foglamp/extras/scripts/foglamp.service /etc/init.d/foglamp
+SSL_NAME="foglamp"
+SSL_DAYS="365"
+PKG_NAME="foglamp"
 
-chown root:root /etc/init.d/foglamp
-chown -R root:root /usr/local/foglamp
-chown -R ${SUDO_USER}:${SUDO_USER} /usr/local/foglamp/data
+copy_service_file() {
+    cp /usr/local/foglamp/extras/scripts/foglamp.service /etc/init.d/foglamp
+}
+
+enable_foglamp_service() {
+    systemctl enable foglamp
+}
+
+start_foglamp_service() {
+    systemctl start foglamp
+}
+
+set_files_ownership () {
+    chown root:root /etc/init.d/foglamp
+    chown -R root:root /usr/local/foglamp
+    chown -R ${SUDO_USER}:${SUDO_USER} /usr/local/foglamp/data
+}
+
+generate_certs () {
+    cd /usr/local/foglamp
+    ./scripts/certificates ${SSL_NAME} ${SSL_DAYS}
+}
+
+# main
+copy_service_file
+generate_certs
+set_files_ownership
+enable_foglamp_service
+start_foglamp_service
 
 
-systemctl enable foglamp
-systemctl start foglamp
+
 
