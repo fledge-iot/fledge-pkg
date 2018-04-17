@@ -30,7 +30,11 @@ set -e
 # Set FogLAMP to run as a service
 cp /usr/local/foglamp/extras/scripts/foglamp.service /etc/init.d/foglamp
 
+chown root:root /etc/init.d/foglamp
+chown -R root:root /usr/local/foglamp
+chown -R ${SUDO_USER}:${SUDO_USER} /usr/local/foglamp/data
+
+
 systemctl enable foglamp
 systemctl start foglamp
-
 
