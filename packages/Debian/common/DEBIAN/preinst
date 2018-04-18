@@ -78,7 +78,6 @@ then
 
     # exit if foglamp is running
     IS_FOGLAMP_RUNNING=$(is_foglamp_running)
-    echo "FINSIHED is_foglamp_running with return $IS_FOGLAMP_RUNNING"
     if [ "$IS_FOGLAMP_RUNNING" -eq "1" ]
     then
         echo "ERROR. FogLAMP is currently running. Stop FogLAMP and try again."
