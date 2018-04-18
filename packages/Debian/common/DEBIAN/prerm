@@ -79,16 +79,26 @@ remove_data_files () {
 }
 
 # main
+echo "prerm begin"
 IS_FOGLAMP_RUNNING=$(is_foglamp_running)
-echo "FINSIHED is_foglamp_running with return $IS_FOGLAMP_RUNNING"
 if [ "$IS_FOGLAMP_RUNNING" -eq "1" ]
 then
+    echo "FogLAMP is currently running."
+    echo "Stop FogLAMP service."
     stop_foglamp_service
+    echo "Kill FogLAMP."
     kill_foglamp
 fi
 
+echo "Remove data directory."
 remove_data_files
+echo "Remove python cache files."
 remove_pycache_files
+echo "Disable FogLAMP service."
 disable_foglamp_service
+echo "Remove FogLAMP service script"
 remove_foglamp_service_file
+echo "Reset systemctl"
 reset_systemctl
+
+echo "prerm complete"

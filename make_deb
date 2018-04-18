@@ -119,17 +119,18 @@ mkdir "${package_name}"
 
 # Populate the package directory with Debian files
 # First with files common to all pla
-echo -n "Populating the package..."
+echo -n "Populating the package and updating version in control file..."
 cd "${package_name}"
 cp -R ${GIT_ROOT}/packages/Debian/common/* .
 cp -R ${GIT_ROOT}/packages/Debian/${architecture}/* .
-
 sed -i "s/Version: 0.0/Version: $version/g" DEBIAN/control
 mkdir -p usr/local/foglamp
 cd usr/local/foglamp
 cp -R ${FOGLAMP_ROOT}/* .
 echo "Done."
 
+# Prepare new data directory
+echo "Prepare data directory"
 mv data data.new
 cd data.new
 rm -rf core.err

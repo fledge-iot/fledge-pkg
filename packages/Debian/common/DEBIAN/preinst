@@ -67,34 +67,36 @@ exists_schema_change_path () {
 }
 
 # main
+echo "preinst begin"
 # check if foglamp is installed
 IS_FOGLAMP_INSTALLED=$(is_foglamp_installed)
-echo "FINSIHED is_foglamp_installed with result $IS_FOGLAMP_INSTALLED"
 
 # if foglamp is installed...
 if [ "$IS_FOGLAMP_INSTALLED" -eq "1" ]
 then
+    echo "FogLAMP is already installed"
+
     # exit if foglamp is running
     IS_FOGLAMP_RUNNING=$(is_foglamp_running)
     echo "FINSIHED is_foglamp_running with return $IS_FOGLAMP_RUNNING"
     if [ "$IS_FOGLAMP_RUNNING" -eq "1" ]
     then
-        echo "exit"
+        echo "ERROR. FogLAMP is currently running. Stop FogLAMP and try again."
         exit 1
     fi
     
     # check schema version file, exit if schema change path does not exist
     CURRENT_VERSION_FILE=$(get_current_version_file)
-    echo "FINSIHED get_current_version_file with file $CURRENT_VERSION_FILE"
     CURRENT_SCHEMA_VERSION=$(get_schema_version $CURRENT_VERSION_FILE)
-    echo "FINSIHED get_schema_version with version $CURRENT_SCHEMA_VERSION"
+    echo "FogLAMP currently has schema version $CURRENT_SCHEMA_VERSION"
     EXISTS_SCHEMA_CHANGE_PATH=$(exists_schema_change_path)
-    echo "FINSIHED exists_schema_change_path with $EXISTS_SCHEMA_CHANGE_PATH"
     if [ "$EXISTS_SCHEMA_CHANGE_PATH" -eq "0" ]
     then
-        echo "exit"
+        echo "ERROR. There is no schema change path from the installed version to the new version."
         exit 1
     fi
+else
+    echo "FogLAMP is not installed"
 fi
 
-
+echo "preinst complete"
