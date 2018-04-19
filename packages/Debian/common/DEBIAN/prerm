@@ -90,8 +90,8 @@ then
     kill_foglamp
 fi
 
-echo "Remove data directory."
-remove_data_files
+#echo "Remove data directory."
+#remove_data_files
 echo "Remove python cache files."
 remove_pycache_files
 echo "Disable FogLAMP service."
