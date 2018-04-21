@@ -1,0 +1,103 @@
+#!/bin/sh
+
+##--------------------------------------------------------------------
+## Copyright (c) 2018 OSIsoft, LLC
+##
+## Licensed under the Apache License, Version 2.0 (the "License");
+## you may not use this file except in compliance with the License.
+## You may obtain a copy of the License at
+##
+##     http://www.apache.org/licenses/LICENSE-2.0
+##
+## Unless required by applicable law or agreed to in writing, software
+## distributed under the License is distributed on an "AS IS" BASIS,
+## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+## See the License for the specific language governing permissions and
+## limitations under the License.
+##--------------------------------------------------------------------
+
+##--------------------------------------------------------------------
+##
+## @prerm DEBIAN/prerm
+## This script is used to execute pre installation tasks.
+##
+## Author: Ivan Zoratti, Ashwin Gopalakrishnan
+##
+##--------------------------------------------------------------------
+
+set -e
+
+PKG_NAME="foglamp"
+
+get_foglamp_script () {
+    foglamp_script=$(dpkg -L $PKG_NAME | grep 'foglamp/bin/foglamp$')
+    echo $foglamp_script
+}
+
+stop_foglamp_service () {
+    systemctl stop foglamp
+}
+
+is_foglamp_running () {
+    set +e
+    foglamp_script=$(get_foglamp_script)
+    foglamp_status_output=$($foglamp_script status 2>&1 | grep 'FogLAMP Uptime')
+    rc=$((!$?))
+    echo $rc
+    set -e
+}
+
+kill_foglamp () {
+    set +e
+    foglamp_script=$(get_foglamp_script)
+    foglamp_status_output=$($foglamp_script kill 2>&1)
+    set -e
+}
+
+disable_foglamp_service () {
+    systemctl disable foglamp
+}
+
+remove_foglamp_service_file () {
+    rm -rf /etc/init.d/foglamp
+}
+
+reset_systemctl () {
+    systemctl daemon-reload
+    systemctl reset-failed
+}
+
+remove_pycache_files () {
+    set +e
+    find /usr/local/foglamp -name "*.pyc" -exec rm -rf {} \;
+    find /usr/local/foglamp -name "__pycache__" -exec rm -rf {} \;
+    set -e
+}
+
+remove_data_files () {
+    rm -rf /usr/local/foglamp/data
+}
+
+# main
+
+IS_FOGLAMP_RUNNING=$(is_foglamp_running)
+if [ "$IS_FOGLAMP_RUNNING" -eq "1" ]
+then
+    echo "FogLAMP is currently running."
+    echo "Stop FogLAMP service."
+    stop_foglamp_service
+    echo "Kill FogLAMP."
+    kill_foglamp
+fi
+
+#echo "Remove data directory."
+#remove_data_files
+echo "Remove python cache files."
+remove_pycache_files
+echo "Disable FogLAMP service."
+disable_foglamp_service
+echo "Remove FogLAMP service script"
+remove_foglamp_service_file
+echo "Reset systemctl"
+reset_systemctl
+
