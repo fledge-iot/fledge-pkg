@@ -71,7 +71,6 @@ copy_new_data () {
 }
 
 # main
-echo "postinst begin"
 
 echo "Resolving data directory"
 copy_new_data
@@ -85,8 +84,5 @@ echo "Enabling FogLAMP service"
 enable_foglamp_service
 echo "Starting FogLAMP service"
 start_foglamp_service
-
-echo "postinst complete"
-
 
 

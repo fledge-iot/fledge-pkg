@@ -79,7 +79,7 @@ remove_data_files () {
 }
 
 # main
-echo "prerm begin"
+
 IS_FOGLAMP_RUNNING=$(is_foglamp_running)
 if [ "$IS_FOGLAMP_RUNNING" -eq "1" ]
 then
@@ -101,4 +101,3 @@ remove_foglamp_service_file
 echo "Reset systemctl"
 reset_systemctl
 
-echo "prerm complete"

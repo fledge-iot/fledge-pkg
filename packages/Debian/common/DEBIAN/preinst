@@ -84,20 +84,20 @@ install_pip3_packages() {
 }
 
 # main
-echo "preinst begin"
+
 # check if foglamp is installed
 IS_FOGLAMP_INSTALLED=$(is_foglamp_installed)
 
 # if foglamp is installed...
 if [ "$IS_FOGLAMP_INSTALLED" -eq "1" ]
 then
-    echo "FogLAMP is already installed"
+    echo "FogLAMP is already installed: this is an upgrade/downgrade."
 
     # exit if foglamp is running
     IS_FOGLAMP_RUNNING=$(is_foglamp_running)
     if [ "$IS_FOGLAMP_RUNNING" -eq "1" ]
     then
-        echo "ERROR. FogLAMP is currently running. Stop FogLAMP and try again."
+        echo "*** ERROR. FogLAMP is currently running. Stop FogLAMP and try again. ***"
         exit 1
     fi
     
@@ -108,14 +108,11 @@ then
     EXISTS_SCHEMA_CHANGE_PATH=$(exists_schema_change_path)
     if [ "$EXISTS_SCHEMA_CHANGE_PATH" -eq "0" ]
     then
-        echo "ERROR. There is no schema change path from the installed version to the new version."
+        echo "*** ERROR. There is no schema change path from the installed version to the new version. ***"
         exit 1
     fi
 
-else
-    echo "FogLAMP is not installed"
 fi
 
 install_pip3_packages
 
-echo "preinst complete"
