@@ -66,6 +66,23 @@ exists_schema_change_path () {
     echo 1
 }
 
+install_pip3_packages() {
+
+  pip3 install --upgrade pip
+  pip3 install psycopg2
+  pip3 install aiohttp
+  pip3 install aiohttp_cors
+  pip3 install chardet
+  pip3 install requests
+  pip3 install pyjwt
+  pip3 install pyparsing
+  pip3 install aiocoap
+  pip3 install cbor2
+  pip3 install pexpect
+  pip3 install pyjq
+
+}
+
 # main
 echo "preinst begin"
 # check if foglamp is installed
@@ -94,6 +111,9 @@ then
         echo "ERROR. There is no schema change path from the installed version to the new version."
         exit 1
     fi
+
+    install_pip3_packages
+
 else
     echo "FogLAMP is not installed"
 fi
