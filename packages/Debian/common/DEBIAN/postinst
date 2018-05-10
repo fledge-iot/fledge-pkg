@@ -70,8 +70,13 @@ copy_new_data () {
     fi
 }
 
-# main
+install_pip3_packages () {
+    pip3 install -r /usr/local/foglamp/python/requirements.txt
+}
 
+# main
+echo "Install python dependencies"
+install_pip3_packages
 echo "Resolving data directory"
 copy_new_data
 echo "Installing service script"

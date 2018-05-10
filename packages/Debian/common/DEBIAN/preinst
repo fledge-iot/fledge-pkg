@@ -66,23 +66,6 @@ exists_schema_change_path () {
     echo 1
 }
 
-install_pip3_packages() {
-
-  sudo pip3 install --upgrade pip
-  sudo pip3 install psycopg2
-  sudo pip3 install aiohttp
-  sudo pip3 install aiohttp_cors
-  sudo pip3 install chardet
-  sudo pip3 install requests
-  sudo pip3 install pyjwt
-  sudo pip3 install pyparsing
-  sudo pip3 install aiocoap
-  sudo pip3 install cbor2
-  sudo pip3 install pexpect
-  sudo pip3 install pyjq
-
-}
-
 # main
 
 # check if foglamp is installed
@@ -114,5 +97,4 @@ then
 
 fi
 
-install_pip3_packages
 
