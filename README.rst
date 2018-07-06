@@ -58,7 +58,7 @@ Finally, run the ``make_deb`` command:
   The package root directory is : /home/foglamp/foglamp-pkg
   The FogLAMP directory is      : /usr/local/foglamp
   The FogLAMP version is        : 1.2
-  The Package will be built in  : /home/foglamp/foglamp-pkg/packages/Debian/build
+  The package will be built in  : /home/foglamp/foglamp-pkg/packages/Debian/build
   The architecture is set as    : x86_64
   The package name is           : foglamp-1.2-x86_64
 
@@ -86,7 +86,7 @@ If you execute the ``make_deb`` command again, you will see:
   The package root directory is : /home/foglamp/foglamp-pkg
   The FogLAMP directory is      : /usr/local/foglamp
   The FogLAMP version is        : 1.2
-  The Package will be built in  : /home/foglamp/foglamp-pkg/packages/Debian/build
+  The package will be built in  : /home/foglamp/foglamp-pkg/packages/Debian/build
   The architecture is set as    : x86_64
   The package name is           : foglamp-1.2-x86_64
 

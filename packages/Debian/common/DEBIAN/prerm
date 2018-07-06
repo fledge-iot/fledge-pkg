@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 ##--------------------------------------------------------------------
 ## Copyright (c) 2018 OSIsoft, LLC
@@ -19,11 +19,11 @@
 ##--------------------------------------------------------------------
 ##
 ## @prerm DEBIAN/prerm
-## This script is used to execute pre installation tasks.
+## This script is used to execute before the removal of files associated with the package.
 ##
 ## Author: Ivan Zoratti, Ashwin Gopalakrishnan
 ##
-##--------------------------------------------------------------------
+##----------------------------------------------------------------------------------------
 
 set -e
 
@@ -100,4 +100,3 @@ echo "Remove FogLAMP service script"
 remove_foglamp_service_file
 echo "Reset systemctl"
 reset_systemctl
-
