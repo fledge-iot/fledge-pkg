@@ -3,7 +3,7 @@ Version: 1.0.0
 Section: devel
 Priority: optional
 Architecture: amd64
-Depends: autoconf,curl,libtool,libboost-dev,libboost-system-dev,libboost-thread-dev,libpq-dev,postgresql,python3-pip,python3-setuptools,sqlite3
+Depends: autoconf,curl,libtool,libboost-dev,libboost-system-dev,libboost-thread-dev,python3-pip,python3-setuptools,sqlite3
 Conflicts:
 Maintainer: Dianomic Systems, Inc. <info@dianomic.com>
 Homepage: http://www.dianomic.com
