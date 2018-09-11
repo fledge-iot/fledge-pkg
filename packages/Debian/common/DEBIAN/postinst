@@ -21,7 +21,7 @@
 ## @postinst DEBIAN/postinst
 ## This script is used to execute post installation tasks.
 ##
-## Author: Ivan Zoratti
+## Author: Ivan Zoratti, Massimiliano Pinto
 ##
 ##--------------------------------------------------------------------
 
@@ -74,6 +74,24 @@ install_pip3_packages () {
     pip3 install -r /usr/local/foglamp/python/requirements.txt
 }
 
+# Call FogLAMP package update script
+# Any message will be written by called update script
+call_package_update_script () {
+    # File created by presinstall hook
+    installed_version_file="/usr/local/foglamp/.current_installed_version"
+    if [ -s "${installed_version_file}" ]; then
+        current_installed_version=`cat ${installed_version_file}`
+        update_script="/usr/local/foglamp/scripts/package/debian/package_update.sh"
+        # Check update script exists
+        if [ -x "${update_script}" ] && [ -s "${update_script}" ]; then
+            # Call Debian update script passing the previous version
+            ${update_script} ${current_installed_version}
+        fi
+        # Update done: remove temp file
+        rm ${installed_version_file}
+    fi
+}
+
 # main
 echo "Install python dependencies"
 install_pip3_packages
@@ -85,6 +103,10 @@ echo "Generating certificate files"
 generate_certs
 echo "Setting ownership of FogLAMP files"
 set_files_ownership
+
+# Call FogLAMP package update script
+call_package_update_script
+
 echo "Enabling FogLAMP service"
 enable_foglamp_service
 echo "Starting FogLAMP service"
