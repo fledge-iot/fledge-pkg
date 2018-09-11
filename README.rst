@@ -47,11 +47,10 @@ The make_deb Script
 .. warning::
 
   Postgres dependencies will not be installed automatically.
-  In order to use postgres storage engine, you will need manual installation of `libpq-dev` and `postgresql`.
+  In order to use postgres storage engine, you will need manual installation of `postgresql`.
 
     .. code-block:: console
 
-       yes Y | sudo apt install libpq-dev
        yes Y | sudo apt install postgresql
 
 
