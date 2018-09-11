@@ -83,7 +83,7 @@ call_package_update_script () {
         current_installed_version=`cat ${installed_version_file}`
         update_script="/usr/local/foglamp/scripts/package/debian/package_update.sh"
         # Check update script exists
-        if [ -x "${update_script}" ] && [ -s "${update_script}" ]; then
+        if [ -x "${update_script}" ] && [ -s "${update_script}" ] && [ -O "${update_script}" ]; then
             # Call Debian update script passing the previous version
             ${update_script} ${current_installed_version}
         fi
