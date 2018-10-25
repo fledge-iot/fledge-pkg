@@ -32,6 +32,8 @@ SSL_NAME="foglamp"
 SSL_DAYS="365"
 
 link_update_task() {
+    chmod u+s /usr/local/foglamp/bin/update_task.apt
+    rm /usr/local/foglamp/scripts/tasks/update 2> /dev/null
     ln -s /usr/local/foglamp/bin/update_task.apt /usr/local/foglamp/scripts/tasks/update
 }
 
