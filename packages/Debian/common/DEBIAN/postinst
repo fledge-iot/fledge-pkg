@@ -31,6 +31,19 @@ set -e
 SSL_NAME="foglamp"
 SSL_DAYS="365"
 
+link_update_task() {
+    echo "Changing setuid of update_task.apt"
+    chmod ugo+s /usr/local/foglamp/bin/update_task.apt
+    echo "Removing task/update"
+    [ -e /usr/local/foglamp/scripts/tasks/update ] && rm  /usr/local/foglamp/scripts/tasks/update
+    echo "Create link file"
+    ln -s /usr/local/foglamp/bin/update_task.apt /usr/local/foglamp/scripts/tasks/update
+}
+
+copy_foglamp_sudoer_file() {
+    cp /usr/local/foglamp/bin/foglamp.sudoers /etc/sudoers.d/foglamp
+}
+
 copy_service_file() {
     cp /usr/local/foglamp/extras/scripts/foglamp.service /etc/init.d/foglamp
 }
@@ -106,6 +119,12 @@ set_files_ownership
 
 # Call FogLAMP package update script
 call_package_update_script
+
+echo "Linking update task"
+link_update_task
+
+echo "Copying sodoers file"
+copy_foglamp_sudoer_file
 
 echo "Enabling FogLAMP service"
 enable_foglamp_service
