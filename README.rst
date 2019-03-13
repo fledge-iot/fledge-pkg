@@ -44,6 +44,16 @@ The make_deb Script
    cleanall - Remove all the versions, including the last one
   $
 
+.. warning::
+
+  Postgres dependencies will not be installed automatically.
+  In order to use postgres storage engine, you will need manual installation of `postgresql`.
+
+    .. code-block:: console
+
+       yes Y | sudo apt install postgresql
+
+
 
 Building a Package
 ==================

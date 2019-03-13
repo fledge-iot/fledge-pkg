@@ -21,7 +21,7 @@
 ## @preinst DEBIAN/preinst
 ## This script is used to execute pre installation tasks.
 ##
-## Author: Ivan Zoratti, Ashwin Gopalakrishnan
+## Author: Ivan Zoratti, Ashwin Gopalakrishnan, Massimiliano Pinto
 ##
 ##--------------------------------------------------------------------
 
@@ -83,7 +83,18 @@ then
         echo "*** ERROR. FogLAMP is currently running. Stop FogLAMP and try again. ***"
         exit 1
     fi
-    
+
+    # Persist current version in case of upgrade/downgrade
+    installed_version=`dpkg -s ${PKG_NAME} | grep '^Version:' | awk '{print $2}'`
+    if [ "${installed_version}" ]
+    then
+        # Persist current FogLAMP version: it will be removed by postinstall script
+        this_dir=`pwd`
+        cd usr/local/foglamp/
+        echo "${installed_version}" > .current_installed_version
+        cd ${this_dir}
+    fi
+
     # check schema version file, exit if schema change path does not exist
     CURRENT_VERSION_FILE=$(get_current_version_file)
     CURRENT_SCHEMA_VERSION=$(get_schema_version $CURRENT_VERSION_FILE)
