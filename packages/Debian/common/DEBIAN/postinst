@@ -30,6 +30,7 @@ set -e
 # certificate generation defaults
 SSL_NAME="foglamp"
 SSL_DAYS="365"
+AUTH_NAME="ca"
 
 link_update_task() {
     echo "Changing setuid of update_task.apt"
@@ -69,6 +70,30 @@ generate_certs () {
         ./scripts/certificates ${SSL_NAME} ${SSL_DAYS}
     else
         echo "Certificate files already exist. Skipping generating new certificate files."
+    fi
+}
+
+generate_auth_certs () {
+    if [ ! -f /usr/local/foglamp/data/etc/certs/ca.cert ]; then
+        echo "CA Certificate file does not exist. Generating new CA certificate file."
+        cd /usr/local/foglamp
+        ./scripts/auth_certificates ca ${AUTH_NAME} ${SSL_DAYS}
+    else
+        echo "CA Certificate file already exists. Skipping generating new CA certificate file."
+    fi
+    if [ ! -f /usr/local/foglamp/data/etc/certs/admin.cert ]; then
+        echo "Admin Certificate file does not exist. Generating new admin certificate file."
+        cd /usr/local/foglamp
+        ./scripts/auth_certificates user admin ${SSL_DAYS}
+    else
+        echo "Admin Certificate file already exists. Skipping generating new admin certificate file."
+    fi
+    if [ ! -f /usr/local/foglamp/data/etc/certs/user.cert ]; then
+        echo "User Certificate file does not exist. Generating new user certificate file."
+        cd /usr/local/foglamp
+        ./scripts/auth_certificates user user ${SSL_DAYS}
+    else
+        echo "User Certificate file already exists. Skipping generating new user certificate file."
     fi
 }
 
@@ -114,6 +139,8 @@ echo "Installing service script"
 copy_service_file
 echo "Generating certificate files"
 generate_certs
+echo "Generating auth certificate files"
+generate_auth_certs
 echo "Setting ownership of FogLAMP files"
 set_files_ownership
 
