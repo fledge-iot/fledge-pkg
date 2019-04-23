@@ -63,6 +63,10 @@ set_files_ownership () {
     chown -R ${SUDO_USER}:${SUDO_USER} /usr/local/foglamp/data
 }
 
+setuid_cmdutil () {
+    chmod u+s /usr/local/foglamp/extras/C/cmdutil
+}
+
 generate_certs () {
     if [ ! -f /usr/local/foglamp/data/etc/certs/foglamp.cert ]; then
         echo "Certificate files do not exist. Generating new certificate files."
@@ -143,16 +147,14 @@ echo "Generating auth certificate files"
 generate_auth_certs
 echo "Setting ownership of FogLAMP files"
 set_files_ownership
-
-# Call FogLAMP package update script
+echo "Calling FogLAMP package update script"
 call_package_update_script
-
 echo "Linking update task"
 link_update_task
-
 echo "Copying sodoers file"
 copy_foglamp_sudoer_file
-
+echo "Setting setuid bit of cmdutil"
+setuid_cmdutil
 echo "Enabling FogLAMP service"
 enable_foglamp_service
 echo "Starting FogLAMP service"
