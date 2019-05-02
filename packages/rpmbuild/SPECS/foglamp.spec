@@ -53,7 +53,7 @@ PKG_NAME="foglamp"
 
 is_foglamp_installed () {
     set +e
-    sudo rm -f /var/run/yum.pid
+    rm -f /var/run/yum.pid
     rc=`yum list installed ${PKG_NAME} 2> /dev/null | grep -c foglamp`
     echo $rc
     set -e
@@ -199,8 +199,8 @@ remove_foglamp_service_file () {
 }
 
 reset_systemctl () {
-    sudo systemctl daemon-reload
-    sudo systemctl reset-failed
+    systemctl daemon-reload
+    systemctl reset-failed
 }
 
 remove_pycache_files () {
