@@ -47,14 +47,12 @@ FogLAMP, the open source platform for the Internet of Things
 ##
 ##--------------------------------------------------------------------
 
-# FIXME_I
-#set -e
+set -e
 
 PKG_NAME="foglamp"
 
 is_foglamp_installed () {
     set +e
-    # FIXME_I
     sudo rm -f /var/run/yum.pid
     rc=`yum list installed ${PKG_NAME} 2> /dev/null | grep -c foglamp`
     echo $rc
@@ -161,8 +159,7 @@ fi
 ##
 ##----------------------------------------------------------------------------------------
 
-# FIXME_I
-#set -e
+set -e
 
 PKG_NAME="foglamp"
 
@@ -192,9 +189,8 @@ kill_foglamp () {
 }
 
 disable_foglamp_service () {
-	# FIXME_I
 	set +e
-    sudo systemctl disable foglamp
+	/sbin/chkconfig foglamp off
     set -e
 }
 
@@ -209,7 +205,6 @@ reset_systemctl () {
 
 remove_pycache_files () {
     set +e
-    # FIXME_I
     find /usr/local/foglamp -name "*.pyc" -exec rm -rf {} \;
     find /usr/local/foglamp -name "__pycache__" -exec rm -rf {} \;
     set -e
@@ -272,9 +267,7 @@ reset_systemctl
 ##
 ##--------------------------------------------------------------------
 
-# FIXME_I
-#set -e
-
+set -e
 
 # certificate generation defaults
 SSL_NAME="foglamp"
@@ -299,16 +292,12 @@ copy_service_file() {
 }
 
 enable_foglamp_service() {
-	# FIXME_I
-    #systemctl enable foglamp
-	/sbin/chkconfig foglamp on
 
+	/sbin/chkconfig foglamp on
 }
 
 start_foglamp_service() {
-	# FIXME_I
-    #systemctl start foglamp
-    echo ""
+    systemctl start foglamp
 }
 
 set_files_ownership () {
@@ -367,7 +356,7 @@ copy_new_data () {
 }
 
 install_pip3_packages () {
-
+	set +e
 	echo "# "                                   >> /home/${SUDO_USER}/.bashrc
 	echo "# added by FogLamp"                   >> /home/${SUDO_USER}/.bashrc
 	echo "source scl_source enable rh-python36" >> /home/${SUDO_USER}/.bashrc
@@ -377,6 +366,7 @@ install_pip3_packages () {
 	pip install -Ir /usr/local/foglamp/python/requirements.txt
 
 	sudo bash -c 'source scl_source enable rh-python36;pip install dbus-python'
+	set -e
 }
 
 # Call FogLAMP package update script
