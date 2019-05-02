@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+##--------------------------------------------------------------------
+## Copyright (c) 2019 OSIsoft, LLC
+##
+## Licensed under the Apache License, Version 2.0 (the "License");
+## you may not use this file except in compliance with the License.
+## You may obtain a copy of the License at
+##
+##     http://www.apache.org/licenses/LICENSE-2.0
+##
+## Unless required by applicable law or agreed to in writing, software
+## distributed under the License is distributed on an "AS IS" BASIS,
+## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+## See the License for the specific language governing permissions and
+## limitations under the License.
+##--------------------------------------------------------------------
+##
+## Author: Stefano Simonelli
+##
+
+echo "make rpm"
+
+
+#base_dir=/home/ec2-user/repos/foglamp-pkg/packages
+
+# Develop
+base_dir=/home/foglamp/repos/foglamp-pkg/packages
+
+# Foglamp should be in
+# ${base_dir}/rpmbuild/BUILDROOT/foglamp-1.5.02-0.0.00.x86_64/usr/local/
+
+rpmbuild --define "_topdir ${base_dir}/rpmbuild"   --noclean -bb ${base_dir}/rpmbuild/SPECS/foglamp.spec
+
+ls -l  ${base_dir}/rpmbuild/RPMS/x86_64
