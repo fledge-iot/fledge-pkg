@@ -2,7 +2,7 @@
 
 Name:          foglamp
 Vendor:        Dianomic Systems, Inc. <info@dianomic.com>
-Version:       1.5.02
+Version: 1.0.0
 Release:       0.0.00
 BuildArch:     x86_64
 Summary:       FogLAMP, the open source platform for the Internet of Things
@@ -284,7 +284,7 @@ link_update_task() {
 }
 
 copy_foglamp_sudoer_file() {
-    cp /usr/local/foglamp/bin/foglamp.sudoers /etc/sudoers.d/foglamp
+    cp /usr/local/foglamp/bin/foglamp.sudoers_rh /etc/sudoers.d/foglamp
 }
 
 copy_service_file() {

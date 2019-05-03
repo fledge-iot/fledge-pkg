@@ -16,20 +16,142 @@
 ## limitations under the License.
 ##--------------------------------------------------------------------
 ##
-## Author: Stefano Simonelli
+## Author: Ivan Zoratti, Ashish Jabble, Stefano Simonelli
 ##
 
-echo "make rpm"
+# FIXME_I
+#set -e
 
+GIT_ROOT=`pwd`    # The script must be executed from the root git directory
 
-#base_dir=/home/ec2-user/repos/foglamp-pkg/packages
+architecture="none"
+usage="$(basename "$0") help [clean|cleanall]
+This script is used to create the RPM package of FogLAMP
+Arguments:
+ help     - Display this help text
+ clean    - Remove all the old versions saved in format .XXXX
+ cleanall - Remove all the versions, including the last one"
 
-# Develop
-base_dir=/home/foglamp/repos/foglamp-pkg/packages
+for i in "$@"
+do
+	case "$i" in
+		clean)
+			echo -n "Cleaning the build folder from older versions..."
+			find "${GIT_ROOT}/packages/rpmbuild/BUILDROOT" -maxdepth 1 | grep '.*\.[0-9][0-9][0-9][0-9]' | xargs rm -rf
+			echo "Done."
+			exit 0
+			;;
+		cleanall)
+			if [ -d "${GIT_ROOT}/packages/rpmbuild/BUILDROOT" ]; then
 
-# Foglamp should be in
-# ${base_dir}/rpmbuild/BUILDROOT/foglamp-1.5.02-0.0.00.x86_64/usr/local/
+				echo -n "Cleaning the build folder..."
+				sudo rm -rf ${GIT_ROOT}/packages/rpmbuild/BUILDROOT/*
+				echo "Done."
+			else
+				echo "No build folder, skipping cleanall"
+			fi
+			exit 0
+			;;
 
+		help)
+			echo "${usage}"
+			exit 0
+			;;
+		*)
+		echo "Unrecognized option: $i"
+		exit 1
+		;;
+	esac
+done
+
+architecture="x86_64"
+
+# If the architecture has not been defined, then the script is complete
+if [[ "$architecture" == "none" ]]; then
+  exit 0
+fi
+
+# Check FOGLAMP_ROOT
+if [ -z ${FOGLAMP_ROOT+x} ]; then
+    # Set FOGLAMP_ROOT as the default directory
+    if [ -d "/usr/local/foglamp" ]; then
+      FOGLAMP_ROOT="/usr/local/foglamp"
+      export FOGLAMP_ROOT
+    else
+      echo "No FOGLAMP_ROOT directory found - Program exit."
+      exit 1
+    fi
+fi
+
+version=`cat ${FOGLAMP_ROOT}/VERSION | tr -d ' ' | grep 'foglamp_version=' | head -1 | sed -e 's/\(.*\)=\(.*\)/\2/g'`
+BUILD_ROOT="${GIT_ROOT}/packages/rpmbuild/BUILDROOT"
+
+# Final package name
+package_name="foglamp-${version}-0.0.00.${architecture}"
+
+# Print the summary of findings
+echo "The package root directory is : ${GIT_ROOT}"
+echo "The FogLAMP directory is      : ${FOGLAMP_ROOT}"
+echo "The FogLAMP version is        : ${version}"
+echo "The package will be built in  : ${BUILD_ROOT}"
+echo "The package name is           : ${package_name}"
+echo
+
+# Create the package directory. If a directory with the same name exists,
+# it is copied with a version number.
+
+# First, create the BUILD_ROOT folder, if necessary
+if [ ! -L "${BUILD_ROOT}" -a ! -d "${BUILD_ROOT}" ]; then
+    mkdir -p "${BUILD_ROOT}"
+fi
+
+cd "${BUILD_ROOT}"
+existing_pkgs=`find . -maxdepth 1 -name "${package_name}.????" | wc -l`
+existing_pkgs=$((existing_pkgs+1))
+new_stored_pkg=$(printf "${package_name}.%04d" "${existing_pkgs}")
+if [ -d "${package_name}" ]; then
+    echo "Saving the old working environment as ${new_stored_pkg}"
+    mv "${package_name}" "${new_stored_pkg}"
+fi
+mkdir "${package_name}"
+
+# Populate the package directory with Debian files
+# First with files common to all pla
+echo -n "Populating the package and updating version in control file..."
+cd "${package_name}"
+sed -i "s/Version: 1.0.0/Version: $version/g" ${GIT_ROOT}/packages/rpmbuild/SPECS/foglamp.spec
+mkdir -p usr/local/foglamp
+cd usr/local/foglamp
+cp -R ${FOGLAMP_ROOT}/* .
+echo "Done."
+
+# Prepare new data directory
+echo "Prepare data directory"
+# FIXME_I
+#mv data data.new
+cd data
+rm -rf core.err
+rm -rf ./etc/certs/*
+rm -rf foglamp.db*
+rm -rf var
+
+# Build the package
+cd "${BUILD_ROOT}"
+cd ..
+cd RPMS
+cd ${architecture}
+
+# Save the old versions
+existing_pkgs=`find . -maxdepth 1 -name "${package_name}.rpm.????" | wc -l`
+existing_pkgs=$((existing_pkgs+1))
+new_stored_pkg=$(printf "${package_name}.rpm.%04d" "${existing_pkgs}")
+
+if [ -e "${package_name}.rpm" ]; then
+    echo "Saving the old package as ${new_stored_pkg}"
+    mv "${package_name}.rpm" "${new_stored_pkg}"
+fi
+
+echo "Building the new package..."
+base_dir=${GIT_ROOT}/packages
 rpmbuild --define "_topdir ${base_dir}/rpmbuild"   --noclean -bb ${base_dir}/rpmbuild/SPECS/foglamp.spec
-
-ls -l  ${base_dir}/rpmbuild/RPMS/x86_64
+echo "Building Complete."
