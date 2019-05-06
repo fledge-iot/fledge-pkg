@@ -19,8 +19,7 @@
 ## Author: Ivan Zoratti, Ashish Jabble, Stefano Simonelli
 ##
 
-# FIXME_I
-#set -e
+set -e
 
 GIT_ROOT=`pwd`    # The script must be executed from the root git directory
 
