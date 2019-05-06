@@ -1,10 +1,10 @@
 %define __spec_install_pre /bin/true
 
-Name:          foglamp
+Name:          __NAME__
 Vendor:        Dianomic Systems, Inc. <info@dianomic.com>
-Version: 1.0.0
-Release:       0.0.00
-BuildArch:     x86_64
+Version:       __VERSION__
+Release:       0.00
+BuildArch:     __ARCH__
 Summary:       FogLAMP, the open source platform for the Internet of Things
 License:       Apache License
 Group: 	       IOT
@@ -13,7 +13,7 @@ URL:           http://www.dianomic.com
 %define install_path	/usr/local
 
 Prefix:        /usr/local
-Requires:      centos-release-scl, boost-devel, glib2-devel, rsyslog, openssl-devel, wget, zlib-devel, git, cmake, libuuid-devel, dbus-devel, sqlite, postgresql-devel, rh-python36
+Requires:      centos-release-scl, boost-devel, glib2-devel, rsyslog, openssl-devel, wget, zlib-devel, git, cmake, libuuid-devel, dbus-devel, sqlite, postgresql-devel, rh-python36, avahi, avahi-tools
 AutoReqProv:   no
 
 

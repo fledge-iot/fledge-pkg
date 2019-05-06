@@ -24,6 +24,9 @@
 
 GIT_ROOT=`pwd`    # The script must be executed from the root git directory
 
+pkg_name="foglamp"
+
+
 architecture="none"
 usage="$(basename "$0") help [clean|cleanall]
 This script is used to create the RPM package of FogLAMP
@@ -87,13 +90,13 @@ version=`cat ${FOGLAMP_ROOT}/VERSION | tr -d ' ' | grep 'foglamp_version=' | hea
 BUILD_ROOT="${GIT_ROOT}/packages/rpmbuild/BUILDROOT"
 
 # Final package name
-package_name="foglamp-${version}-0.0.00.${architecture}"
+package_name="${pkg_name}-${version}-0.00.${architecture}"
 
 # Print the summary of findings
 echo "The package root directory is : ${GIT_ROOT}"
 echo "The FogLAMP directory is      : ${FOGLAMP_ROOT}"
 echo "The FogLAMP version is        : ${version}"
-echo "The package will be built in  : ${BUILD_ROOT}"
+echo "The package will be built in  : ${GIT_ROOT}/packages/rpmbuild/RPMS/${architecture}"
 echo "The package name is           : ${package_name}"
 echo
 
@@ -119,7 +122,11 @@ mkdir "${package_name}"
 # First with files common to all pla
 echo -n "Populating the package and updating version in control file..."
 cd "${package_name}"
-sed -i "s/Version: 1.0.0/Version: $version/g" ${GIT_ROOT}/packages/rpmbuild/SPECS/foglamp.spec
+
+sed -i "s/__NAME__/${pkg_name}/g"     ${GIT_ROOT}/packages/rpmbuild/SPECS/foglamp.spec
+sed -i "s/__VERSION__/${version}/g"   ${GIT_ROOT}/packages/rpmbuild/SPECS/foglamp.spec
+sed -i "s/__ARCH__/${architecture}/g" ${GIT_ROOT}/packages/rpmbuild/SPECS/foglamp.spec
+
 mkdir -p usr/local/foglamp
 cd usr/local/foglamp
 cp -R ${FOGLAMP_ROOT}/* .
@@ -155,3 +162,5 @@ echo "Building the new package..."
 base_dir=${GIT_ROOT}/packages
 rpmbuild --define "_topdir ${base_dir}/rpmbuild"   --noclean -bb ${base_dir}/rpmbuild/SPECS/foglamp.spec
 echo "Building Complete."
+
+exit 0
