@@ -106,7 +106,7 @@ then
     fi
 
     # Persist current version in case of upgrade/downgrade
-    installed_version=`rpm -qi ${PKG_NAME} | grep Version |awk '{print $3}`
+    installed_version=`rpm -qi ${PKG_NAME} | grep Version |awk '{print $3}'`
     if [ "${installed_version}" ]
     then
         # Persist current FogLAMP version: it will be removed by postinstall script
