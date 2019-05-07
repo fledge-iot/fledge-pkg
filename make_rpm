@@ -133,8 +133,6 @@ echo "Done."
 
 # Prepare new data directory
 echo "Prepare data directory"
-# FIXME_I
-#mv data data.new
 cd data
 rm -rf core.err
 rm -rf ./etc/certs/*

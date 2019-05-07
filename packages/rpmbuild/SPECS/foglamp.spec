@@ -13,7 +13,7 @@ URL:           http://www.dianomic.com
 %define install_path	/usr/local
 
 Prefix:        /usr/local
-Requires:      centos-release-scl, boost-devel, glib2-devel, rsyslog, openssl-devel, wget, zlib-devel, git, cmake, libuuid-devel, dbus-devel, sqlite, postgresql-devel, rh-python36, avahi, avahi-tools
+Requires:      boost-devel, glib2-devel, rsyslog, openssl-devel, wget, zlib-devel, git, cmake, libuuid-devel, dbus-devel, postgresql-devel, rh-python36, avahi
 AutoReqProv:   no
 
 
@@ -52,9 +52,8 @@ set -e
 PKG_NAME="foglamp"
 
 is_foglamp_installed () {
-    set +e
-    rm -f /var/run/yum.pid
-    rc=`yum list installed ${PKG_NAME} 2> /dev/null | grep -c foglamp`
+	set +e
+    rc=`rpm -qa  2> /dev/null  | grep -c ${PKG_NAME}`
     echo $rc
     set -e
 }
@@ -107,7 +106,7 @@ then
     fi
 
     # Persist current version in case of upgrade/downgrade
-    installed_version=`yum list installed ${PKG_NAME} | grep ${PKG_NAME} | awk '{print $2}'`
+    installed_version=`rpm -qi ${PKG_NAME} | grep Version |awk '{print $3}`
     if [ "${installed_version}" ]
     then
         # Persist current FogLAMP version: it will be removed by postinstall script
