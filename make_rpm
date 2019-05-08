@@ -89,6 +89,7 @@ version=`cat ${FOGLAMP_ROOT}/VERSION | tr -d ' ' | grep 'foglamp_version=' | hea
 BUILD_ROOT="${GIT_ROOT}/packages/rpmbuild/BUILDROOT"
 
 mkdir -p ${GIT_ROOT}/packages/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+mkdir -p ${GIT_ROOT}/packages/rpmbuild/RPMS/x86_64
 
 # Final package name
 package_name="${pkg_name}-${version}-0.00.${architecture}"
