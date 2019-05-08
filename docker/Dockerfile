@@ -25,6 +25,8 @@ RUN echo "service rsyslog start" > start.sh && \
 ENV FOGLAMP_ROOT=/usr/local/foglamp
 
 VOLUME /usr/local/foglamp/data
+
+# These Volumes will be used in future when we want to install plugins
 VOLUME /usr/local/foglamp
 VOLUME /foglamp-core/FogLAMP
 
