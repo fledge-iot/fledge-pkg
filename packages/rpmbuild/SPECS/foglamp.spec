@@ -13,7 +13,7 @@ URL:           http://www.dianomic.com
 %define install_path	/usr/local
 
 Prefix:        /usr/local
-Requires:      boost-devel, glib2-devel, rsyslog, openssl-devel, wget, zlib-devel, git, cmake, libuuid-devel, dbus-devel, postgresql-devel, rh-python36, avahi
+Requires:      @development, boost-devel, glib2-devel, rsyslog, openssl-devel, wget, zlib-devel, git, cmake, libuuid-devel, dbus-devel, postgresql-devel, rh-python36, avahi
 AutoReqProv:   no
 
 
