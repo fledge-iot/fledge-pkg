@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ##--------------------------------------------------------------------
-## Copyright (c) 2018 Dianomic Systems
+## Copyright (c) 2019 Dianomic Systems
 ##
 ## Licensed under the Apache License, Version 2.0 (the "License");
 ## you may not use this file except in compliance with the License.
@@ -34,15 +34,15 @@ for i in "$@"
 do
   case "$i" in
       clean)
-          echo -n "Cleaning the build folder from older versions..."
-          find "${GIT_ROOT}/packages/build" -maxdepth 1 | grep '.*\.[0-9][0-9][0-9][0-9]' | xargs rm -rf
+          echo -n "Cleaning the package archive of older versions..."
+          find "./archive" -maxdepth 1 | grep '.*\.[0-9][0-9][0-9][0-9]' | xargs rm -rf
           echo "Done."
           exit 0
           ;;
       cleanall)
-          if [ -d "${GIT_ROOT}/packages/build" ]; then
-            echo -n "Cleaning the build folder..."
-            rm -rf ${GIT_ROOT}/packages/build/*
+          if [ -d "./archive" ]; then
+            echo -n "Cleaning the package archieve folder..."
+            rm -rf ./archive/*
             echo "Done."
           else
             echo "No build folder, skipping cleanall"
@@ -87,6 +87,7 @@ fi
 GIT_ROOT=/tmp/"$repos"
 cd ${GIT_ROOT}
 
+# Check for BRANCH environment variable
 if [ "$BRANCH" != "" ]; then
 	echo Packaging branch $BRANCH
 	git checkout $BRANCH
@@ -126,7 +127,7 @@ package_name="${pkg_name}-${version}"
 
 # Print the summary of findings
 echo "The package root directory is         : ${GIT_ROOT}"
-echo "The FogLAMP south sinusoid version is : ${version}"
+echo "The FogLAMP ${plugin_type} ${plugin_name} version is : ${version}"
 echo "The package will be built in          : ${BUILD_ROOT}"
 echo "The package name is                   : ${package_name}"
 echo
@@ -149,7 +150,12 @@ if [ -d "${package_name}" ]; then
 fi
 mkdir "${package_name}"
 
-installs=plugins/${plugin_type}/${plugin_install_dirname}
+if [ -d ${GIT_ROOT}/python ]; then
+    installs=python/foglamp/plugins/${plugin_type}/${plugin_install_dirname}
+else
+    installs=plugins/${plugin_type}/${plugin_install_dirname}
+fi
+
 
 # Populate the package directory with RPM files
 # First with files common to all plugins
