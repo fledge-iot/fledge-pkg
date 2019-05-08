@@ -88,6 +88,8 @@ fi
 version=`cat ${FOGLAMP_ROOT}/VERSION | tr -d ' ' | grep 'foglamp_version=' | head -1 | sed -e 's/\(.*\)=\(.*\)/\2/g'`
 BUILD_ROOT="${GIT_ROOT}/packages/rpmbuild/BUILDROOT"
 
+mkdir -p ${GIT_ROOT}/packages/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+
 # Final package name
 package_name="${pkg_name}-${version}-0.00.${architecture}"
 
