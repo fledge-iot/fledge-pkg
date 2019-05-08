@@ -86,20 +86,34 @@ fi
 
 GIT_ROOT=/tmp/"$repos"
 cd ${GIT_ROOT}
-# TODO Remove when merged
-git checkout FOGL-2774
 
+if [ "$BRANCH" != "" ]; then
+	echo Packaging branch $BRANCH
+	git checkout $BRANCH
+fi
 
-. ${GIT_ROOT}/Package
+if [ ! -f "${GIT_ROOT}/Package" ]; then
+	echo Repository $repos is missing package directive file
+	rm -rf "${GIT_ROOT}"
+	exit 1
+fi
+
+if [ ! -f "${GIT_ROOT}/Description" ]; then
+	echo Repository $repos is missing package description file
+	rm -rf "${GIT_ROOT}"
+	exit 1
+fi
+
+. "${GIT_ROOT}"/Package
 pkg_name="$repos"
 
 if [ -f "${GIT_ROOT}/VERSION" ]; then
-	version=`cat ${GIT_ROOT}/VERSION`
+	version=`cat "${GIT_ROOT}/VERSION"`
 elif [ -f "${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name}" ]; then
 	version=`cat "${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name}" | tr -d ' ' | grep "foglamp_${plugin_type}_${plugin_name}_version" | head -1 | sed -e 's/\(.*\)=\(.*\)/\2/g'`
 else
 	echo Unable to determine version of package to create
-	rm -rf ${GIT_ROOT}
+	rm -rf "${GIT_ROOT}"
 	exit 1
 fi
 echo Version is $version
