@@ -31,14 +31,14 @@ where name of the image is foglamp, FOGLAMP_BRANCH is the branch to build (devel
 
 
 ```
-    $ docker run -d -v foglamp-data:/usr/local/foglamp/data --name foglamp -p 8081:8081 -p 1995:1995 foglamp 
+    $ docker run -d -v /foglamp-data:/usr/local/foglamp/data --name foglamp -p 8081:8081 -p 1995:1995 foglamp 
 ```
 
--d : run foglamp container in detached mode
--v : maps host volume foglamp-data to container volume /usr/local/foglamp/data
---name : name of the container (foglamp)
--p : map the port of host machine (8081) and container (:8081)
-foglamp : name of the image created in earlier step
+	-d : run foglamp container in detached mode
+	-v : maps host volume foglamp-data to container volume /usr/local/foglamp/data
+	--name : name of the container (foglamp)
+	-p : map the port of host machine (8081) and container (:8081)
+	foglamp : name of the image created in earlier step
 
 > To attach to a running conatiner: `docker exec -it foglamp bash`
 
