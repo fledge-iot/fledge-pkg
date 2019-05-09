@@ -24,7 +24,7 @@ __DESCRIPTION__
 #!/usr/bin/env bash
 
 ##--------------------------------------------------------------------
-## Copyright (c) 2018 OSIsoft, LLC
+## Copyright (c) 2019 Dianomic Systems Inc.
 ##
 ## Licensed under the Apache License, Version 2.0 (the "License");
 ## you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ __DESCRIPTION__
 #!/usr/bin/env bash
 
 ##--------------------------------------------------------------------
-## Copyright (c) 2018 OSIsoft, LLC
+## Copyright (c) 2019 Dianomic Systems Inc.
 ##
 ## Licensed under the Apache License, Version 2.0 (the "License");
 ## you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ PKG_NAME="__PACKAGE_NAME__"
 #!/usr/bin/env bash
 
 ##--------------------------------------------------------------------
-## Copyright (c) 2018 OSIsoft, LLC
+## Copyright (c) 2019 Dianomic Systems Inc.
 ##
 ## Licensed under the Apache License, Version 2.0 (the "License");
 ## you may not use this file except in compliance with the License.
