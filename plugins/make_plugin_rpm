@@ -110,15 +110,16 @@ pkg_name="$repos"
 
 if [ -f "${GIT_ROOT}/VERSION" ]; then
 	version=`cat "${GIT_ROOT}/VERSION"`
+	foglamp_version=`cat ${GIT_ROOT}/foglamp.version| tr -d ' ' | grep 'foglamp_version' | head -1 | sed -e 's/\(.*\)version\(.*\)/\2/g'`
 elif [ -f "${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name}" ]; then
 	version=`cat "${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name}" | tr -d ' ' | grep "foglamp_${plugin_type}_${plugin_name}_version" | head -1 | sed -e 's/\(.*\)=\(.*\)/\2/g'`
+	foglamp_version=`cat ${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name} | tr -d ' ' | grep 'foglamp_version' | head -1 | sed -e 's/\(.*\)version\(.*\)/\2/g'`
 else
 	echo Unable to determine version of package to create
 	rm -rf "${GIT_ROOT}"
 	exit 1
 fi
 echo Version is $version
-foglamp_version=`cat ${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name} | tr -d ' ' | grep 'foglamp_version' | head -1 | sed -e 's/\(.*\)version\(.*\)/\2/g'`
 BUILD_ROOT="${GIT_ROOT}/packages/build"
 pkg_name="foglamp-${plugin_type}-${plugin_name}"
 # Final package name
