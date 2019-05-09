@@ -358,10 +358,16 @@ copy_new_data () {
 
 install_pip3_packages () {
 	set +e
-	echo "# "                                   >> /home/${SUDO_USER}/.bashrc
-	echo "# added by FogLamp"                   >> /home/${SUDO_USER}/.bashrc
-	echo "source scl_source enable rh-python36" >> /home/${SUDO_USER}/.bashrc
 
+	foglam_test="added by FogLamp"
+	check_already_added=`cat /home/${SUDO_USER}/.bashrc | grep -c "${foglam_test}"`
+
+	if [ "$check_already_added" -eq "0" ]
+	then
+		echo "# "                                   >> /home/${SUDO_USER}/.bashrc
+		echo "# ${foglam_test}"                     >> /home/${SUDO_USER}/.bashrc
+		echo "source scl_source enable rh-python36" >> /home/${SUDO_USER}/.bashrc
+	fi
 	source scl_source enable rh-python36
 
 	pip install -Ir /usr/local/foglamp/python/requirements.txt
