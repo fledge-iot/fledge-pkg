@@ -122,7 +122,7 @@ The make_rpm Script
 ===================
 .. code-block:: console
 
-  $ ./make_prm --help
+  $ ./make_rpm --help
   make_rpm help [clean|cleanall]
   This script is used to create the RPM package of FogLAMP
   Arguments:
@@ -136,11 +136,11 @@ Building a RPM Package
 
 First, make sure that FogLAMP is properly installed via ``make install`` somewhere on your environment (default is */usr/local/foglamp*).
 Next, *x86* is the only currently supported architecture for RedHat/Centos.
-Finally, run the ``make_prm`` command:
+Finally, run the ``make_rpm`` command:
 
 .. code-block:: console
 
-  $ ./make_prm
+  $ ./make_rpm
   The package root directory is : /home/foglamp/repos/foglamp-pkg
   The FogLAMP directory is      : /home/foglamp/foglamp
   The FogLAMP version is        : 1.5.2
