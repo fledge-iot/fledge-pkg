@@ -55,7 +55,7 @@ do
 			exit 0
 			;;
 
-		help)
+		--help)
 			echo "${usage}"
 			exit 0
 			;;
