@@ -190,7 +190,11 @@ if [ -d ${GIT_ROOT}/python ]; then
 	find ${GIT_ROOT}/python | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
 	cp -R ${GIT_ROOT}/python .
 else
-	(cd ${GIT_ROOT}; mkdir -p build; cd build; cmake ..; make)
+	(cd ${GIT_ROOT}; 
+		if [ -f requirements.sh ]; then
+			sh requirements.sh
+		fi
+		mkdir -p build; cd build; cmake ..; make)
 	mkdir -p "plugins/${plugin_type}/${plugin_install_dirname}"
 	cp -R --preserve=links ${GIT_ROOT}/build/lib* "plugins/${plugin_type}/${plugin_install_dirname}"
 fi
