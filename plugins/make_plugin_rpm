@@ -38,7 +38,7 @@ while getopts ":hcab:" opt; do
 	case "$opt" in
 		c)
 			echo -n "Cleaning the package archive of older versions..."
-			find "./archive" -maxdepth 1 | grep '.*\.[0-9][0-9][0-9][0-9]' | xargs rm -rf
+			find "./archive" | grep '.*\.[0-9][0-9][0-9][0-9]' | xargs rm -rf
 			echo "Done."
 			exit 0
 			;;
@@ -222,7 +222,7 @@ EOF
 
 	fullname="${package_name}-1.${arch}.rpm"
 	# Save the old versions
-	existing_pkgs=`find ${archive}/${arch} -name "${fullname}.????" | wc -l`
+	existing_pkgs=`find ${archive}/${arch} -maxdepth 1 -name "${fullname}.????" | wc -l`
 	existing_pkgs=$((existing_pkgs+1))
 	new_stored_pkg=$(printf "${fullname}.%04d" "${existing_pkgs}")
 
