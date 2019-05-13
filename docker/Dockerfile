@@ -12,8 +12,8 @@ WORKDIR /foglamp-core
 RUN git clone --single-branch -b $FOGLAMP_BRANCH https://github.com/foglamp/FogLAMP.git 
 
 RUN cd FogLAMP && \
-	sed -i 's/sudo//g' requirements.sh && \
-	sh requirements.sh && \
+	chmod +x requirements.sh && \
+	./requirements.sh && \
 	make install
 
 RUN echo "service rsyslog start" > start.sh && \
