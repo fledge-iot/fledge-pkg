@@ -222,7 +222,7 @@ EOF
 
 	fullname="${package_name}-1.${arch}.rpm"
 	# Save the old versions
-	existing_pkgs=`find ${archive}/${arch} -maxdepth 1 -name "${fullname}.????" | wc -l`
+	existing_pkgs=`find ${archive}/${arch} -name "${fullname}.????" | wc -l`
 	existing_pkgs=$((existing_pkgs+1))
 	new_stored_pkg=$(printf "${fullname}.%04d" "${existing_pkgs}")
 
