@@ -16,7 +16,7 @@
 ## limitations under the License.
 ##--------------------------------------------------------------------
 ##
-## Author: Mark Riddoch
+## Author: Mark Riddoch, Massimiliano Pinto
 ##
 
 set -e
@@ -160,10 +160,19 @@ do
 	fi
 	mkdir "${package_name}"
 
-	if [ -d ${GIT_ROOT}/python ]; then
-	    installs=python/foglamp/plugins/${plugin_type}/${plugin_install_dirname}
+	# If plugin_type_install if not set use plugin_type value
+	if [ "${plugin_type}" = "notify" ]; then
+	    plugin_type_install="notificationDelivery"
+        elif [ "${plugin_type}" = "rule" ]; then
+	    plugin_type_install="notificationRule"
 	else
-	    installs=plugins/${plugin_type}/${plugin_install_dirname}
+	    plugin_type_install=${plugin_type}
+        fi
+
+	if [ -d ${GIT_ROOT}/python ]; then
+	    installs=python/foglamp/plugins/${plugin_type_install}/${plugin_install_dirname}
+	else
+	    installs=plugins/${plugin_type_install}/${plugin_install_dirname}
 	fi
 
 
@@ -205,8 +214,8 @@ EOF
 				sh requirements.sh
 			fi
 			mkdir -p build; cd build; cmake ..; make)
-		mkdir -p "plugins/${plugin_type}/${plugin_install_dirname}"
-		cp -R --preserve=links ${GIT_ROOT}/build/lib* "plugins/${plugin_type}/${plugin_install_dirname}"
+		mkdir -p "plugins/${plugin_type_install}/${plugin_install_dirname}"
+		cp -R --preserve=links ${GIT_ROOT}/build/lib* "plugins/${plugin_type_install}/${plugin_install_dirname}"
 	fi
 	echo "Done."
 
