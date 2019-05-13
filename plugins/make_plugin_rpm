@@ -178,7 +178,7 @@ do
 	sed -i "s/__PACKAGE_NAME__/${package_name}/g" SPECS/plugin.spec
 	sed -i "s|__INSTALL_DIR__|${installs}|g" SPECS/plugin.spec
 	sed -i "s/__REQUIRES__/${requirements}/g" SPECS/plugin.spec
-	sed -i "s/Requires: foglamp/Requires: foglamp(${foglamp_version})/g" SPECS/plugin.spec
+	sed -i "s/foglamp,/foglamp${foglamp_version},/" | sed -i "s/foglamp$/foglamp${foglamp_version}/" SPECS/plugin.spec
 	cat > /tmp/sed.script.$$ << EOF
 	/__DESCRIPTION__/ {
 		r ${GIT_ROOT}/Description
