@@ -119,10 +119,10 @@ do
 
 	if [ -f "${GIT_ROOT}/VERSION" ]; then
 		version=`cat "${GIT_ROOT}/VERSION"`
-		foglamp_version=`cat ${GIT_ROOT}/foglamp.version| tr -d ' ' | grep 'foglamp_version' | head -1 | sed -e 's/\(.*\)version\(.*\)/\2/g'`
+		foglamp_version=`cat ${GIT_ROOT}/foglamp.version| tr -d ' ' | grep 'foglamp_version' | head -1 | sed -e 's/\(.*\)version\([>=|>|<|<=|=]*\)\(.*\)/\2 \3/g'`
 	elif [ -f "${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name}" ]; then
 		  version=`cat "${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name}" | tr -d ' ' | grep "foglamp_${plugin_type}_${plugin_name}_version" | head -1 | sed -e 's/\(.*\)=\(.*\)/\2/g'`
-		  foglamp_version=`cat ${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name} | tr -d ' ' | grep 'foglamp_version' | head -1 | sed -e 's/\(.*\)version\(.*\)/\2/g'`
+		  foglamp_version=`cat ${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name} | tr -d ' ' | grep 'foglamp_version' | head -1 | sed -e 's/\(.*\)version\([>=|>|<|<=|=]*\)\(.*\)/\2 \3/g'`
 	else
 		echo Unable to determine version of package to create
 		rm -rf "${GIT_ROOT}"
@@ -141,9 +141,9 @@ do
 	echo "The package will be built in                         : ${BUILD_ROOT}"
 	echo "The package name is                                  : ${package_name}"
 	if [ -f "${GIT_ROOT}/service_notification.version" ]; then
-	     service_notification_version=`cat ${GIT_ROOT}/service_notification.version | tr -d ' ' | grep 'service_notification_version' | head -1 | sed -e 's/\(.*\)version\(.*\)/\2/g'`
+	     service_notification_version=`cat ${GIT_ROOT}/service_notification.version | tr -d ' ' | grep 'service_notification_version' | head -1 | sed -e 's/\(.*\)version\([>=|>|<|<=|=]*\)\(.*\)/\2 \3/g'`
 	     echo "The Service notification required version         : ${service_notification_version}"
-    fi
+	fi
 	echo
 
 	# Create the package directory. If a directory with the same name exists,
@@ -171,9 +171,9 @@ do
 	    plugin_type_install="notificationRule"
 	else
 	    plugin_type_install=${plugin_type}
-    fi
+	fi
 
-    # Install directory path
+	# Install directory path
 	if [ -d ${GIT_ROOT}/python ]; then
 	    installs=python/foglamp/plugins/${plugin_type_install}/${plugin_install_dirname}
 	else
@@ -191,11 +191,12 @@ do
 	sed -i "s/__PACKAGE_NAME__/${package_name}/g" SPECS/plugin.spec
 	sed -i "s|__INSTALL_DIR__|${installs}|g" SPECS/plugin.spec
 	sed -i "s/__REQUIRES__/${requirements}/g" SPECS/plugin.spec
-	sed -i "s/foglamp,/foglamp${foglamp_version},/" SPECS/plugin.spec
-    sed -i "s/foglamp$/foglamp${foglamp_version}/" SPECS/plugin.spec
-    if [ ! -z ${service_notification_version} ] ; then
-       sed -i "s/foglamp-service-notification/foglamp-service-notification${service_notification_version}/" SPECS/plugin.spec
-    fi
+	sed -i "s/foglamp,/foglamp ${foglamp_version},/" SPECS/plugin.spec
+	sed -i "s/foglamp$/foglamp ${foglamp_version}/" SPECS/plugin.spec
+
+	if [ ! -z "${service_notification_version}" ] ; then
+	    sed -i "s/foglamp-service-notification/foglamp-service-notification ${service_notification_version}/" SPECS/plugin.spec
+	fi
 	cat > /tmp/sed.script.$$ << EOF
 	/__DESCRIPTION__/ {
 		r ${GIT_ROOT}/Description
@@ -218,7 +219,7 @@ EOF
 	else
 		(cd ${GIT_ROOT}; 
 			if [ -f requirements.sh ]; then
-				sh requirements.sh
+				sudo sh requirements.sh
 			fi
 			mkdir -p build; cd build; cmake ..; make)
 		mkdir -p "plugins/${plugin_type_install}/${plugin_install_dirname}"
