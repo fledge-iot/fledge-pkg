@@ -92,7 +92,7 @@ mkdir -p ${GIT_ROOT}/packages/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS
 mkdir -p ${GIT_ROOT}/packages/rpmbuild/RPMS/x86_64
 
 # Final package name
-package_name="${pkg_name}-${version}-0.00.${architecture}"
+package_name="${pkg_name}-${version}-1.${architecture}"
 
 # Print the summary of findings
 echo "The package root directory is : ${GIT_ROOT}"
