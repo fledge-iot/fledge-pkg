@@ -121,5 +121,8 @@ set_files_ownership () {
 echo "Setting ownership of FogLAMP files"
 set_files_ownership
 
+# Install any Python dependencies
+find /usr/local/foglamp/__INSTALL_DIR__ -name "requirements*.txt" -exec pip3 install -Ir "{}" --no-cache-dir \;
+
 
 %files
