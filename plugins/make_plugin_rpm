@@ -219,7 +219,7 @@ EOF
 	else
 		(cd ${GIT_ROOT}; 
 			if [ -f requirements.sh ]; then
-				sudo ./requirements.sh
+				./requirements.sh
 			fi
 			mkdir -p build; cd build; cmake ..; make)
 		mkdir -p "plugins/${plugin_type_install}/${plugin_install_dirname}"
