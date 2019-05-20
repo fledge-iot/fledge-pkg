@@ -124,7 +124,7 @@ set_files_ownership
 # Install any Python dependencies
 if [ -f /usr/local/foglamp/python/requirements-__PLUGIN_NAME__.txt ]; then
 	scl enable rh-python36 bash
-	pip3 install -Ir /usr/local/foglamp/python/requirements-__PLUGIN_NAME__.txt
+	pip install -Ir /usr/local/foglamp/python/requirements-__PLUGIN_NAME__.txt
 fi
 
 %files
