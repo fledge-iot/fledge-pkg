@@ -3,7 +3,7 @@
 Name:          __NAME__
 Vendor:        Dianomic Systems, Inc. <info@dianomic.com>
 Version:       __VERSION__
-Release:       0.00
+Release:       1
 BuildArch:     __ARCH__
 Summary:       FogLAMP, the open source platform for the Internet of Things
 License:       Apache License
