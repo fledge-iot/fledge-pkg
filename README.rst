@@ -145,22 +145,22 @@ Finally, run the ``make_rpm`` command:
   The FogLAMP directory is      : /home/foglamp/foglamp
   The FogLAMP version is        : 1.5.2
   The package will be built in  : /home/foglamp/repos/foglamp-pkg/packages/rpmbuild/RPMS/x86_64
-  The package name is           : foglamp-1.5.2-0.00.x86_64
+  The package name is           : foglamp-1.5.2-1.x86_64
 
-  Saving the old working environment as foglamp-1.5.2-0.00.x86_64.0077
+  Saving the old working environment as foglamp-1.5.2-1.x86_64.0077
   Populating the package and updating version in control file...Done.
   Prepare data directory
-  Saving the old package as foglamp-1.5.2-0.00.x86_64.rpm.0001
+  Saving the old package as foglamp-1.5.2-1.x86_64.rpm.0001
   Building the new package...
-  Processing files: foglamp-1.5.2-0.00.x86_64
-  Provides: foglamp = 1.5.2-0.00 foglamp(x86-64) = 1.5.2-0.00
+  Processing files: foglamp-1.5.2-1.x86_64
+  Provides: foglamp = 1.5.2-1 foglamp(x86-64) = 1.5.2-1
   Requires(interp): /bin/sh /bin/sh /bin/sh
   Requires(rpmlib): rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1 rpmlib(CompressedFileNames) <= 3.0.4-1
   Requires(pre): /bin/sh
   Requires(post): /bin/sh
   Requires(preun): /bin/sh
-  Checking for unpackaged file(s): /usr/lib/rpm/check-files /home/foglamp/repos/foglamp-pkg/packages/rpmbuild/BUILDROOT/foglamp-1.5.2-0.00.x86_64
-  Wrote: /home/foglamp/repos/foglamp-pkg/packages/rpmbuild/RPMS/x86_64/foglamp-1.5.2-0.00.x86_64.rpm
+  Checking for unpackaged file(s): /usr/lib/rpm/check-files /home/foglamp/repos/foglamp-pkg/packages/rpmbuild/BUILDROOT/foglamp-1.5.2-1.x86_64
+  Wrote: /home/foglamp/repos/foglamp-pkg/packages/rpmbuild/RPMS/x86_64/foglamp-1.5.2-1.x86_64.rpm
   Building Complete.
   $
 
@@ -170,7 +170,7 @@ The result will be:
 
   $ ls -l packages/rpmbuild/RPMS/x86_64
   total 6444
-  -rw-rw-r-- 1 foglamp foglamp 6597376 May 10 02:08 foglamp-1.5.2-0.00.x86_64.rpm
+  -rw-rw-r-- 1 foglamp foglamp 6597376 May 10 02:08 foglamp-1.5.2-1.x86_64.rpm
   $
 
 If you execute the ``make_rpm`` command again, you will see:
@@ -182,27 +182,27 @@ If you execute the ``make_rpm`` command again, you will see:
   The FogLAMP directory is      : /home/foglamp/foglamp
   The FogLAMP version is        : 1.5.2
   The package will be built in  : /home/foglamp/repos/foglamp-pkg/packages/rpmbuild/RPMS/x86_64
-  The package name is           : foglamp-1.5.2-0.00.x86_64
+  The package name is           : foglamp-1.5.2-1.x86_64
 
-  Saving the old working environment as foglamp-1.5.2-0.00.x86_64.0079
+  Saving the old working environment as foglamp-1.5.2-1.x86_64.0079
   Populating the package and updating version in control file...Done.
   Prepare data directory
-  Saving the old package as foglamp-1.5.2-0.00.x86_64.rpm.0001
+  Saving the old package as foglamp-1.5.2-1.x86_64.rpm.0001
   Building the new package...
-  Processing files: foglamp-1.5.2-0.00.x86_64
-  Provides: foglamp = 1.5.2-0.00 foglamp(x86-64) = 1.5.2-0.00
+  Processing files: foglamp-1.5.2-1.x86_64
+  Provides: foglamp = 1.5.2-1 foglamp(x86-64) = 1.5.2-1
   Requires(interp): /bin/sh /bin/sh /bin/sh
   Requires(rpmlib): rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1 rpmlib(CompressedFileNames) <= 3.0.4-1
   Requires(pre): /bin/sh
   Requires(post): /bin/sh
   Requires(preun): /bin/sh
-  Checking for unpackaged file(s): /usr/lib/rpm/check-files /home/foglamp/repos/foglamp-pkg/packages/rpmbuild/BUILDROOT/foglamp-1.5.2-0.00.x86_64
-  Wrote: /home/foglamp/repos/foglamp-pkg/packages/rpmbuild/RPMS/x86_64/foglamp-1.5.2-0.00.x86_64.rpm
+  Checking for unpackaged file(s): /usr/lib/rpm/check-files /home/foglamp/repos/foglamp-pkg/packages/rpmbuild/BUILDROOT/foglamp-1.5.2-1.x86_64
+  Wrote: /home/foglamp/repos/foglamp-pkg/packages/rpmbuild/RPMS/x86_64/foglamp-1.5.2-1.x86_64.rpm
   Building Complete.
   $ ls -l packages/rpmbuild/RPMS/x86_64
   total 12888
-  -rw-rw-r-- 1 foglamp foglamp 6597420 May 10 02:10 foglamp-1.5.2-0.00.x86_64.rpm
-  -rw-rw-r-- 1 foglamp foglamp 6597376 May 10 02:08 foglamp-1.5.2-0.00.x86_64.rpm.0001
+  -rw-rw-r-- 1 foglamp foglamp 6597420 May 10 02:10 foglamp-1.5.2-1.x86_64.rpm
+  -rw-rw-r-- 1 foglamp foglamp 6597376 May 10 02:08 foglamp-1.5.2-1.x86_64.rpm.0001
   $
 
 ... where the previous build is now marked with the suffix *.0001*.

@@ -5,7 +5,7 @@ Vendor:        Dianomic Systems, Inc. <info@dianomic.com>
 Version:       __VERSION__
 Release:       1
 BuildArch:     __ARCH__
-Summary:       FogLAMP, the open source platform for the Internet of Things
+Summary:       FogLAMP __NAME__ plugin, the open source platform for the Internet of Things
 License:       Apache License
 Group:         IOT
 URL:           http://www.dianomic.com
@@ -125,6 +125,5 @@ set_files_ownership
 if [ -f /usr/local/foglamp/python/requirements-__PLUGIN_NAME__.txt ]; then
 	pip3 install -Ir /usr/local/foglamp/python/requirements-__PLUGIN_NAME__.txt
 fi
-
 
 %files
