@@ -187,6 +187,7 @@ do
 	cp -R ${PKG_ROOT}/packages/RPM/* .
 	sed -i "s/__VERSION__/${version}/g" SPECS/plugin.spec
 	sed -i "s/__NAME__/${pkg_name}/g" SPECS/plugin.spec
+	sed -i "s/__PLUGIN_NAME__/${plugin_name}/g" SPECS/plugin.spec
 	sed -i "s/__ARCH__/${arch}/g" SPECS/plugin.spec
 	sed -i "s/__PACKAGE_NAME__/${package_name}/g" SPECS/plugin.spec
 	sed -i "s|__INSTALL_DIR__|${installs}|g" SPECS/plugin.spec
