@@ -121,4 +121,12 @@ set_files_ownership () {
 echo "Setting ownership of FogLAMP files"
 set_files_ownership
 
+# Install any Python dependencies
+if [ -f /usr/local/foglamp/python/requirements-__PLUGIN_NAME__.txt ]; then
+	bash << EOF
+scl enable rh-python36 bash
+pip install -Ir /usr/local/foglamp/python/requirements-__PLUGIN_NAME__.txt
+EOF
+fi
+
 %files
