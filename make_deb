@@ -25,11 +25,12 @@ set -e
 GIT_ROOT=`pwd`    # The script must be executed from the root git directory
 
 architecture="none"
-usage="$(basename "$0") {x86|arm} [clean|cleanall]
+usage="$(basename "$0") {x86|arm|coral} [clean|cleanall]
 This script is used to create the Debian package of FogLAMP
 Arguments:
  x86      - Build an x86_64 package
  arm      - Build an armv7l package
+ coral    - Build package for Google Coral board
  clean    - Remove all the old versions saved in format .XXXX
  cleanall - Remove all the versions, including the last one"
 
@@ -44,6 +45,10 @@ then
               ;;
           arm)
               architecture="armhf"
+              shift
+              ;;
+          coral)
+              architecture="arm64"
               shift
               ;;
           clean)
