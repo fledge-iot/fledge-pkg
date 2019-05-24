@@ -53,7 +53,7 @@ while getopts ":hcab:" opt; do
 			exit 0
 			;;
 		h)
-			echo ${usage}
+			echo "${usage}"
 			exit 0
 			;;
 		b)
