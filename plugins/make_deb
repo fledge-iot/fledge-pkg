@@ -115,7 +115,7 @@ do
         rm -rf "${GIT_ROOT}"
         exit 1
     fi
-	echo Version is $version
+    echo Version is $version
     BUILD_ROOT="${GIT_ROOT}/packages/build"
     if [ "${plugin_package_name}" ]; then
         pkg_name=${plugin_package_name}
@@ -123,7 +123,8 @@ do
         pkg_name="foglamp-${plugin_type}-${plugin_name}"
     fi
     # Final package name
-    package_name="${pkg_name}-${version}"
+    archname=$(dpkg --print-architecture)
+    package_name="${pkg_name}-${version}-${archname}"
 
     # Print the summary of findings
     echo "The package root directory is                         : ${GIT_ROOT}"
@@ -132,7 +133,7 @@ do
     echo "The package name is                                   : ${package_name}"
     if [ -f "${GIT_ROOT}/service_notification.version" ]; then
         service_notification_version=`cat ${GIT_ROOT}/service_notification.version | tr -d ' ' | grep 'service_notification_version' | head -1 | sed -e 's/\(.*\)version\(.*\)/\2/g'`
-        echo "The Service notification required version        : ${service_notification_version}"
+        echo "The Service notification required version             : ${service_notification_version}"
     fi
     echo
 
@@ -175,7 +176,6 @@ do
     echo -n "Populating the package and updating version file..."
     cd "${package_name}"
     mkdir DEBIAN
-    archname=$(dpkg --print-architecture)
     deb_path=${BUILD_ROOT}/${package_name}/DEBIAN
     cp -R ${PKG_ROOT}/packages/DEBIAN/* ${deb_path}
     sed -i "s/__VERSION__/${version}/g" ${deb_path}/control
