@@ -222,7 +222,11 @@ EOF
 			if [ -f requirements.sh ]; then
 				./requirements.sh
 			fi
-			mkdir -p build; cd build; cmake ..; make)
+			if [ -f build.sh ]; then
+				./build.sh
+			else
+				mkdir -p build; cd build; cmake ..; make
+			fi)
 		mkdir -p "plugins/${plugin_type_install}/${plugin_install_dirname}"
 		cp -R --preserve=links ${GIT_ROOT}/build/lib* "plugins/${plugin_type_install}/${plugin_install_dirname}"
 	fi
