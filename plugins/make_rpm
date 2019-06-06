@@ -228,7 +228,10 @@ EOF
 				mkdir -p build; cd build; cmake ..; make
 			fi)
 		mkdir -p "plugins/${plugin_type_install}/${plugin_install_dirname}"
-		cp -R --preserve=links ${GIT_ROOT}/build/lib* "plugins/${plugin_type_install}/${plugin_install_dirname}"
+	        cp -R --preserve=links ${GIT_ROOT}/build/lib* "plugins/${plugin_type_install}/${plugin_install_dirname}" 2>/dev/null || \
+        	cp -R --preserve=links ${GIT_ROOT}/*.json "plugins/${plugin_type_install}/${plugin_install_dirname}" 2>/dev/null || \
+        	echo "Unable to find libraries in ${GIT_ROOT}/build and json config files in ${GIT_ROOT}, cannot proceed..."
+
 	fi
 	echo "Done."
 
