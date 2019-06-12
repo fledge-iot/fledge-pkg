@@ -32,9 +32,15 @@ set_files_ownership () {
 }
 
 set_files_ownership
-echo __PLUGIN_NAME__ plugin is installed.
 
-# Install Python dependencies when requirements file exists
+# Install Prerequisite; if any
+if [ -f /usr/local/foglamp/python/requirements-__PLUGIN_NAME__.sh ]; then
+   sh /usr/local/foglamp/python/requirements-__PLUGIN_NAME__.sh
+fi
+
+# Install Python dependencies; if any
 if [ -f /usr/local/foglamp/python/requirements-__PLUGIN_NAME__.txt ]; then
     pip3 install -Ir /usr/local/foglamp/python/requirements-__PLUGIN_NAME__.txt
 fi
+
+echo __PLUGIN_NAME__ plugin is installed.
