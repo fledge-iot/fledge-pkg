@@ -215,8 +215,13 @@ EOF
 	mkdir -p usr/local/foglamp
 	cd usr/local/foglamp
 	if [ -d ${GIT_ROOT}/python ]; then
-		find ${GIT_ROOT}/python | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
-		cp -R ${GIT_ROOT}/python .
+	    find ${GIT_ROOT}/python | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
+	    if [ -f "${GIT_ROOT}/requirements.sh" ]; then
+	        sed -i "s/sudo//" ${GIT_ROOT}/requirements.sh
+	        cp -p ${GIT_ROOT}/requirements.sh ${GIT_ROOT}/python/requirements-${plugin_name}.sh
+	    fi
+	    cp -R ${GIT_ROOT}/python .
+	    cp -R ${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name} ./python/foglamp/plugins/${plugin_type}/${plugin_name}
 	else
 		(cd ${GIT_ROOT}; 
 			if [ -f requirements.sh ]; then
