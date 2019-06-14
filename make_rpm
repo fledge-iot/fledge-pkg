@@ -168,7 +168,7 @@ if [[ "${FOGLAMP_ROOT}" == "" ]]; then
 	export FOGLAMP_ROOT="/usr/local/foglamp"
 fi
 
-if [ ! -d "${FOGLAMP_ROOT}" ]; then
+if [[ ! -d "${FOGLAMP_ROOT}" ]]; then
 
   echo "No FOGLAMP_ROOT directory found in the path ${FOGLAMP_ROOT} - Program exit."
   exit 1
