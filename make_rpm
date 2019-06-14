@@ -162,7 +162,7 @@ if [[ $skip_build == 0 ]]; then
 fi
 
 # Checks if the FOGLAMP_ROOT environment is defined
-if [ -z ${FOGLAMP_ROOT+x} ]; then
+if [[ "${FOGLAMP_ROOT}" == "" ]]; then
 
     # Set FOGLAMP_ROOT as the default directory
 	export FOGLAMP_ROOT="/usr/local/foglamp"
