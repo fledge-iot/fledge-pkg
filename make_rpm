@@ -34,11 +34,11 @@ usage="$(basename "$0") [-h] [-c] [-a] [-s] [-b <branch>]
 This script is used to create the RPM package of FogLAMP
 
 Arguments:
- -h	- Display this help text
- -c	- Remove all the old versions saved in format .XXXX
- -a	- Remove all the versions, including the last one
+ -h - Display this help text
+ -c - Remove all the old versions saved in format .XXXX
+ -a - Remove all the versions, including the last one
  -s - Skip FogLAMP building using the binaries already available
- -b	- Branch to base package on"
+ -b - Branch to base package on"
 
 while getopts ":hcasb:" opt; do
 	case "$opt" in
