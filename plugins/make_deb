@@ -124,7 +124,7 @@ do
     fi
     # Final package name
     archname=$(dpkg --print-architecture)
-    package_name="${pkg_name}-${version}-${archname}"
+    package_name="${pkg_name}-${version}-${arch}"
 
     # Print the summary of findings
     echo "The package root directory is                         : ${GIT_ROOT}"
