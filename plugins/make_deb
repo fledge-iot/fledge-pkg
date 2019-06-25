@@ -201,6 +201,8 @@ do
             sed -i "s/sudo//" ${GIT_ROOT}/requirements.sh
             cp -p ${GIT_ROOT}/requirements.sh ${GIT_ROOT}/python/requirements-${plugin_name}.sh
         fi
+        # plugin info version replaced in ${plugin_name}.py
+        sed -i "s/'version':.*$/'version': '${version}',/g" ${GIT_ROOT}/python/foglamp/plugins/${plugin_type}/${plugin_name}/${plugin_name}.py
         cp -R ${GIT_ROOT}/python .
         cp -R ${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name} ./python/foglamp/plugins/${plugin_type}/${plugin_name}
     else
