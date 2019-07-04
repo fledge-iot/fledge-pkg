@@ -122,8 +122,8 @@ echo "Setting ownership of FogLAMP files"
 set_files_ownership
 
 # Install Prerequisite; if any
-if [ -f /usr/local/foglamp/python/requirements-__PLUGIN_NAME__.sh ]; then
-   sh /usr/local/foglamp/python/requirements-__PLUGIN_NAME__.sh
+if [ -f /usr/local/foglamp/python/extras_install___PLUGIN_NAME__.sh ]; then
+   sh /usr/local/foglamp/python/extras_install___PLUGIN_NAME__.sh
 fi
 
 # Install any Python dependencies

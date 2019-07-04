@@ -197,9 +197,9 @@ do
     cd usr/local/foglamp
     if [ -d ${GIT_ROOT}/python ]; then
         find ${GIT_ROOT}/python | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
-        if [ -f "${GIT_ROOT}/requirements.sh" ]; then
-            sed -i "s/sudo//" ${GIT_ROOT}/requirements.sh
-            cp -p ${GIT_ROOT}/requirements.sh ${GIT_ROOT}/python/requirements-${plugin_name}.sh
+        if [ -f "${GIT_ROOT}/extras_install.sh" ]; then
+            sed -i "s/sudo//" ${GIT_ROOT}/extras_install.sh
+            cp -p ${GIT_ROOT}/extras_install.sh ${GIT_ROOT}/python/extras_install_${plugin_name}.sh
         fi
         # plugin info version replaced in ${plugin_name}.py
         sed -i "s/'version':.*$/'version': '${version}',/g" ${GIT_ROOT}/python/foglamp/plugins/${plugin_type}/${plugin_name}/${plugin_name}.py
