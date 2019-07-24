@@ -17,16 +17,17 @@ Internal Structure
 
 The repository contains the following set of files:
 
-- Files named with **make_** prefix, such as ``make_deb``, are the shell scripts used to build the package. The scripts accept the architecture to build as argument (currently *x86* and *arm*).
+- Files named with **make_** prefix, such as ``make_deb``, ``make_rpm``, are the shell scripts used to build the package. The script runs as per the architecture to build.
 - The **packages** folder contains the list package types to build. It contains *Debian* and *rpmbuild*, latter for RedHat/Centos RPM creation.
 
-  - Inside the *packages/Debian* folder, we have the **architecture** folders, plus a *common* folder containing files that are common to all the architectures. The architectures that we provide at the moment are *armhf* and *x86_64*.
+  - Inside the *packages/Debian* folder, we have the **architecture** folders, plus a *common* folder containing files that are common to all the architectures. The architectures that we provide at the moment are *aarch64*, *armv7l* and *x86_64*.
 
-    - Inside the architecture folder we have the DEBIAN folder, which contains all the Debian-based files, i.e. control, pre/post inst/rm, needed for the creation of the package.
+    - Inside the architecture folder we have the DEBIAN folder, which contains only control file
+    - Inside the common folder we have the DEBIAN folder, which contains pre/post inst/rm, needed for the creation of the package.
 
-  - After the first build, the *packages/Debian* will also contain a **build** folder. This folder contains a copy of what will be used to build the package (in a directory with the same name of the package) and the package itself.
+  - After the first build, the *packages/Debian* will also contain a **build/architecture** folder. This folder contains a copy of what will be used to build the package (in a directory with the same name of the package) and the package itself.
 
-    - In the *build* folder, folders and files that have a sequence number are a previous package build.
+    - In the *build/architecture* folder, folders and files that have a sequence number are a previous package build.
 
 
 The make_deb Script
@@ -34,12 +35,11 @@ The make_deb Script
 
 .. code-block:: console
 
-  $ ./make_deb --help
-  make_deb {x86|arm} [clean|cleanall]
+  $ ./make_deb help
+  make_deb [help|clean|cleanall]
   This script is used to create the Debian package of FogLAMP
   Arguments:
-   x86      - Build an x86_64 package
-   arm      - Build an armv7l package
+   help     - Display this help text
    clean    - Remove all the old versions saved in format .XXXX
    cleanall - Remove all the versions, including the last one
   $
@@ -59,22 +59,21 @@ Building a Debian Package
 =========================
 
 First, make sure that FogLAMP is properly installed via ``make install`` somewhere on your environment (default is */usr/local/foglamp*).
-Next, select the architecture to use, *x86* or *arm*.
-Finally, run the ``make_deb`` command:
+Finally, run the ``make_deb`` command and it will make as per ``arch``:
 
 .. code-block:: console
 
-  $ ./make_deb x86
+  $ ./make_deb
   The package root directory is : /home/foglamp/foglamp-pkg
   The FogLAMP directory is      : /usr/local/foglamp
-  The FogLAMP version is        : 1.2
-  The package will be built in  : /home/foglamp/foglamp-pkg/packages/Debian/build
+  The FogLAMP version is        : 1.6.0
+  The package will be built in  : /home/foglamp/foglamp-pkg/packages/Debian/build/x86_64
   The architecture is set as    : x86_64
-  The package name is           : foglamp-1.2-x86_64
+  The package name is           : foglamp-1.6.0-x86_64
 
   Populating the package...Done.
   Building the new package...
-  dpkg-deb: building package 'foglamp' in 'foglamp-1.2-x86_64.deb'.
+  dpkg-deb: building package 'foglamp' in 'foglamp-1.6.0-x86_64.deb'.
   Building Complete.
   $
   
@@ -82,37 +81,37 @@ The result will be:
   
 .. code-block:: console
 
-  $ ls -l packages/Debian/build/
+  $ ls -l packages/Debian/build/x86_64
   total 564
-  drwxrwxr-x 4 foglamp foglamp   4096 Mar 23 17:35 foglamp-1.2-x86_64
-  -rw-r--r-- 1 foglamp foglamp 572742 Mar 23 17:35 foglamp-1.2-x86_64.deb
+  drwxrwxr-x 4 foglamp foglamp   4096 Mar 23 17:35 foglamp-1.6.0-x86_64
+  -rw-r--r-- 1 foglamp foglamp 572742 Mar 23 17:35 foglamp-1.6.0-x86_64.deb
   $
   
 If you execute the ``make_deb`` command again, you will see:
 
 .. code-block:: console
 
-  $ ./make_deb x86
+  $ ./make_deb
   The package root directory is : /home/foglamp/foglamp-pkg
   The FogLAMP directory is      : /usr/local/foglamp
-  The FogLAMP version is        : 1.2
-  The package will be built in  : /home/foglamp/foglamp-pkg/packages/Debian/build
+  The FogLAMP version is        : 1.6.0
+  The package will be built in  : /home/foglamp/foglamp-pkg/packages/Debian/build/x86_64
   The architecture is set as    : x86_64
-  The package name is           : foglamp-1.2-x86_64
+  The package name is           : foglamp-1.6.0-x86_64
 
-  Saving the old working environment as foglamp-1.2-x86_64.0001
+  Saving the old working environment as foglamp-1.6.0-x86_64.0001
   Populating the package...Done.
-  Saving the old package as foglamp-1.2-x86_64.deb.0001
+  Saving the old package as foglamp-1.6.0-x86_64.deb.0001
   Building the new package...
-  dpkg-deb: building package 'foglamp' in 'foglamp-1.2-x86_64.deb'.
+  dpkg-deb: building package 'foglamp' in 'foglamp-1.6.0-x86_64.deb'.
   Building Complete.
   $
-  $ ls -l packages/Debian/build/
+  $ ls -l packages/Debian/build/x86_64
   total 1128
-  drwxrwxr-x 4 foglamp foglamp   4096 Mar 23 17:53 foglamp-1.2-x86_64
-  drwxrwxr-x 4 foglamp foglamp   4096 Mar 23 17:35 foglamp-1.2-x86_64.0001
-  -rw-r--r-- 1 foglamp foglamp 573080 Mar 23 17:54 foglamp-1.2-x86_64.deb
-  -rw-r--r-- 1 foglamp foglamp 572742 Mar 23 17:35 foglamp-1.2-x86_64.deb.0001
+  drwxrwxr-x 4 foglamp foglamp   4096 Mar 23 17:53 foglamp-1.6.0-x86_64
+  drwxrwxr-x 4 foglamp foglamp   4096 Mar 23 17:35 foglamp-1.6.0-x86_64.0001
+  -rw-r--r-- 1 foglamp foglamp 573080 Mar 23 17:54 foglamp-1.6.0-x86_64.deb
+  -rw-r--r-- 1 foglamp foglamp 572742 Mar 23 17:35 foglamp-1.6.0-x86_64.deb.0001
   $
    
 ... where the previous build is now marked with the suffix *.0001*.
