@@ -72,9 +72,6 @@ while [ "${REPO_NAME}" != "" ]
 do
 	package_manager=deb
 	arch=`arch`
-    if [ "${arch}" = "armv7l" ]; then
-        arch="armhf"
-    fi
 	archive=`pwd`/archive/DEBIAN
 	if [ ! -d "${archive}/${arch}" ]; then
 		mkdir -p "${archive}/${arch}"
