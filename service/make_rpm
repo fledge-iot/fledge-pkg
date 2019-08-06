@@ -113,9 +113,9 @@ do
     cd /tmp
     if [ -d "${REPO_NAME}" ]; then
         echo WARNING: Repository ${REPO_NAME} already exists, using the existing copy
-        (cd ${REPO_NAME}; git pull; git checkout "$branch")
+        (cd ${REPO_NAME}; git pull; git checkout "${BRANCH_NAME}")
     else
-        git clone -b "$branch" https://github.com/foglamp/${REPO_NAME}.git
+        git clone -b "${BRANCH_NAME}" https://github.com/foglamp/${REPO_NAME}.git
     fi
 
     GIT_ROOT=/tmp/"${REPO_NAME}"
@@ -171,6 +171,18 @@ do
         mkdir -p "${BUILD_ROOT}"
     fi
 
+    (cd ${GIT_ROOT};
+    if [ -f requirements.sh ]; then
+        ./requirements.sh
+    fi
+
+    if [ -f build.sh ]; then
+        rm -rf build;
+        ./build.sh
+    else
+        rm -rf build; mkdir ./build; cd ./build; cmake ..; make
+    fi)
+
     cd "${BUILD_ROOT}"
     if [ -d "${package_name}" ]; then
         rm -rf ${package_name}*
@@ -206,17 +218,6 @@ EOF
 
     mkdir -p usr/local/foglamp
     cd usr/local/foglamp
-    (cd ${GIT_ROOT};
-    if [ -f requirements.sh ]; then
-        ./requirements.sh
-    fi
-
-    if [ -f build.sh ]; then
-        rm -rf build;
-        ./build.sh
-    else
-        rm -rf build; mkdir ./build; cd ./build; cmake ..; make
-    fi)
     mkdir -p ${install_dir}
     cp -R --preserve=links ${GIT_ROOT}/build/C/${install_dir}/notification/foglamp* "${install_dir}/"
     echo "Done."

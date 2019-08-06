@@ -6,7 +6,7 @@ Version:       __VERSION__
 Release:       1
 BuildArch:     __ARCH__
 Summary:       FogLAMP, the open source platform for the Internet of Things
-License:       2019 Dianomic Systems Inc.
+License:       Apache License, 2019 Dianomic Systems Inc.
 Group:         IOT
 URL:           http://www.dianomic.com
 
