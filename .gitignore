@@ -13,3 +13,4 @@ packages/Debian/build/
 
 # Archived packages
 plugins/archive
+service/archive
