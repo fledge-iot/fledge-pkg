@@ -191,6 +191,21 @@ do
     if [ ! -z "${service_notification_version}" ] ; then
         sed -i "s/foglamp-service-notification/foglamp-service-notification (${service_notification_version})/" ${deb_path}/control
     fi
+    # install notes
+    if [ -f "${GIT_ROOT}/install_notes.txt" ]; then
+        cat > /tmp/sed.script.$$ << EOF
+	    /__PLUGIN_NOTES__/ {
+		    r ${GIT_ROOT}/install_notes.txt
+		    d
+	    }
+EOF
+	sed -i -f /tmp/sed.script.$$ ${deb_path}/postinst
+	rm /tmp/sed.script.$$
+    else
+        sed -i "s/echo \"/""/g" ${deb_path}/postinst
+        sed -i "s/__PLUGIN_NOTES__/""/g" ${deb_path}/postinst
+        sed -i "s/\"/""/g" ${deb_path}/postinst
+    fi
 
     # Creating packaging file structure
     mkdir -p usr/local/foglamp

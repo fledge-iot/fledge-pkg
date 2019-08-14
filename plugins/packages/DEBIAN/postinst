@@ -44,3 +44,6 @@ if [ -f /usr/local/foglamp/python/requirements-__PLUGIN_NAME__.txt ]; then
 fi
 
 echo __PLUGIN_NAME__ plugin is installed.
+echo "
+__PLUGIN_NOTES__
+"
