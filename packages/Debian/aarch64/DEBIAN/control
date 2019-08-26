@@ -3,7 +3,7 @@ Version: 1.0.0
 Section: devel
 Priority: optional
 Architecture: arm64
-Depends: autoconf,libtool,libboost-dev,libboost-system-dev,libboost-thread-dev,libpq-dev,python3-pip,python3-setuptools,sqlite3,sudo,cpulimit
+Depends: autoconf,libtool,libboost-dev,libboost-system-dev,libboost-thread-dev,libpq-dev,python3-pip,python3-setuptools,sqlite3,sudo
 Conflicts:
 Maintainer: Dianomic Systems, Inc. <info@dianomic.com>
 Homepage: http://www.dianomic.com
