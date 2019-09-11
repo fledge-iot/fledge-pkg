@@ -2,35 +2,35 @@ FROM ubuntu:18.04
 
 MAINTAINER Vaibhav Singhal "vaibhav@dianomic.com"
 
-ARG FOGLAMP_BRANCH=master
-ENV FOGLAMP_BRANCH ${FOGLAMP_BRANCH}
+ARG FLEDGE_BRANCH=master
+ENV FLEDGE_BRANCH ${FLEDGE_BRANCH}
 RUN apt-get update && apt-get -y upgrade
 RUN apt-get install -y git rsyslog
 
-WORKDIR /foglamp-core
+WORKDIR /fledge-core
 
-RUN git clone --single-branch -b $FOGLAMP_BRANCH https://github.com/foglamp/FogLAMP.git 
+RUN git clone --single-branch -b $FLEDGE_BRANCH https://github.com/fledge/Fledge.git 
 
-RUN cd FogLAMP && \
+RUN cd Fledge && \
 	chmod +x requirements.sh && \
 	./requirements.sh && \
 	make install
 
 RUN echo "service rsyslog start" > start.sh && \
-	echo "/usr/local/foglamp/bin/foglamp start" >> start.sh && \
+	echo "/usr/local/fledge/bin/fledge start" >> start.sh && \
 	echo "tail -f /dev/null" >> start.sh && \
 	chmod +x start.sh
 	
 
-ENV FOGLAMP_ROOT=/usr/local/foglamp
+ENV FLEDGE_ROOT=/usr/local/fledge
 
-VOLUME /usr/local/foglamp/data
+VOLUME /usr/local/fledge/data
 
 # These Volumes will be used in future when we want to install plugins
-VOLUME /usr/local/foglamp
-VOLUME /foglamp-core/FogLAMP
+VOLUME /usr/local/fledge
+VOLUME /fledge-core/Fledge
 
 EXPOSE 8081 1995
 
-CMD ["bash", "/foglamp-core/start.sh"]
+CMD ["bash", "/fledge-core/start.sh"]
 

@@ -22,22 +22,22 @@
 set -e
 
 PKG_ROOT=`pwd`               # The script must be executed from the root git directory
-repos="FogLAMP"              # Name of the Git repository
+repos="Fledge"              # Name of the Git repository
 branch="master"              # Default Git branch to use
-pkg_name="foglamp"           # Name of the package to build
+pkg_name="fledge"           # Name of the package to build
 architecture="x86_64"        # The architecture for which the rpm should be created
 rhpg_pkg="rh-postgresql96"   # Name of the Red Hat package for postgres
 rhgcc_pkg="devtoolset-7"     # Name of the Red Hat package for the newer g++
-skip_build=0                 # 1=skip Git repo extraction and FogLAMP build
+skip_build=0                 # 1=skip Git repo extraction and Fledge build
 
 usage="$(basename "$0") [-h] [-c] [-a] [-s] [-b <branch>]
-This script is used to create the RPM package of FogLAMP
+This script is used to create the RPM package of Fledge
 
 Arguments:
  -h - Display this help text
  -c - Remove all the old versions saved in format .XXXX
  -a - Remove all the versions, including the last one
- -s - Skip FogLAMP building using the binaries already available
+ -s - Skip Fledge building using the binaries already available
  -b - Branch to base package on"
 
 while getopts ":hcasb:" opt; do
@@ -85,8 +85,8 @@ if [[ "$architecture" == "none" ]]; then
   exit 0
 fi
 
-if [ ! -f packages/rpmbuild/SPECS/foglamp.spec ] ; then
-	echo You must run this script from the foglamp-pkg directory
+if [ ! -f packages/rpmbuild/SPECS/fledge.spec ] ; then
+	echo You must run this script from the fledge-pkg directory
 	exit 1
 fi
 
@@ -100,7 +100,7 @@ if [[ $skip_build == 0 ]]; then
 		echo WARNING: Repository $repos already exists, using the existing copy
 		(cd $repos; git fetch --all; git pull ; git checkout "$branch")
 	else
-		git clone -b "$branch" https://github.com/foglamp/${repos}.git
+		git clone -b "$branch" https://github.com/fledge/${repos}.git
 	fi
 
 	GIT_ROOT=/tmp/"$repos"
@@ -108,20 +108,20 @@ if [[ $skip_build == 0 ]]; then
 fi
 
 #
-# Builds FogLAMP
+# Builds Fledge
 #
 if [[ $skip_build == 0 ]]; then
 
-	# Backups FOGLAMP_ROOT
-	export FOGLAMP_ROOT_BCK=${FOGLAMP_ROOT}
+	# Backups FLEDGE_ROOT
+	export FLEDGE_ROOT_BCK=${FLEDGE_ROOT}
 
-	export FOGLAMP_ROOT=${GIT_ROOT}
-	export FOGLAMP_DATA=${FOGLAMP_ROOT}/data
-	export PYTHONPATH=${FOGLAMP_ROOT}/python
+	export FLEDGE_ROOT=${GIT_ROOT}
+	export FLEDGE_DATA=${FLEDGE_ROOT}/data
+	export PYTHONPATH=${FLEDGE_ROOT}/python
 
 	set +e
 
-	cd ${FOGLAMP_ROOT}
+	cd ${FLEDGE_ROOT}
 	sudo ./requirements.sh
 
 	# Enables/verifies the environment for the build
@@ -157,24 +157,24 @@ if [[ $skip_build == 0 ]]; then
 	make
 	sudo make install
 
-	# Restores FOGLAMP_ROOT
-	export FOGLAMP_ROOT=${FOGLAMP_ROOT_BCK}
+	# Restores FLEDGE_ROOT
+	export FLEDGE_ROOT=${FLEDGE_ROOT_BCK}
 fi
 
-# Checks if the FOGLAMP_ROOT environment is defined
-if [[ "${FOGLAMP_ROOT}" == "" ]]; then
+# Checks if the FLEDGE_ROOT environment is defined
+if [[ "${FLEDGE_ROOT}" == "" ]]; then
 
-    # Set FOGLAMP_ROOT as the default directory
-	export FOGLAMP_ROOT="/usr/local/foglamp"
+    # Set FLEDGE_ROOT as the default directory
+	export FLEDGE_ROOT="/usr/local/fledge"
 fi
 
-if [[ ! -d "${FOGLAMP_ROOT}" ]]; then
+if [[ ! -d "${FLEDGE_ROOT}" ]]; then
 
-  echo "No FOGLAMP_ROOT directory found in the path ${FOGLAMP_ROOT} - Program exit."
+  echo "No FLEDGE_ROOT directory found in the path ${FLEDGE_ROOT} - Program exit."
   exit 1
 fi
 
-version=`cat ${FOGLAMP_ROOT}/VERSION | tr -d ' ' | grep 'foglamp_version=' | head -1 | sed -e 's/\(.*\)=\(.*\)/\2/g'`
+version=`cat ${FLEDGE_ROOT}/VERSION | tr -d ' ' | grep 'fledge_version=' | head -1 | sed -e 's/\(.*\)=\(.*\)/\2/g'`
 BUILD_ROOT="${PKG_ROOT}/packages/rpmbuild/BUILDROOT"
 
 mkdir -p ${PKG_ROOT}/packages/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
@@ -185,8 +185,8 @@ package_name="${pkg_name}-${version}-1.${architecture}"
 
 # Print the summary of findings
 echo "The package root directory is : ${PKG_ROOT}"
-echo "The FogLAMP directory is      : ${FOGLAMP_ROOT}"
-echo "The FogLAMP version is        : ${version}"
+echo "The Fledge directory is      : ${FLEDGE_ROOT}"
+echo "The Fledge version is        : ${version}"
 echo "The package will be built in  : ${PKG_ROOT}/packages/rpmbuild/RPMS/${architecture}"
 echo "The package name is           : ${package_name}"
 echo
@@ -214,13 +214,13 @@ mkdir "${package_name}"
 echo -n "Populating the package and updating version in control file..."
 cd "${package_name}"
 
-sed -i "s/__NAME__/${pkg_name}/g"     ${PKG_ROOT}/packages/rpmbuild/SPECS/foglamp.spec
-sed -i "s/__VERSION__/${version}/g"   ${PKG_ROOT}/packages/rpmbuild/SPECS/foglamp.spec
-sed -i "s/__ARCH__/${architecture}/g" ${PKG_ROOT}/packages/rpmbuild/SPECS/foglamp.spec
+sed -i "s/__NAME__/${pkg_name}/g"     ${PKG_ROOT}/packages/rpmbuild/SPECS/fledge.spec
+sed -i "s/__VERSION__/${version}/g"   ${PKG_ROOT}/packages/rpmbuild/SPECS/fledge.spec
+sed -i "s/__ARCH__/${architecture}/g" ${PKG_ROOT}/packages/rpmbuild/SPECS/fledge.spec
 
-mkdir -p usr/local/foglamp
-cd usr/local/foglamp
-cp -R ${FOGLAMP_ROOT}/* .
+mkdir -p usr/local/fledge
+cd usr/local/fledge
+cp -R ${FLEDGE_ROOT}/* .
 echo "Done."
 
 # Prepare new data directory
@@ -228,7 +228,7 @@ echo "Prepare data directory"
 cd data
 rm -rf core.err
 rm -rf ./etc/certs/*
-rm -rf foglamp.db*
+rm -rf fledge.db*
 rm -rf var
 
 # Build the package
@@ -249,7 +249,7 @@ fi
 
 echo "Building the new package..."
 base_dir=${PKG_ROOT}/packages
-rpmbuild --define "_topdir ${base_dir}/rpmbuild"   --noclean -bb ${base_dir}/rpmbuild/SPECS/foglamp.spec
+rpmbuild --define "_topdir ${base_dir}/rpmbuild"   --noclean -bb ${base_dir}/rpmbuild/SPECS/fledge.spec
 echo "Building Complete."
 
 exit 0

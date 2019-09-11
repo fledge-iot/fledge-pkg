@@ -19,7 +19,7 @@
 ##--------------------------------------------------------------------
 ##
 ## @postinst DEBIAN/postrm
-## This script is used to modifies links or other files associated with foglamp, and/or removes files created by the package.
+## This script is used to modifies links or other files associated with fledge, and/or removes files created by the package.
 ##
 ## Author: Ashish Jabble
 ##
@@ -27,9 +27,9 @@
 
 set -e
 
-remove_foglamp_sudoer_file() {
-    rm -rf /etc/sudoers.d/foglamp
+remove_fledge_sudoer_file() {
+    rm -rf /etc/sudoers.d/fledge
 }
 
-echo "Remove foglamp sudoers file"
-remove_foglamp_sudoer_file
+echo "Remove fledge sudoers file"
+remove_fledge_sudoer_file

@@ -1,8 +1,8 @@
 *****************************
-Packaging for FogLAMP Plugins
+Packaging for Fledge Plugins
 *****************************
 
-This directory contains the deb and rpm scripts used to create a FogLAMP plugins package.
+This directory contains the deb and rpm scripts used to create a Fledge plugins package.
 
 Internal Structure
 ==================
@@ -28,7 +28,7 @@ The make_deb Script
 
   $ ./make_deb -h
   make_deb [-h] [-a] [-b <branch>] repository ...
-  This script is used to create the Debian package for a FogLAMP plugin
+  This script is used to create the Debian package for a Fledge plugin
 
   Arguments:
   -h	- Display this help text
@@ -40,24 +40,24 @@ The make_deb Script
 Building a Debian Package
 =========================
 
-First, make sure that FogLAMP_ROOT is set.
+First, make sure that Fledge_ROOT is set.
 Finally, run the ``make_deb`` command:
 
 .. code-block:: console
 
-  $ ./make_deb -b develop foglamp-south-sinusoid
-  Cloning into 'foglamp-south-sinusoid'...
+  $ ./make_deb -b develop fledge-south-sinusoid
+  Cloning into 'fledge-south-sinusoid'...
 
   Checking connectivity... done.
   Version is 1.6.0
-  The package root directory is                         : /tmp/foglamp-south-sinusoid
-  The FogLAMP south sinusoid  version is                : 1.6.0
-  The package will be built in                          : /tmp/foglamp-south-sinusoid/packages/build
-  The package name is                                   : foglamp-south-sinusoid-1.6.0
+  The package root directory is                         : /tmp/fledge-south-sinusoid
+  The Fledge south sinusoid  version is                : 1.6.0
+  The package will be built in                          : /tmp/fledge-south-sinusoid/packages/build
+  The package name is                                   : fledge-south-sinusoid-1.6.0
 
   Populating the package and updating version file...Done.
   Building the new package...
-  dpkg-deb: building package 'foglamp-south-sinusoid' in 'foglamp-south-sinusoid-1.6.0.deb'.
+  dpkg-deb: building package 'fledge-south-sinusoid' in 'fledge-south-sinusoid-1.6.0.deb'.
   Building Complete.
   $
   
@@ -67,8 +67,8 @@ The result will be:
 
   $ ls -l archive/DEBIAN/x86_64/
   total 8
-  drwxrwxr-x 4 foglamp foglamp  4096 foglamp-south-sinusoid-1.6.0
-  -rw-r--r-- 1 foglamp foglamp  3338 foglamp-south-sinusoid-1.6.0.deb
+  drwxrwxr-x 4 fledge fledge  4096 fledge-south-sinusoid-1.6.0
+  -rw-r--r-- 1 fledge fledge  3338 fledge-south-sinusoid-1.6.0.deb
   $
 
 The make_rpm Script
@@ -77,7 +77,7 @@ The make_rpm Script
 
   $ ./make_rpm --help
   make_rpm [-a] [-c] [-h] [-b <branch>] repository ...
-  This script is used to create the RPM package for a FogLAMP plugin
+  This script is used to create the RPM package for a Fledge plugin
 
   Arguments:
     -h	- Display this help text
@@ -89,25 +89,25 @@ The make_rpm Script
 Building a RPM Package
 ======================
 
-First, make sure that FogLAMP_ROOT is set.
+First, make sure that Fledge_ROOT is set.
 Finally, run the ``make_rpm`` command:
 
 .. code-block:: console
 
-  $ ./make_rpm -b develop foglamp-south-sinusoid
-  Cloning into 'foglamp-south-sinusoid'...
+  $ ./make_rpm -b develop fledge-south-sinusoid
+  Cloning into 'fledge-south-sinusoid'...
   Checking connectivity... done.
   Version is 1.6.0
-  The package root directory is                        : /tmp/foglamp-south-sinusoid
-  The FogLAMP south sinusoid version is                : 1.6.0
-  The package will be built in                         : /tmp/foglamp-south-sinusoid/packages/build
-  The package name is                                  : foglamp-south-sinusoid-1.6.0
+  The package root directory is                        : /tmp/fledge-south-sinusoid
+  The Fledge south sinusoid version is                : 1.6.0
+  The package will be built in                         : /tmp/fledge-south-sinusoid/packages/build
+  The package name is                                  : fledge-south-sinusoid-1.6.0
 
   Populating the package and updating version file...Done.
   Building the new package...
-  Processing files: foglamp-south-sinusoid-1.6.0-1.x86_64
-  Checking for unpackaged file(s): /usr/lib/rpm/check-files /tmp/foglamp-south-sinusoid/packages/build/foglamp-south-sinusoid-1.6.0/BUILDROOT/foglamp-south-sinusoid-1.6.0-1.x86_64
-  Wrote: /tmp/foglamp-south-sinusoid/packages/build/foglamp-south-sinusoid-1.6.0/RPMS/x86_64/foglamp-south-sinusoid-1.6.0-1.x86_64.rpm
+  Processing files: fledge-south-sinusoid-1.6.0-1.x86_64
+  Checking for unpackaged file(s): /usr/lib/rpm/check-files /tmp/fledge-south-sinusoid/packages/build/fledge-south-sinusoid-1.6.0/BUILDROOT/fledge-south-sinusoid-1.6.0-1.x86_64
+  Wrote: /tmp/fledge-south-sinusoid/packages/build/fledge-south-sinusoid-1.6.0/RPMS/x86_64/fledge-south-sinusoid-1.6.0-1.x86_64.rpm
   Building Complete.
   $
 
@@ -117,7 +117,7 @@ The result will be:
 
   $ ls -l archive/x86_64
   total 12
-  -rw-rw-r-- 1 foglamp foglamp 11805 foglamp-south-sinusoid-1.6.0-1.x86_64.rpm
+  -rw-rw-r-- 1 fledge fledge 11805 fledge-south-sinusoid-1.6.0-1.x86_64.rpm
   $
 
 Cleaning the Package Folder

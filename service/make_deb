@@ -25,7 +25,7 @@ set -e
 BRANCH_NAME=master
 
 USAGE="$(basename "$0") [-h] [-a] [-b <branch>] repository ...
-This script is used to create the Debian package for a FogLAMP service
+This script is used to create the Debian package for a Fledge service
 
 Arguments:
   -h	- Display this help text
@@ -87,7 +87,7 @@ do
 		echo WARNING: Repository ${REPO_NAME} already exists, using the existing copy
 		(cd ${REPO_NAME}; git pull; git checkout "${BRANCH_NAME}")
 	else
-		git clone -b ${BRANCH_NAME} --single-branch https://github.com/foglamp/${REPO_NAME}.git
+		git clone -b ${BRANCH_NAME} --single-branch https://github.com/fledge/${REPO_NAME}.git
 	fi
 
 	GIT_ROOT=/tmp/"${REPO_NAME}"
@@ -110,7 +110,7 @@ do
 
     if [ -f "${GIT_ROOT}/VERSION" ]; then
         version=`cat ${GIT_ROOT}/VERSION | tr -d ' ' | grep 'notification_version' | head -1 | sed -e 's/\(.*\)version=\(.*\)/\2/g'`
-        foglamp_version=`cat ${GIT_ROOT}/VERSION | tr -d ' ' | grep 'foglamp_version' | head -1 | sed -e 's/\(.*\)version\(.*\)/\2/g'`
+        fledge_version=`cat ${GIT_ROOT}/VERSION | tr -d ' ' | grep 'fledge_version' | head -1 | sed -e 's/\(.*\)version\(.*\)/\2/g'`
     else
         echo Unable to determine version of package to create
         rm -rf "${GIT_ROOT}"
@@ -121,7 +121,7 @@ do
     if [ "${package_name}" ]; then
         pkg_name=${package_name}
     else
-        pkg_name="foglamp-service-${service_name}"
+        pkg_name="fledge-service-${service_name}"
     fi
     # Final package name
     archname=$(dpkg --print-architecture)
@@ -130,7 +130,7 @@ do
     # Print the summary of findings
     echo "The package root directory is     : ${GIT_ROOT}"
     echo "The package build directory is    : ${BUILD_ROOT}"
-    echo "The FogLAMP required version      : ${foglamp_version}"
+    echo "The Fledge required version      : ${fledge_version}"
     echo "The architecture is set as        : ${architecture}"
     echo "The package will be built in      : ${archive}/${architecture}"
     echo "The package name is               : ${package_name}"
@@ -146,20 +146,20 @@ do
 
 
     # Check if the default directory exists
-    if [[ ! -d "${FOGLAMP_ROOT}" ]]; then
-        logger -p local0.err -t "foglamp.script.foglamp" "FogLAMP cannot be executed: ${FOGLAMP_ROOT} is not a valid directory."
-        echo "FogLAMP cannot be executed: ${FOGLAMP_ROOT} is not a valid directory."
-        echo "Create the enviroment variable FOGLAMP_ROOT before using FogLAMP."
-        echo "Specify the base directory for FogLAMP and set the variable with:"
-        echo "export FOGLAMP_ROOT=<basedir>"
+    if [[ ! -d "${FLEDGE_ROOT}" ]]; then
+        logger -p local0.err -t "fledge.script.fledge" "Fledge cannot be executed: ${FLEDGE_ROOT} is not a valid directory."
+        echo "Fledge cannot be executed: ${FLEDGE_ROOT} is not a valid directory."
+        echo "Create the enviroment variable FLEDGE_ROOT before using Fledge."
+        echo "Specify the base directory for Fledge and set the variable with:"
+        echo "export FLEDGE_ROOT=<basedir>"
         exit 1
     fi
 
     # Check/set LD_LIBRARY_PATH
     libPathSet=0
-    libdir=${FOGLAMP_ROOT}/lib; [ -d ${libdir} ] && LD_LIBRARY_PATH=$(echo $LD_LIBRARY_PATH | sed "s|${libdir}||g") && export LD_LIBRARY_PATH=${libdir}:${LD_LIBRARY_PATH} && libPathSet=1
-    libdir=${FOGLAMP_ROOT}/cmake_build/C/lib; [ -d ${libdir} ] && LD_LIBRARY_PATH=$(echo $LD_LIBRARY_PATH | sed "s|${libdir}||g") && export LD_LIBRARY_PATH=${libdir}:${LD_LIBRARY_PATH} && libPathSet=1
-    [ "$libPathSet" -eq "0" ] && echo "Unable to set/update LD_LIBRARY_PATH to include path of Foglamp shared libraries: check whether ${FOGLAMP_ROOT}/lib or ${FOGLAMP_ROOT}/cmake_build/C/lib exists" && exit 1
+    libdir=${FLEDGE_ROOT}/lib; [ -d ${libdir} ] && LD_LIBRARY_PATH=$(echo $LD_LIBRARY_PATH | sed "s|${libdir}||g") && export LD_LIBRARY_PATH=${libdir}:${LD_LIBRARY_PATH} && libPathSet=1
+    libdir=${FLEDGE_ROOT}/cmake_build/C/lib; [ -d ${libdir} ] && LD_LIBRARY_PATH=$(echo $LD_LIBRARY_PATH | sed "s|${libdir}||g") && export LD_LIBRARY_PATH=${libdir}:${LD_LIBRARY_PATH} && libPathSet=1
+    [ "$libPathSet" -eq "0" ] && echo "Unable to set/update LD_LIBRARY_PATH to include path of Fledge shared libraries: check whether ${FLEDGE_ROOT}/lib or ${FLEDGE_ROOT}/cmake_build/C/lib exists" && exit 1
     
     # Make service
     rm -rf build; mkdir ./build; cd ./build; cmake ..; make; cd ..
@@ -181,15 +181,15 @@ do
     sed -i "s/__NAME__/${pkg_name}/g" ${deb_path}/control
     sed -i "s/__ARCH__/${archname}/g" ${deb_path}/control
     sed -i "s/__REQUIRES__/${requirements}/g" ${deb_path}/control
-    sed -i "s/foglamp,/foglamp (${foglamp_version}),/" ${deb_path}/control
-    sed -i "s/foglamp$/foglamp (${foglamp_version})/" ${deb_path}/control
+    sed -i "s/fledge,/fledge (${fledge_version}),/" ${deb_path}/control
+    sed -i "s/fledge$/fledge (${fledge_version})/" ${deb_path}/control
     desc=`cat "${GIT_ROOT}/Description"`
     sed -i "s/__DESCRIPTION__/${desc}/g" ${deb_path}/control
     sed -i "s|__INSTALL_DIR__|${install_dir}|g" ${deb_path}/postinst
 
     # Debian file structure
-    mkdir -p usr/local/foglamp
-    cd usr/local/foglamp
+    mkdir -p usr/local/fledge
+    cd usr/local/fledge
     mkdir -p ${install_dir}
     cp "${GIT_ROOT}/build/C/${install_dir}/${service_name}/${exec_name}" "${install_dir}/${exec_name}"
     echo "Done."

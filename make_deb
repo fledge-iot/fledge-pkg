@@ -23,7 +23,7 @@
 set -e
 
 usage="$(basename "$0") [help|clean|cleanall]
-This script is used to create the Debian package of FogLAMP
+This script is used to create the Debian package of Fledge
 Arguments:
  help	  - Display this help text
  clean    - Remove all the old versions saved in format .XXXX
@@ -66,28 +66,28 @@ do
   esac
 done
 
-# Check FOGLAMP_ROOT
-if [ -z ${FOGLAMP_ROOT+x} ]; then
-    # Set FOGLAMP_ROOT as the default directory
-    if [ -d "/usr/local/foglamp" ]; then
-      FOGLAMP_ROOT="/usr/local/foglamp"
-      export FOGLAMP_ROOT
+# Check FLEDGE_ROOT
+if [ -z ${FLEDGE_ROOT+x} ]; then
+    # Set FLEDGE_ROOT as the default directory
+    if [ -d "/usr/local/fledge" ]; then
+      FLEDGE_ROOT="/usr/local/fledge"
+      export FLEDGE_ROOT
     else
-      echo "No FOGLAMP_ROOT directory found - Program exit."
+      echo "No FLEDGE_ROOT directory found - Program exit."
       exit 1
     fi
 fi
 
-version=`cat ${FOGLAMP_ROOT}/VERSION | tr -d ' ' | grep 'foglamp_version=' | head -1 | sed -e 's/\(.*\)=\(.*\)/\2/g'`
+version=`cat ${FLEDGE_ROOT}/VERSION | tr -d ' ' | grep 'fledge_version=' | head -1 | sed -e 's/\(.*\)=\(.*\)/\2/g'`
 BUILD_ROOT="${GIT_ROOT}/packages/Debian/build/${architecture}"
 
 # Final package name
-package_name="foglamp-${version}-${architecture}"
+package_name="fledge-${version}-${architecture}"
 
 # Print the summary of findings
 echo "The package root directory is : ${GIT_ROOT}"
-echo "The FogLAMP directory is      : ${FOGLAMP_ROOT}"
-echo "The FogLAMP version is        : ${version}"
+echo "The Fledge directory is      : ${FLEDGE_ROOT}"
+echo "The Fledge version is        : ${version}"
 echo "The package will be built in  : ${BUILD_ROOT}"
 echo "The architecture is set as    : ${architecture}"
 echo "The package name is           : ${package_name}"
@@ -118,9 +118,9 @@ cd "${package_name}"
 cp -R ${GIT_ROOT}/packages/Debian/common/* .
 cp -R ${GIT_ROOT}/packages/Debian/${architecture}/* .
 sed -i "s/Version: 1.0.0/Version: ${version}/g" DEBIAN/control
-mkdir -p usr/local/foglamp
-cd usr/local/foglamp
-cp -R ${FOGLAMP_ROOT}/* .
+mkdir -p usr/local/fledge
+cd usr/local/fledge
+cp -R ${FLEDGE_ROOT}/* .
 echo "Done."
 
 # Prepare new data directory
@@ -129,14 +129,14 @@ mv data data.new
 cd data.new
 rm -rf core.err
 rm -rf etc/certs/*
-rm -rf foglamp.db
+rm -rf fledge.db
 rm -rf var
 
 # Add customised files
-#echo -n "Adding FogLAMP customization..."
+#echo -n "Adding Fledge customization..."
 
 #cp -R ${GIT_ROOT}/share/* share/postgresql/.
-#cd ${BUILD_ROOT}/${package_name}/usr/local/foglamp/plugins/storage/postgres
+#cd ${BUILD_ROOT}/${package_name}/usr/local/fledge/plugins/storage/postgres
 #mkdir bin
 #cp ${GIT_ROOT}/scripts/* bin/.
 #echo "Done."

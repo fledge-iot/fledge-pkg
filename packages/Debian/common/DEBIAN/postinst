@@ -28,49 +28,49 @@
 set -e
 
 # certificate generation defaults
-SSL_NAME="foglamp"
+SSL_NAME="fledge"
 SSL_DAYS="365"
 AUTH_NAME="ca"
 
 link_update_task() {
     echo "Changing setuid of update_task.apt"
-    chmod ugo+s /usr/local/foglamp/bin/update_task.apt
+    chmod ugo+s /usr/local/fledge/bin/update_task.apt
     echo "Removing task/update"
-    [ -e /usr/local/foglamp/scripts/tasks/update ] && rm  /usr/local/foglamp/scripts/tasks/update
+    [ -e /usr/local/fledge/scripts/tasks/update ] && rm  /usr/local/fledge/scripts/tasks/update
     echo "Create link file"
-    ln -s /usr/local/foglamp/bin/update_task.apt /usr/local/foglamp/scripts/tasks/update
+    ln -s /usr/local/fledge/bin/update_task.apt /usr/local/fledge/scripts/tasks/update
 }
 
-copy_foglamp_sudoer_file() {
-    cp /usr/local/foglamp/bin/foglamp.sudoers /etc/sudoers.d/foglamp
+copy_fledge_sudoer_file() {
+    cp /usr/local/fledge/bin/fledge.sudoers /etc/sudoers.d/fledge
 }
 
 copy_service_file() {
-    cp /usr/local/foglamp/extras/scripts/foglamp.service /etc/init.d/foglamp
+    cp /usr/local/fledge/extras/scripts/fledge.service /etc/init.d/fledge
 }
 
-enable_foglamp_service() {
-    systemctl enable foglamp
+enable_fledge_service() {
+    systemctl enable fledge
 }
 
-start_foglamp_service() {
-    systemctl start foglamp
+start_fledge_service() {
+    systemctl start fledge
 }
 
 set_files_ownership () {
-    chown root:root /etc/init.d/foglamp
-    chown -R root:root /usr/local/foglamp
-    chown -R ${SUDO_USER}:${SUDO_USER} /usr/local/foglamp/data
+    chown root:root /etc/init.d/fledge
+    chown -R root:root /usr/local/fledge
+    chown -R ${SUDO_USER}:${SUDO_USER} /usr/local/fledge/data
 }
 
 setuid_cmdutil () {
-    chmod u+s /usr/local/foglamp/extras/C/cmdutil
+    chmod u+s /usr/local/fledge/extras/C/cmdutil
 }
 
 generate_certs () {
-    if [ ! -f /usr/local/foglamp/data/etc/certs/foglamp.cert ]; then
+    if [ ! -f /usr/local/fledge/data/etc/certs/fledge.cert ]; then
         echo "Certificate files do not exist. Generating new certificate files."
-        cd /usr/local/foglamp
+        cd /usr/local/fledge
         ./scripts/certificates ${SSL_NAME} ${SSL_DAYS}
     else
         echo "Certificate files already exist. Skipping generating new certificate files."
@@ -78,23 +78,23 @@ generate_certs () {
 }
 
 generate_auth_certs () {
-    if [ ! -f /usr/local/foglamp/data/etc/certs/ca.cert ]; then
+    if [ ! -f /usr/local/fledge/data/etc/certs/ca.cert ]; then
         echo "CA Certificate file does not exist. Generating new CA certificate file."
-        cd /usr/local/foglamp
+        cd /usr/local/fledge
         ./scripts/auth_certificates ca ${AUTH_NAME} ${SSL_DAYS}
     else
         echo "CA Certificate file already exists. Skipping generating new CA certificate file."
     fi
-    if [ ! -f /usr/local/foglamp/data/etc/certs/admin.cert ]; then
+    if [ ! -f /usr/local/fledge/data/etc/certs/admin.cert ]; then
         echo "Admin Certificate file does not exist. Generating new admin certificate file."
-        cd /usr/local/foglamp
+        cd /usr/local/fledge
         ./scripts/auth_certificates user admin ${SSL_DAYS}
     else
         echo "Admin Certificate file already exists. Skipping generating new admin certificate file."
     fi
-    if [ ! -f /usr/local/foglamp/data/etc/certs/user.cert ]; then
+    if [ ! -f /usr/local/fledge/data/etc/certs/user.cert ]; then
         echo "User Certificate file does not exist. Generating new user certificate file."
-        cd /usr/local/foglamp
+        cd /usr/local/fledge
         ./scripts/auth_certificates user user ${SSL_DAYS}
     else
         echo "User Certificate file already exists. Skipping generating new user certificate file."
@@ -102,28 +102,28 @@ generate_auth_certs () {
 }
 
 copy_new_data () {
-    if [ ! -d /usr/local/foglamp/data ]; then
+    if [ ! -d /usr/local/fledge/data ]; then
         echo "Data directory does not exist. Using new data directory"
-        mv /usr/local/foglamp/data.new /usr/local/foglamp/data
+        mv /usr/local/fledge/data.new /usr/local/fledge/data
     else
         echo "Data directory already exists. Updating data/extras/fogbench/fogbench_sensor_coap.template.json only."
-        cp /usr/local/foglamp/data.new/extras/fogbench/fogbench_sensor_coap.template.json /usr/local/foglamp/data/extras/fogbench/fogbench_sensor_coap.template.json
-        rm -rf /usr/local/foglamp/data.new
+        cp /usr/local/fledge/data.new/extras/fogbench/fogbench_sensor_coap.template.json /usr/local/fledge/data/extras/fogbench/fogbench_sensor_coap.template.json
+        rm -rf /usr/local/fledge/data.new
     fi
 }
 
 install_pip3_packages () {
-    pip3 install -r /usr/local/foglamp/python/requirements.txt
+    pip3 install -r /usr/local/fledge/python/requirements.txt
 }
 
-# Call FogLAMP package update script
+# Call Fledge package update script
 # Any message will be written by called update script
 call_package_update_script () {
     # File created by presinstall hook
-    installed_version_file="/usr/local/foglamp/.current_installed_version"
+    installed_version_file="/usr/local/fledge/.current_installed_version"
     if [ -s "${installed_version_file}" ]; then
         current_installed_version=`cat ${installed_version_file}`
-        update_script="/usr/local/foglamp/scripts/package/debian/package_update.sh"
+        update_script="/usr/local/fledge/scripts/package/debian/package_update.sh"
         # Check update script exists
         if [ -x "${update_script}" ] && [ -s "${update_script}" ] && [ -O "${update_script}" ]; then
             # Call Debian update script passing the previous version
@@ -145,17 +145,17 @@ echo "Generating certificate files"
 generate_certs
 echo "Generating auth certificate files"
 generate_auth_certs
-echo "Setting ownership of FogLAMP files"
+echo "Setting ownership of Fledge files"
 set_files_ownership
-echo "Calling FogLAMP package update script"
+echo "Calling Fledge package update script"
 call_package_update_script
 echo "Linking update task"
 link_update_task
 echo "Copying sodoers file"
-copy_foglamp_sudoer_file
+copy_fledge_sudoer_file
 echo "Setting setuid bit of cmdutil"
 setuid_cmdutil
-echo "Enabling FogLAMP service"
-enable_foglamp_service
-echo "Starting FogLAMP service"
-start_foglamp_service
+echo "Enabling Fledge service"
+enable_fledge_service
+echo "Starting Fledge service"
+start_fledge_service

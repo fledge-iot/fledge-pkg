@@ -1,4 +1,4 @@
-Package: foglamp
+Package: fledge
 Version: 1.0.0
 Section: devel
 Priority: optional
@@ -7,4 +7,4 @@ Depends: autoconf,libtool,libboost-dev,libboost-system-dev,libboost-thread-dev,l
 Conflicts:
 Maintainer: Dianomic Systems, Inc. <info@dianomic.com>
 Homepage: http://www.dianomic.com
-Description: FogLAMP, the open source platform for the Internet of Things
+Description: Fledge, the open source platform for the Internet of Things

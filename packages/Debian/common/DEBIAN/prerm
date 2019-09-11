@@ -27,39 +27,39 @@
 
 set -e
 
-PKG_NAME="foglamp"
+PKG_NAME="fledge"
 
-get_foglamp_script () {
-    foglamp_script=$(dpkg -L $PKG_NAME | grep 'foglamp/bin/foglamp$')
-    echo $foglamp_script
+get_fledge_script () {
+    fledge_script=$(dpkg -L $PKG_NAME | grep 'fledge/bin/fledge$')
+    echo $fledge_script
 }
 
-stop_foglamp_service () {
-    systemctl stop foglamp
+stop_fledge_service () {
+    systemctl stop fledge
 }
 
-is_foglamp_running () {
+is_fledge_running () {
     set +e
-    foglamp_script=$(get_foglamp_script)
-    foglamp_status_output=$($foglamp_script status 2>&1 | grep 'FogLAMP Uptime')
+    fledge_script=$(get_fledge_script)
+    fledge_status_output=$($fledge_script status 2>&1 | grep 'Fledge Uptime')
     rc=$((!$?))
     echo $rc
     set -e
 }
 
-kill_foglamp () {
+kill_fledge () {
     set +e
-    foglamp_script=$(get_foglamp_script)
-    foglamp_status_output=$($foglamp_script kill 2>&1)
+    fledge_script=$(get_fledge_script)
+    fledge_status_output=$($fledge_script kill 2>&1)
     set -e
 }
 
-disable_foglamp_service () {
-    systemctl disable foglamp
+disable_fledge_service () {
+    systemctl disable fledge
 }
 
-remove_foglamp_service_file () {
-    rm -rf /etc/init.d/foglamp
+remove_fledge_service_file () {
+    rm -rf /etc/init.d/fledge
 }
 
 reset_systemctl () {
@@ -69,34 +69,34 @@ reset_systemctl () {
 
 remove_pycache_files () {
     set +e
-    find /usr/local/foglamp -name "*.pyc" -exec rm -rf {} \;
-    find /usr/local/foglamp -name "__pycache__" -exec rm -rf {} \;
+    find /usr/local/fledge -name "*.pyc" -exec rm -rf {} \;
+    find /usr/local/fledge -name "__pycache__" -exec rm -rf {} \;
     set -e
 }
 
 remove_data_files () {
-    rm -rf /usr/local/foglamp/data
+    rm -rf /usr/local/fledge/data
 }
 
 # main
 
-IS_FOGLAMP_RUNNING=$(is_foglamp_running)
-if [ "$IS_FOGLAMP_RUNNING" -eq "1" ]
+IS_FLEDGE_RUNNING=$(is_fledge_running)
+if [ "$IS_FLEDGE_RUNNING" -eq "1" ]
 then
-    echo "FogLAMP is currently running."
-    echo "Stop FogLAMP service."
-    stop_foglamp_service
-    echo "Kill FogLAMP."
-    kill_foglamp
+    echo "Fledge is currently running."
+    echo "Stop Fledge service."
+    stop_fledge_service
+    echo "Kill Fledge."
+    kill_fledge
 fi
 
 #echo "Remove data directory."
 #remove_data_files
 echo "Remove python cache files."
 remove_pycache_files
-echo "Disable FogLAMP service."
-disable_foglamp_service
-echo "Remove FogLAMP service script"
-remove_foglamp_service_file
+echo "Disable Fledge service."
+disable_fledge_service
+echo "Remove Fledge service script"
+remove_fledge_service_file
 echo "Reset systemctl"
 reset_systemctl

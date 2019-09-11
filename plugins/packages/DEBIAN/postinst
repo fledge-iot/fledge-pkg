@@ -28,19 +28,19 @@
 set -e
 
 set_files_ownership () {
-    chown -R root:root /usr/local/foglamp/__INSTALL_DIR__
+    chown -R root:root /usr/local/fledge/__INSTALL_DIR__
 }
 
 set_files_ownership
 
 # Install Prerequisite; if any
-if [ -f /usr/local/foglamp/python/extras_install___PLUGIN_NAME__.sh ]; then
-   sh /usr/local/foglamp/python/extras_install___PLUGIN_NAME__.sh
+if [ -f /usr/local/fledge/python/extras_install___PLUGIN_NAME__.sh ]; then
+   sh /usr/local/fledge/python/extras_install___PLUGIN_NAME__.sh
 fi
 
 # Install Python dependencies; if any
-if [ -f /usr/local/foglamp/python/requirements-__PLUGIN_NAME__.txt ]; then
-    pip3 install -Ir /usr/local/foglamp/python/requirements-__PLUGIN_NAME__.txt
+if [ -f /usr/local/fledge/python/requirements-__PLUGIN_NAME__.txt ]; then
+    pip3 install -Ir /usr/local/fledge/python/requirements-__PLUGIN_NAME__.txt
 fi
 
 echo __PLUGIN_NAME__ plugin is installed.

@@ -25,7 +25,7 @@ set -e
 branch=master
 
 usage="$(basename "$0") [-a] [-c] [-h] [-b <branch>] repository ...
-This script is used to create the RPM package for a FogLAMP plugin
+This script is used to create the RPM package for a Fledge plugin
 
 Arguments:
  -h	- Display this help text
@@ -87,7 +87,7 @@ do
 
 	PKG_ROOT=`pwd`
 	if [ ! -f packages/RPM/SPECS/plugin.spec ] ; then
-		echo You must run this script from the foglamp-pkg/plugins directory
+		echo You must run this script from the fledge-pkg/plugins directory
 		exit 1
 	fi
 
@@ -96,7 +96,7 @@ do
 		echo WARNING: Repository $repos already exists, using the existing copy
 		(cd $repos; git pull; git checkout "$branch")
 	else
-		git clone -b "$branch" https://github.com/foglamp/${repos}.git
+		git clone -b "$branch" https://github.com/fledge/${repos}.git
 	fi
 
 	GIT_ROOT=/tmp/"$repos"
@@ -119,10 +119,10 @@ do
 
 	if [ -f "${GIT_ROOT}/VERSION" ]; then
 		version=`cat "${GIT_ROOT}/VERSION"`
-		foglamp_version=`cat ${GIT_ROOT}/foglamp.version| tr -d ' ' | grep 'foglamp_version' | head -1 | sed -e 's/\(.*\)version\([>=|>|<|<=|=]*\)\(.*\)/\2 \3/g'`
+		fledge_version=`cat ${GIT_ROOT}/fledge.version| tr -d ' ' | grep 'fledge_version' | head -1 | sed -e 's/\(.*\)version\([>=|>|<|<=|=]*\)\(.*\)/\2 \3/g'`
 	elif [ -f "${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name}" ]; then
-		  version=`cat "${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name}" | tr -d ' ' | grep "foglamp_${plugin_type}_${plugin_name}_version" | head -1 | sed -e 's/\(.*\)=\(.*\)/\2/g'`
-		  foglamp_version=`cat ${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name} | tr -d ' ' | grep 'foglamp_version' | head -1 | sed -e 's/\(.*\)version\([>=|>|<|<=|=]*\)\(.*\)/\2 \3/g'`
+		  version=`cat "${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name}" | tr -d ' ' | grep "fledge_${plugin_type}_${plugin_name}_version" | head -1 | sed -e 's/\(.*\)=\(.*\)/\2/g'`
+		  fledge_version=`cat ${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name} | tr -d ' ' | grep 'fledge_version' | head -1 | sed -e 's/\(.*\)version\([>=|>|<|<=|=]*\)\(.*\)/\2 \3/g'`
 	else
 		echo Unable to determine version of package to create
 		rm -rf "${GIT_ROOT}"
@@ -130,14 +130,14 @@ do
 	fi
 	echo Version is $version
 	BUILD_ROOT="${GIT_ROOT}/packages/build"
-	pkg_name="foglamp-${plugin_type}-${plugin_name}"
+	pkg_name="fledge-${plugin_type}-${plugin_name}"
 
 	# Final package name
 	package_name="${pkg_name}-${version}"
 
 	# Print the summary of findings
 	echo "The package root directory is                        : ${GIT_ROOT}"
-	echo "The FogLAMP ${plugin_type} ${plugin_name} version is : ${version}"
+	echo "The Fledge ${plugin_type} ${plugin_name} version is : ${version}"
 	echo "The package will be built in                         : ${BUILD_ROOT}"
 	echo "The package name is                                  : ${package_name}"
 	if [ -f "${GIT_ROOT}/service_notification.version" ]; then
@@ -175,7 +175,7 @@ do
 
 	# Install directory path
 	if [ -d ${GIT_ROOT}/python ]; then
-	    installs=python/foglamp/plugins/${plugin_type_install}/${plugin_install_dirname}
+	    installs=python/fledge/plugins/${plugin_type_install}/${plugin_install_dirname}
 	else
 	    installs=plugins/${plugin_type_install}/${plugin_install_dirname}
 	fi
@@ -192,11 +192,11 @@ do
 	sed -i "s/__PACKAGE_NAME__/${package_name}/g" SPECS/plugin.spec
 	sed -i "s|__INSTALL_DIR__|${installs}|g" SPECS/plugin.spec
 	sed -i "s/__REQUIRES__/${requirements}/g" SPECS/plugin.spec
-	sed -i "s/foglamp,/foglamp ${foglamp_version},/" SPECS/plugin.spec
-	sed -i "s/foglamp$/foglamp ${foglamp_version}/" SPECS/plugin.spec
+	sed -i "s/fledge,/fledge ${fledge_version},/" SPECS/plugin.spec
+	sed -i "s/fledge$/fledge ${fledge_version}/" SPECS/plugin.spec
 
 	if [ ! -z "${service_notification_version}" ] ; then
-	    sed -i "s/foglamp-service-notification/foglamp-service-notification ${service_notification_version}/" SPECS/plugin.spec
+	    sed -i "s/fledge-service-notification/fledge-service-notification ${service_notification_version}/" SPECS/plugin.spec
 	fi
 	cat > /tmp/sed.script.$$ << EOF
 	/__DESCRIPTION__/ {
@@ -212,8 +212,8 @@ EOF
 	mkdir -p ${package_name}-1.${arch}
 	cd ${package_name}-1.${arch}
 
-	mkdir -p usr/local/foglamp
-	cd usr/local/foglamp
+	mkdir -p usr/local/fledge
+	cd usr/local/fledge
 	if [ -d ${GIT_ROOT}/python ]; then
 	    find ${GIT_ROOT}/python | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
 	    if [ -f "${GIT_ROOT}/extras_install.sh" ]; then
@@ -221,9 +221,9 @@ EOF
 	        cp -p ${GIT_ROOT}/extras_install.sh ${GIT_ROOT}/python/extras_install_${plugin_name}.sh
 	    fi
 	    # plugin info version replaced in ${plugin_name}.py
-	    sed -i "s/'version':.*$/'version': '${version}',/g" ${GIT_ROOT}/python/foglamp/plugins/${plugin_type}/${plugin_name}/${plugin_name}.py
+	    sed -i "s/'version':.*$/'version': '${version}',/g" ${GIT_ROOT}/python/fledge/plugins/${plugin_type}/${plugin_name}/${plugin_name}.py
 	    cp -R ${GIT_ROOT}/python .
-	    cp -R ${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name} ./python/foglamp/plugins/${plugin_type}/${plugin_name}
+	    cp -R ${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name} ./python/fledge/plugins/${plugin_type}/${plugin_name}
 	else
 		(cd ${GIT_ROOT}; 
 			if [ -f requirements.sh ]; then

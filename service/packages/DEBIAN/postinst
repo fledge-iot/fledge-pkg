@@ -28,7 +28,7 @@
 set -e
 
 set_files_ownership () {
-    chown -R root:root "/usr/local/foglamp/__INSTALL_DIR__"
+    chown -R root:root "/usr/local/fledge/__INSTALL_DIR__"
 }
 
 set_files_ownership

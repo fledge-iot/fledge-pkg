@@ -5,7 +5,7 @@ Vendor:        Dianomic Systems, Inc. <info@dianomic.com>
 Version:       __VERSION__
 Release:       1
 BuildArch:     __ARCH__
-Summary:       FogLAMP, the open source platform for the Internet of Things
+Summary:       Fledge, the open source platform for the Internet of Things
 License:       Apache License, 2019 Dianomic Systems Inc.
 Group:         IOT
 URL:           http://www.dianomic.com
@@ -29,11 +29,11 @@ PKG_NAME="__PACKAGE_NAME__"
 %post
 set -e
 set_files_ownership () {
-	chown -R root:root /usr/local/foglamp/__INSTALL_DIR__
+	chown -R root:root /usr/local/fledge/__INSTALL_DIR__
 }
 
 # main
-echo "Setting ownership of FogLAMP files"
+echo "Setting ownership of Fledge files"
 set_files_ownership
 
 

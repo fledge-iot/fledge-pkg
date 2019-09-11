@@ -5,7 +5,7 @@ Vendor:        Dianomic Systems, Inc. <info@dianomic.com>
 Version:       __VERSION__
 Release:       1
 BuildArch:     __ARCH__
-Summary:       FogLAMP __NAME__ plugin, the open source platform for the Internet of Things
+Summary:       Fledge __NAME__ plugin, the open source platform for the Internet of Things
 License:       Apache License
 Group:         IOT
 URL:           http://www.dianomic.com
@@ -114,23 +114,23 @@ set -e
 
 
 set_files_ownership () {
-	chown -R root:root /usr/local/foglamp/__INSTALL_DIR__
+	chown -R root:root /usr/local/fledge/__INSTALL_DIR__
 }
 
 # main
-echo "Setting ownership of FogLAMP files"
+echo "Setting ownership of Fledge files"
 set_files_ownership
 
 # Install Prerequisite; if any
-if [ -f /usr/local/foglamp/python/extras_install___PLUGIN_NAME__.sh ]; then
-   sh /usr/local/foglamp/python/extras_install___PLUGIN_NAME__.sh
+if [ -f /usr/local/fledge/python/extras_install___PLUGIN_NAME__.sh ]; then
+   sh /usr/local/fledge/python/extras_install___PLUGIN_NAME__.sh
 fi
 
 # Install any Python dependencies
-if [ -f /usr/local/foglamp/python/requirements-__PLUGIN_NAME__.txt ]; then
+if [ -f /usr/local/fledge/python/requirements-__PLUGIN_NAME__.txt ]; then
 	bash << EOF
 scl enable rh-python36 bash
-pip install -Ir /usr/local/foglamp/python/requirements-__PLUGIN_NAME__.txt
+pip install -Ir /usr/local/fledge/python/requirements-__PLUGIN_NAME__.txt
 EOF
 fi
 

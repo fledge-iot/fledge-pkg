@@ -25,7 +25,7 @@ set -e
 BRANCH_NAME=master
 
 USAGE="$(basename "$0") [-h] [-a] [-b <branch>] repository ...
-This script is used to create the RPM package for a FogLAMP service
+This script is used to create the RPM package for a Fledge service
 
 Arguments:
   -h	- Display this help text
@@ -70,26 +70,26 @@ if [ "${REPO_NAME}" = "" ]; then
 fi
 
 # Check if the default directory exists
-echo FOGLAMP_ROOT = ${FOGLAMP_ROOT}
-if [ "${FOGLAMP_ROOT}" = "" ]; then
-echo "Notification server cannot be compiled: FOGLAMP_ROOT environment variable is not set."
-echo "Specify the base directory for FogLAMP and set the variable with:"
-echo "export FOGLAMP_ROOT=<basedir>"
+echo FLEDGE_ROOT = ${FLEDGE_ROOT}
+if [ "${FLEDGE_ROOT}" = "" ]; then
+echo "Notification server cannot be compiled: FLEDGE_ROOT environment variable is not set."
+echo "Specify the base directory for Fledge and set the variable with:"
+echo "export FLEDGE_ROOT=<basedir>"
 exit 1
 fi
 
-if [ ! -d "${FOGLAMP_ROOT}" ]; then
-echo "Notification server cannot be compiled: ${FOGLAMP_ROOT} is not a valid directory."
-echo "Specify the base directory for FogLAMP and set the variable with:"
-echo "export FOGLAMP_ROOT=<basedir>"
+if [ ! -d "${FLEDGE_ROOT}" ]; then
+echo "Notification server cannot be compiled: ${FLEDGE_ROOT} is not a valid directory."
+echo "Specify the base directory for Fledge and set the variable with:"
+echo "export FLEDGE_ROOT=<basedir>"
 exit 1
 fi
 
 # Check/set LD_LIBRARY_PATH
 libPathSet=0
-libdir=${FOGLAMP_ROOT}/lib; [ -d ${libdir} ] && LD_LIBRARY_PATH=$(echo $LD_LIBRARY_PATH | sed "s|${libdir}||g") && export LD_LIBRARY_PATH=${libdir}:${LD_LIBRARY_PATH} && libPathSet=1
-libdir=${FOGLAMP_ROOT}/cmake_build/C/lib; [ -d ${libdir} ] && LD_LIBRARY_PATH=$(echo $LD_LIBRARY_PATH | sed "s|${libdir}||g") && export LD_LIBRARY_PATH=${libdir}:${LD_LIBRARY_PATH} && libPathSet=1
-[ "$libPathSet" -eq "0" ] && echo "Unable to set/update LD_LIBRARY_PATH to include path of Foglamp shared libraries: check whether ${FOGLAMP_ROOT}/lib or ${FOGLAMP_ROOT}/cmake_build/C/lib exists" && exit 1
+libdir=${FLEDGE_ROOT}/lib; [ -d ${libdir} ] && LD_LIBRARY_PATH=$(echo $LD_LIBRARY_PATH | sed "s|${libdir}||g") && export LD_LIBRARY_PATH=${libdir}:${LD_LIBRARY_PATH} && libPathSet=1
+libdir=${FLEDGE_ROOT}/cmake_build/C/lib; [ -d ${libdir} ] && LD_LIBRARY_PATH=$(echo $LD_LIBRARY_PATH | sed "s|${libdir}||g") && export LD_LIBRARY_PATH=${libdir}:${LD_LIBRARY_PATH} && libPathSet=1
+[ "$libPathSet" -eq "0" ] && echo "Unable to set/update LD_LIBRARY_PATH to include path of Fledge shared libraries: check whether ${FLEDGE_ROOT}/lib or ${FLEDGE_ROOT}/cmake_build/C/lib exists" && exit 1
 
 
 while [ "${REPO_NAME}" != "" ]
@@ -115,7 +115,7 @@ do
         echo WARNING: Repository ${REPO_NAME} already exists, using the existing copy
         (cd ${REPO_NAME}; git pull; git checkout "${BRANCH_NAME}")
     else
-        git clone -b "${BRANCH_NAME}" https://github.com/foglamp/${REPO_NAME}.git
+        git clone -b "${BRANCH_NAME}" https://github.com/fledge/${REPO_NAME}.git
     fi
 
     GIT_ROOT=/tmp/"${REPO_NAME}"
@@ -138,7 +138,7 @@ do
 
     if [ -f "${GIT_ROOT}/VERSION" ]; then
         version=`cat "${GIT_ROOT}/VERSION" | tr -d ' ' | grep "notification_version" | head -1 | sed -e 's/\(.*\)version\([>=|>|<|<=|=]*\)\(.*\)/\3/g'`
-        foglamp_version=`cat ${GIT_ROOT}/VERSION| tr -d ' ' | grep 'foglamp_version' | head -1 | sed -e 's/\(.*\)version\([>=|>|<|<=|=]*\)\(.*\)/\2 \3/g'`
+        fledge_version=`cat ${GIT_ROOT}/VERSION| tr -d ' ' | grep 'fledge_version' | head -1 | sed -e 's/\(.*\)version\([>=|>|<|<=|=]*\)\(.*\)/\2 \3/g'`
     else
         echo Unable to determine version of package to create
         rm -rf "${GIT_ROOT}"
@@ -149,15 +149,15 @@ do
     if [ "${package_name}" ]; then
         pkg_name=${package_name}
     else
-        pkg_name="foglamp-service-${service_name}"
+        pkg_name="fledge-service-${service_name}"
     fi
     package_name="${pkg_name}-${version}"
 
     # Print the summary of findings
     echo "The package root directory is                           : ${GIT_ROOT}"
     echo "The package build directory is                          : ${BUILD_ROOT}"
-    echo "The FogLAMP required version                            : ${foglamp_version}"
-    echo "The FogLAMP service ${service_name} version is          : ${version}"
+    echo "The Fledge required version                            : ${fledge_version}"
+    echo "The Fledge service ${service_name} version is          : ${version}"
     echo "The architecture is set as                              : ${arch}"
     echo "The package will be built in                            : ${archive}/${architecture}"
     echo "The package name is                                     : ${package_name}"
@@ -199,8 +199,8 @@ do
     sed -i "s/__PACKAGE_NAME__/${package_name}/g" SPECS/service.spec
     sed -i "s|__INSTALL_DIR__|${install_dir}|g" SPECS/service.spec
     sed -i "s/__REQUIRES__/${requirements}/g" SPECS/service.spec
-    sed -i "s/foglamp,/foglamp ${foglamp_version},/" SPECS/service.spec
-    sed -i "s/foglamp$/foglamp ${foglamp_version}/" SPECS/service.spec
+    sed -i "s/fledge,/fledge ${fledge_version},/" SPECS/service.spec
+    sed -i "s/fledge$/fledge ${fledge_version}/" SPECS/service.spec
 
     cat > /tmp/sed.script.$$ << EOF
         /__DESCRIPTION__/ {
@@ -216,10 +216,10 @@ EOF
     mkdir -p ${package_name}-1.${arch}
     cd ${package_name}-1.${arch}
 
-    mkdir -p usr/local/foglamp
-    cd usr/local/foglamp
+    mkdir -p usr/local/fledge
+    cd usr/local/fledge
     mkdir -p ${install_dir}
-    cp -R --preserve=links ${GIT_ROOT}/build/C/${install_dir}/notification/foglamp* "${install_dir}/"
+    cp -R --preserve=links ${GIT_ROOT}/build/C/${install_dir}/notification/fledge* "${install_dir}/"
     echo "Done."
 
     cd ..
