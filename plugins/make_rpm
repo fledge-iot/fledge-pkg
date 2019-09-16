@@ -1,0 +1,274 @@
+#!/bin/bash
+
+##--------------------------------------------------------------------
+## Copyright (c) 2019 Dianomic Systems
+##
+## Licensed under the Apache License, Version 2.0 (the "License");
+## you may not use this file except in compliance with the License.
+## You may obtain a copy of the License at
+##
+##     http://www.apache.org/licenses/LICENSE-2.0
+##
+## Unless required by applicable law or agreed to in writing, software
+## distributed under the License is distributed on an "AS IS" BASIS,
+## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+## See the License for the specific language governing permissions and
+## limitations under the License.
+##--------------------------------------------------------------------
+##
+## Author: Mark Riddoch, Massimiliano Pinto, Ashish Jabble
+##
+
+set -e
+
+# Default branch to package
+branch=master
+
+usage="$(basename "$0") [-a] [-c] [-h] [-b <branch>] repository ...
+This script is used to create the RPM package for a FogLAMP plugin
+
+Arguments:
+ -h	- Display this help text
+ -c	- Remove all the old versions saved in format .XXXX
+ -a	- Remove all the versions, including the last one
+ -b	- Branch to base package on"
+
+
+while getopts ":hcab:" opt; do
+	case "$opt" in
+		c)
+			echo -n "Cleaning the package archive of older versions..."
+			find "./archive" | grep '.*\.[0-9][0-9][0-9][0-9]' | xargs rm -rf
+			echo "Done."
+			exit 0
+			;;
+		a)
+			if [ -d "./archive" ]; then
+				echo -n "Cleaning the package archieve folder..."
+				rm -rf ./archive/*
+				echo "Done."
+			else
+				echo "No archive folder, skipping cleanall"
+			fi
+			exit 0
+			;;
+		h)
+			echo "${usage}"
+			exit 0
+			;;
+		b)
+			branch=$OPTARG
+			;;
+		\?)
+			echo "Invalid option -$OPTARG"
+			exit 1
+			;;
+		:)
+			echo "-$OPTARG requires an argument"
+			exit 1
+	esac
+done
+shift $((OPTIND -1))
+repos=$1
+
+if [ "$repos" = "" ]; then
+	echo You must specifify plugin repository name to package
+	exit 1
+fi
+
+while [ "$repos" != "" ]
+do
+	package_manager=rpm
+	arch=`arch`
+	archive=`pwd`/archive
+	if [ ! -d "${archive}/${arch}" ]; then
+		mkdir -p "${archive}/$arch"
+	fi
+
+	PKG_ROOT=`pwd`
+	if [ ! -f packages/RPM/SPECS/plugin.spec ] ; then
+		echo You must run this script from the foglamp-pkg/plugins directory
+		exit 1
+	fi
+
+	cd /tmp
+	if [ -d "$repos" ]; then
+		echo WARNING: Repository $repos already exists, using the existing copy
+		(cd $repos; git pull; git checkout "$branch")
+	else
+		git clone -b "$branch" https://github.com/foglamp/${repos}.git
+	fi
+
+	GIT_ROOT=/tmp/"$repos"
+	cd ${GIT_ROOT}
+
+	if [ ! -f "${GIT_ROOT}/Package" ]; then
+		echo Repository $repos is missing package directive file
+		rm -rf "${GIT_ROOT}"
+		exit 1
+	fi
+
+	if [ ! -f "${GIT_ROOT}/Description" ]; then
+		echo Repository $repos is missing package description file
+		rm -rf "${GIT_ROOT}"
+		exit 1
+	fi
+
+	. "${GIT_ROOT}"/Package
+	pkg_name="$repos"
+
+	if [ -f "${GIT_ROOT}/VERSION" ]; then
+		version=`cat "${GIT_ROOT}/VERSION"`
+		foglamp_version=`cat ${GIT_ROOT}/foglamp.version| tr -d ' ' | grep 'foglamp_version' | head -1 | sed -e 's/\(.*\)version\([>=|>|<|<=|=]*\)\(.*\)/\2 \3/g'`
+	elif [ -f "${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name}" ]; then
+		  version=`cat "${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name}" | tr -d ' ' | grep "foglamp_${plugin_type}_${plugin_name}_version" | head -1 | sed -e 's/\(.*\)=\(.*\)/\2/g'`
+		  foglamp_version=`cat ${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name} | tr -d ' ' | grep 'foglamp_version' | head -1 | sed -e 's/\(.*\)version\([>=|>|<|<=|=]*\)\(.*\)/\2 \3/g'`
+	else
+		echo Unable to determine version of package to create
+		rm -rf "${GIT_ROOT}"
+		exit 1
+	fi
+	echo Version is $version
+	BUILD_ROOT="${GIT_ROOT}/packages/build"
+	pkg_name="foglamp-${plugin_type}-${plugin_name}"
+
+	# Final package name
+	package_name="${pkg_name}-${version}"
+
+	# Print the summary of findings
+	echo "The package root directory is                        : ${GIT_ROOT}"
+	echo "The FogLAMP ${plugin_type} ${plugin_name} version is : ${version}"
+	echo "The package will be built in                         : ${BUILD_ROOT}"
+	echo "The package name is                                  : ${package_name}"
+	if [ -f "${GIT_ROOT}/service_notification.version" ]; then
+	     service_notification_version=`cat ${GIT_ROOT}/service_notification.version | tr -d ' ' | grep 'service_notification_version' | head -1 | sed -e 's/\(.*\)version\([>=|>|<|<=|=]*\)\(.*\)/\2 \3/g'`
+	     echo "The Service notification required version         : ${service_notification_version}"
+	fi
+	echo
+
+	# Create the package directory. If a directory with the same name exists,
+	# it is copied with a version number.
+
+	# First, create the BUILD_ROOT folder, if necessary
+	if [ ! -L "${BUILD_ROOT}" -a ! -d "${BUILD_ROOT}" ]; then
+	    mkdir -p "${BUILD_ROOT}"
+	fi
+
+	cd "${BUILD_ROOT}"
+	existing_pkgs=`find . -maxdepth 1 -name "${package_name}.????" | wc -l`
+	existing_pkgs=$((existing_pkgs+1))
+	new_stored_pkg=$(printf "${package_name}.%04d" "${existing_pkgs}")
+	if [ -d "${package_name}" ]; then
+	    echo "Saving the old working environment as ${new_stored_pkg}"
+	    mv "${package_name}" "${new_stored_pkg}"
+	fi
+	mkdir "${package_name}"
+
+	# If plugin_type_install if not set use plugin_type value
+	if [ "${plugin_type}" = "notify" ]; then
+	    plugin_type_install="notificationDelivery"
+        elif [ "${plugin_type}" = "rule" ]; then
+	    plugin_type_install="notificationRule"
+	else
+	    plugin_type_install=${plugin_type}
+	fi
+
+	# Install directory path
+	if [ -d ${GIT_ROOT}/python ]; then
+	    installs=python/foglamp/plugins/${plugin_type_install}/${plugin_install_dirname}
+	else
+	    installs=plugins/${plugin_type_install}/${plugin_install_dirname}
+	fi
+
+	# Populate the package directory with RPM files
+	# First with files common to all plugins
+	echo -n "Populating the package and updating version file..."
+	cd "${package_name}"
+	cp -R ${PKG_ROOT}/packages/RPM/* .
+	sed -i "s/__VERSION__/${version}/g" SPECS/plugin.spec
+	sed -i "s/__NAME__/${pkg_name}/g" SPECS/plugin.spec
+	sed -i "s/__PLUGIN_NAME__/${plugin_name}/g" SPECS/plugin.spec
+	sed -i "s/__ARCH__/${arch}/g" SPECS/plugin.spec
+	sed -i "s/__PACKAGE_NAME__/${package_name}/g" SPECS/plugin.spec
+	sed -i "s|__INSTALL_DIR__|${installs}|g" SPECS/plugin.spec
+	sed -i "s/__REQUIRES__/${requirements}/g" SPECS/plugin.spec
+	sed -i "s/foglamp,/foglamp ${foglamp_version},/" SPECS/plugin.spec
+	sed -i "s/foglamp$/foglamp ${foglamp_version}/" SPECS/plugin.spec
+
+	if [ ! -z "${service_notification_version}" ] ; then
+	    sed -i "s/foglamp-service-notification/foglamp-service-notification ${service_notification_version}/" SPECS/plugin.spec
+	fi
+	cat > /tmp/sed.script.$$ << EOF
+	/__DESCRIPTION__/ {
+		r ${GIT_ROOT}/Description
+		d
+	}
+EOF
+	sed -i -f /tmp/sed.script.$$ SPECS/plugin.spec
+	rm /tmp/sed.script.$$
+
+	mkdir BUILDROOT
+	cd BUILDROOT
+	mkdir -p ${package_name}-1.${arch}
+	cd ${package_name}-1.${arch}
+
+	mkdir -p usr/local/foglamp
+	cd usr/local/foglamp
+	if [ -d ${GIT_ROOT}/python ]; then
+	    find ${GIT_ROOT}/python | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
+	    if [ -f "${GIT_ROOT}/extras_install.sh" ]; then
+	        sed -i "s/sudo//" ${GIT_ROOT}/extras_install.sh
+	        cp -p ${GIT_ROOT}/extras_install.sh ${GIT_ROOT}/python/extras_install_${plugin_name}.sh
+	    fi
+	    # plugin info version replaced in ${plugin_name}.py
+	    sed -i "s/'version':.*$/'version': '${version}',/g" ${GIT_ROOT}/python/foglamp/plugins/${plugin_type}/${plugin_name}/${plugin_name}.py
+	    cp -R ${GIT_ROOT}/python .
+	    cp -R ${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name} ./python/foglamp/plugins/${plugin_type}/${plugin_name}
+	else
+		(cd ${GIT_ROOT}; 
+			if [ -f requirements.sh ]; then
+				./requirements.sh
+			fi
+			if [ -f build.sh ]; then
+				./build.sh
+			else
+				mkdir -p build; cd build; cmake ..; make
+			fi)
+		mkdir -p "plugins/${plugin_type_install}/${plugin_install_dirname}"
+	        cp -R --preserve=links ${GIT_ROOT}/build/lib* "plugins/${plugin_type_install}/${plugin_install_dirname}" 2>/dev/null || \
+        	cp -R --preserve=links ${GIT_ROOT}/*.json "plugins/${plugin_type_install}/${plugin_install_dirname}" 2>/dev/null || \
+        	echo "Unable to find libraries in ${GIT_ROOT}/build and json config files in ${GIT_ROOT}, cannot proceed..."
+
+	fi
+	echo "Done."
+
+	cd ..
+	find -L . -type f -exec echo '%{install_path}/'{} \; >> ../../../../SPECS/plugin.spec
+
+	# Build the package
+	cd "${BUILD_ROOT}"
+
+	echo "Building the new package..."
+	rpmbuild --define "_topdir ${BUILD_ROOT}/${package_name}" --noclean -bb ${BUILD_ROOT}/${package_name}/SPECS/plugin.spec
+	echo "Building Complete."
+
+	fullname="${package_name}-1.${arch}.rpm"
+
+	# Save the old versions
+	existing_pkgs=`find ${archive}/${arch} -maxdepth 1 -name "${fullname}.????" | wc -l`
+	existing_pkgs=$((existing_pkgs+1))
+	new_stored_pkg=$(printf "${fullname}.%04d" "${existing_pkgs}")
+
+	if [ -e "${archive}/${arch}/${fullname}" ]; then
+	    echo "Saving the old package as ${new_stored_pkg}"
+	    mv "${archive}/${arch}/${fullname}" "${archive}/${arch}/${new_stored_pkg}"
+	fi
+
+	cp ${BUILD_ROOT}/${package_name}/RPMS/${arch}/${fullname} ${archive}/${arch}/${fullname}
+
+	rm -rf /tmp/${repos}
+	shift
+	repos=$1
+	cd ${PKG_ROOT}
+done
+exit 0

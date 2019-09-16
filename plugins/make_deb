@@ -1,0 +1,260 @@
+#!/bin/bash
+
+##--------------------------------------------------------------------
+## Copyright (c) 2019 Dianomic Systems Inc.
+##
+## Licensed under the Apache License, Version 2.0 (the "License");
+## you may not use this file except in compliance with the License.
+## You may obtain a copy of the License at
+##
+##     http://www.apache.org/licenses/LICENSE-2.0
+##
+## Unless required by applicable law or agreed to in writing, software
+## distributed under the License is distributed on an "AS IS" BASIS,
+## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+## See the License for the specific language governing permissions and
+## limitations under the License.
+##--------------------------------------------------------------------
+##
+## Author: Ashish Jabble
+##
+
+set -e
+
+# Default branch to package
+BRANCH_NAME=master
+USAGE="$(basename "$0") [-h] [-a] [-b <branch>] repository ...
+This script is used to create the Debian package for a FogLAMP plugin
+
+Arguments:
+  -h	- Display this help text
+  -a	- Remove all the versions
+  -b	- Branch to base package on"
+
+while getopts ":hab:" opt; do
+	case "$opt" in
+		a)
+			if [ -d "./archive" ]; then
+				echo -n "Cleaning the package archive folder..."
+				rm -rf ./archive/*
+				echo "Done."
+			else
+				echo "No archive folder, skipping cleanall"
+			fi
+			exit 0
+			;;
+		h)
+			echo "${USAGE}"
+			exit 0
+			;;
+		b)
+			BRANCH_NAME=$OPTARG
+			;;
+		\?)
+			echo "Invalid option -$OPTARG"
+			exit 1
+			;;
+		:)
+			echo "-$OPTARG requires an argument"
+			exit 1
+	esac
+done
+shift $((OPTIND -1))
+
+REPO_NAME=$1
+
+if [ "${REPO_NAME}" = "" ]; then
+	echo You must specify plugin repository name to package
+	exit 1
+fi
+
+while [ "${REPO_NAME}" != "" ]
+do
+	package_manager=deb
+	arch=`arch`
+	archive=`pwd`/archive/DEBIAN
+	if [ ! -d "${archive}/${arch}" ]; then
+		mkdir -p "${archive}/${arch}"
+	fi
+
+	PKG_ROOT=`pwd`
+	cd /tmp
+	if [ -d "${REPO_NAME}" ]; then
+		echo WARNING: Repository ${REPO_NAME} already exists, using the existing copy
+		(cd ${REPO_NAME}; git pull; git checkout "${BRANCH_NAME}")
+	else
+		git clone -b ${BRANCH_NAME} --single-branch https://github.com/foglamp/${REPO_NAME}.git
+	fi
+
+	GIT_ROOT=/tmp/"${REPO_NAME}"
+	cd ${GIT_ROOT}
+
+	if [ ! -f "${GIT_ROOT}/Package" ]; then
+		echo Repository ${REPO_NAME} is missing package directive file
+		rm -rf "${GIT_ROOT}"
+		exit 1
+	fi
+
+	if [ ! -f "${GIT_ROOT}/Description" ]; then
+		echo Repository ${REPO_NAME} is missing package description file
+		rm -rf "${GIT_ROOT}"
+		exit 1
+	fi
+
+	. "${GIT_ROOT}"/Package
+	pkg_name="${REPO_NAME}"
+
+    if [ -f "${GIT_ROOT}/VERSION" ]; then
+        version=`cat "${GIT_ROOT}/VERSION"`
+        foglamp_version=`cat ${GIT_ROOT}/foglamp.version | tr -d ' ' | grep 'foglamp_version' | head -1 | sed -e 's/\(.*\)version\(.*\)/\2/g'`
+    elif [ -f "${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name}" ]; then
+        version=`cat "${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name}" | tr -d ' ' | grep "foglamp_${plugin_type}_${plugin_name}_version" | head -1 | sed -e 's/\(.*\)=\(.*\)/\2/g'`
+        foglamp_version=`cat ${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name} | tr -d ' ' | grep 'foglamp_version' | head -1 | sed -e 's/\(.*\)version\(.*\)/\2/g'`
+    else
+        echo Unable to determine version of package to create
+        rm -rf "${GIT_ROOT}"
+        exit 1
+    fi
+    echo Version is $version
+    BUILD_ROOT="${GIT_ROOT}/packages/build"
+    if [ "${plugin_package_name}" ]; then
+        pkg_name=${plugin_package_name}
+    else
+        pkg_name="foglamp-${plugin_type}-${plugin_name}"
+    fi
+    # Final package name
+    archname=$(dpkg --print-architecture)
+    package_name="${pkg_name}-${version}-${arch}"
+
+    # Print the summary of findings
+    echo "The package root directory is                         : ${GIT_ROOT}"
+    echo "The FogLAMP ${plugin_type} ${plugin_name}  version is : ${version}"
+    echo "The package will be built in                          : ${BUILD_ROOT}"
+    echo "The package name is                                   : ${package_name}"
+    if [ -f "${GIT_ROOT}/service_notification.version" ]; then
+        service_notification_version=`cat ${GIT_ROOT}/service_notification.version | tr -d ' ' | grep 'service_notification_version' | head -1 | sed -e 's/\(.*\)version\(.*\)/\2/g'`
+        echo "The Service notification required version             : ${service_notification_version}"
+    fi
+    echo
+
+    # Create the package directory. If a directory with the same name exists,
+    # it is copied with a version number.
+
+    # First, create the BUILD_ROOT folder, if necessary
+    if [ ! -L "${BUILD_ROOT}" -a ! -d "${BUILD_ROOT}" ]; then
+        mkdir -p "${BUILD_ROOT}"
+    fi
+
+    cd "${BUILD_ROOT}"
+    existing_pkgs=`find . -maxdepth 1 -name "${package_name}.????" | wc -l`
+    existing_pkgs=$((existing_pkgs+1))
+    new_stored_pkg=$(printf "${package_name}.%04d" "${existing_pkgs}")
+    if [ -d "${package_name}" ]; then
+        echo "Saving the old working environment as ${new_stored_pkg}"
+        mv "${package_name}" "${new_stored_pkg}"
+    fi
+    mkdir "${package_name}"
+
+    # If plugin_type_install if not set use plugin_type value
+    if [ "${plugin_type}" = "notify" ]; then
+        plugin_type_install="notificationDelivery"
+    elif [ "${plugin_type}" = "rule" ]; then
+        plugin_type_install="notificationRule"
+    else
+        plugin_type_install=${plugin_type}
+    fi
+
+    # Install directory path
+    if [ -d ${GIT_ROOT}/python ]; then
+        installs=python/foglamp/plugins/${plugin_type_install}/${plugin_install_dirname}
+    else
+        installs=plugins/${plugin_type_install}/${plugin_install_dirname}
+    fi
+
+    # Populate the package directory with Debian files
+    # First with files common to all plugins
+    echo -n "Populating the package and updating version file..."
+    cd "${package_name}"
+    mkdir DEBIAN
+    deb_path=${BUILD_ROOT}/${package_name}/DEBIAN
+    cp -R ${PKG_ROOT}/packages/DEBIAN/* ${deb_path}
+    sed -i "s/__VERSION__/${version}/g" ${deb_path}/control
+    sed -i "s/__NAME__/${pkg_name}/g" ${deb_path}/control
+    sed -i "s/__ARCH__/${archname}/g" ${deb_path}/control
+    sed -i "s/__REQUIRES__/${requirements}/g" ${deb_path}/control
+    sed -i "s/foglamp,/foglamp (${foglamp_version}),/" ${deb_path}/control
+    sed -i "s/foglamp$/foglamp (${foglamp_version})/" ${deb_path}/control
+    sed -i "s|__INSTALL_DIR__|${installs}|g" ${deb_path}/postinst
+    sed -i "s/__PLUGIN_NAME__/${plugin_name}/g" ${deb_path}/postinst
+    desc=`cat "${GIT_ROOT}/Description"`
+    sed -i "s/__DESCRIPTION__/${desc}/g" ${deb_path}/control
+    if [ ! -z "${service_notification_version}" ] ; then
+        sed -i "s/foglamp-service-notification/foglamp-service-notification (${service_notification_version})/" ${deb_path}/control
+    fi
+    # install notes
+    if [ -f "${GIT_ROOT}/install_notes.txt" ]; then
+        cat > /tmp/sed.script.$$ << EOF
+	    /__PLUGIN_NOTES__/ {
+		    r ${GIT_ROOT}/install_notes.txt
+		    d
+	    }
+EOF
+	sed -i -f /tmp/sed.script.$$ ${deb_path}/postinst
+	rm /tmp/sed.script.$$
+    else
+        sed -i "s/echo \"/""/g" ${deb_path}/postinst
+        sed -i "s/__PLUGIN_NOTES__/""/g" ${deb_path}/postinst
+        sed -i "s/\"/""/g" ${deb_path}/postinst
+    fi
+
+    # Creating packaging file structure
+    mkdir -p usr/local/foglamp
+    cd usr/local/foglamp
+    if [ -d ${GIT_ROOT}/python ]; then
+        find ${GIT_ROOT}/python | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
+        if [ -f "${GIT_ROOT}/extras_install.sh" ]; then
+            sed -i "s/sudo//" ${GIT_ROOT}/extras_install.sh
+            cp -p ${GIT_ROOT}/extras_install.sh ${GIT_ROOT}/python/extras_install_${plugin_name}.sh
+        fi
+        # plugin info version replaced in ${plugin_name}.py
+        sed -i "s/'version':.*$/'version': '${version}',/g" ${GIT_ROOT}/python/foglamp/plugins/${plugin_type}/${plugin_name}/${plugin_name}.py
+        cp -R ${GIT_ROOT}/python .
+        cp -R ${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name} ./python/foglamp/plugins/${plugin_type}/${plugin_name}
+    else
+        (cd ${GIT_ROOT};
+        if [ -f requirements.sh ]; then
+            ./requirements.sh
+        fi
+        mkdir -p build; cd build; cmake ..; make)
+        mkdir -p "plugins/${plugin_type_install}/${plugin_install_dirname}"
+        cp -R --preserve=links ${GIT_ROOT}/build/lib* "plugins/${plugin_type_install}/${plugin_install_dirname}" 2>/dev/null || \
+        cp -R --preserve=links ${GIT_ROOT}/*.json "plugins/${plugin_type_install}/${plugin_install_dirname}" 2>/dev/null || \
+        echo "Unable to find libraries in ${GIT_ROOT}/build and json config files in ${GIT_ROOT}, cannot proceed..."
+    fi
+    echo "Done."
+
+    # Build the package
+    cd "${BUILD_ROOT}"
+
+    # Save the old versions
+    existing_pkgs=`find . -maxdepth 1 -name "${package_name}.deb.????" | wc -l`
+    existing_pkgs=$((existing_pkgs+1))
+    new_stored_pkg=$(printf "${package_name}.deb.%04d" "${existing_pkgs}")
+
+    if [ -e "${package_name}.deb" ]; then
+        echo "Saving the old package as ${new_stored_pkg}"
+        mv "${package_name}.deb" "${new_stored_pkg}"
+    fi
+
+    echo "Building the new package..."
+    dpkg-deb --build ${package_name}
+    echo "Building Complete."
+
+    # Move final package to archive directory
+    cp  ${BUILD_ROOT}/${package_name}.deb ${archive}/${arch}/${fullname}
+    cp -R ${BUILD_ROOT}/${package_name} ${archive}/${arch}/${fullname}
+
+    rm -rf /tmp/${REPO_NAME}
+    exit 0
+done
+exit 0
