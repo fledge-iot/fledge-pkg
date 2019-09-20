@@ -52,7 +52,7 @@ PKG_NAME="foglamp"
 
 is_foglamp_installed () {
 	set +e
-    rc=`rpm -qa  2> /dev/null  | grep -c ${PKG_NAME}`
+    rc=`rpm -qa  2> /dev/null  | grep -Fx ${PKG_NAME}`
     echo $rc
     set -e
 }
