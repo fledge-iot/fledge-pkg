@@ -1,10 +1,10 @@
 %define __spec_install_pre /bin/true
 
-Name:          __NAME__
+Name:          foglamp
 Vendor:        Dianomic Systems, Inc. <info@dianomic.com>
-Version:       __VERSION__
+Version:       1.7.0
 Release:       1
-BuildArch:     __ARCH__
+BuildArch:     x86_64
 Summary:       FogLAMP, the open source platform for the Internet of Things
 License:       Apache License
 Group: 	       IOT
@@ -23,7 +23,7 @@ FogLAMP, the open source platform for the Internet of Things
 #!/usr/bin/env bash
 
 ##--------------------------------------------------------------------
-## Copyright (c) 2019 OSIsoft, LLC
+## Copyright (c) 2019 Dianomic Systems Inc.
 ##
 ## Licensed under the Apache License, Version 2.0 (the "License");
 ## you may not use this file except in compliance with the License.
@@ -134,7 +134,7 @@ fi
 #!/usr/bin/env bash
 
 ##--------------------------------------------------------------------
-## Copyright (c) 2019 OSIsoft, LLC
+## Copyright (c) 2019 Dianomic Systems Inc.
 ##
 ## Licensed under the Apache License, Version 2.0 (the "License");
 ## you may not use this file except in compliance with the License.
@@ -242,7 +242,7 @@ reset_systemctl
 #!/usr/bin/env bash
 
 ##--------------------------------------------------------------------
-## Copyright (c) 2019 OSIsoft, LLC
+## Copyright (c) 2019 Dianomic Systems Inc.
 ##
 ## Licensed under the Apache License, Version 2.0 (the "License");
 ## you may not use this file except in compliance with the License.
