@@ -1,10 +1,10 @@
 %define __spec_install_pre /bin/true
 
-Name:          foglamp
+Name:          __NAME__
 Vendor:        Dianomic Systems, Inc. <info@dianomic.com>
-Version:       1.7.0
+Version:       __VERSION__
 Release:       1
-BuildArch:     x86_64
+BuildArch:     __ARCH__
 Summary:       FogLAMP, the open source platform for the Internet of Things
 License:       Apache License
 Group: 	       IOT

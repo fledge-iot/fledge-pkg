@@ -216,9 +216,13 @@ echo "Done."
 # Prepare new data directory
 echo "Prepare data directory"
 cd data
+rm -rf backup
 rm -rf core.err
 rm -rf ./etc/certs/*
 rm -rf foglamp.db*
+rm -rf logs
+rm -rf scripts
+rm -rf support
 rm -rf var
 
 # Build the package
