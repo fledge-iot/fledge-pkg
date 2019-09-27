@@ -215,7 +215,8 @@ echo "Done."
 
 # Prepare new data directory
 echo "Prepare data directory"
-cd data
+mv data data.new
+cd data.new
 rm -rf backup
 rm -rf core.err
 rm -rf ./etc/certs/*
