@@ -22,7 +22,7 @@
 set -e
 
 PKG_ROOT=`pwd`               # The script must be executed from the root git directory
-repos="FogLAMP"              # Name of the Git repository
+repo_name="FogLAMP"          # Name of the Git repository
 branch="master"              # Default Git branch to use
 pkg_name="foglamp"           # Name of the package to build
 architecture="x86_64"        # The architecture for which the rpm should be created
@@ -41,51 +41,49 @@ Arguments:
  -b - Branch to base package on"
 
 while getopts ":hcasb:" opt; do
-	case "$opt" in
-		h)
-			echo "${usage}"
-			exit 0
-			;;
-		c)
-			echo -n "Cleaning the build folder from older versions..."
-			find "${PKG_ROOT}/packages/rpmbuild/BUILDROOT" -maxdepth 1 | grep '.*\.[0-9][0-9][0-9][0-9]' | sudo xargs rm -rf
-			echo "Done."
-			exit 0
-			;;
-		a)
-			if [ -d "${PKG_ROOT}/packages/rpmbuild/BUILDROOT" ]; then
-
-				echo -n "Cleaning the build folder..."
-				sudo rm -rf ${PKG_ROOT}/packages/rpmbuild/BUILDROOT/*
-				echo "Done."
-			else
-				echo "No build folder, skipping cleanall"
-			fi
-			exit 0
-			;;
-		s)
-			skip_build=1
-			;;
-		b)
-			branch=$OPTARG
-			;;
-		\?)
-			echo "Invalid option -$OPTARG"
-			exit 1
-			;;
-		:)
-			echo "-$OPTARG requires an argument"
-			exit 1
-	esac
+  case "$opt" in
+    h)
+      echo "${usage}"
+      exit 0
+      ;;
+    c)
+      if [ -d "${GIT_ROOT}/packages/RPM/build" ]; then
+        echo -n "Cleaning the build folder from older versions..."
+        find "${PKG_ROOT}/packages/RPM/build/BUILDROOT" -maxdepth 1 | grep '.*\.[0-9][0-9][0-9][0-9]' | sudo xargs rm -rf
+        find "${PKG_ROOT}/packages/RPM/build/RPMS/${architecture}" -maxdepth 1 | grep '.*\.[0-9][0-9][0-9][0-9]' | sudo xargs rm -rf
+        echo "Done."
+      else
+          echo "No build folder, skipping clean old versions"
+      fi
+      exit 0
+      ;;
+    a)
+      if [ -d "${PKG_ROOT}/packages/RPM/build" ]; then
+        echo -n "Cleaning the build folder..."
+        sudo rm -rf ${PKG_ROOT}/packages/RPM/build/*
+        echo "Done."
+      else
+        echo "No build folder, skipping cleanall"
+      fi
+      exit 0
+      ;;
+    s)
+      skip_build=1
+      ;;
+    b)
+      branch=$OPTARG
+      ;;
+    \?)
+      echo "Invalid option -$OPTARG"
+      exit 1
+      ;;
+    :)
+      echo "-$OPTARG requires an argument"
+      exit 1
+  esac
 done
 
-
-# If the architecture has not been defined, then the script is complete
-if [[ "$architecture" == "none" ]]; then
-  exit 0
-fi
-
-if [ ! -f packages/rpmbuild/SPECS/foglamp.spec ] ; then
+if [ ! -f packages/RPM/SPECS/foglamp.spec ] ; then
 	echo You must run this script from the foglamp-pkg directory
 	exit 1
 fi
@@ -94,16 +92,15 @@ fi
 # Extracts/updates Git repository
 #
 if [[ $skip_build == 0 ]]; then
-
 	cd /tmp
-	if [ -d "$repos" ]; then
-		echo WARNING: Repository $repos already exists, using the existing copy
-		(cd $repos; git fetch --all; git pull ; git checkout "$branch")
+	if [ -d "${repo_name}" ]; then
+		echo WARNING: Repository ${repo_name} already exists, using the existing copy
+		(cd ${repo_name}; git fetch --all; git pull ; git checkout "$branch")
 	else
-		git clone -b "$branch" https://github.com/foglamp/${repos}.git
+		git clone -b "$branch" https://github.com/foglamp/${repo_name}.git
 	fi
 
-	GIT_ROOT=/tmp/"$repos"
+	GIT_ROOT=/tmp/"${repo_name}"
 	cd ${GIT_ROOT}
 fi
 
@@ -111,10 +108,8 @@ fi
 # Builds FogLAMP
 #
 if [[ $skip_build == 0 ]]; then
-
 	# Backups FOGLAMP_ROOT
 	export FOGLAMP_ROOT_BCK=${FOGLAMP_ROOT}
-
 	export FOGLAMP_ROOT=${GIT_ROOT}
 	export FOGLAMP_DATA=${FOGLAMP_ROOT}/data
 	export PYTHONPATH=${FOGLAMP_ROOT}/python
@@ -135,19 +130,16 @@ if [[ $skip_build == 0 ]]; then
 	status_pg_isready=$?
 
 	if [[ $status_rh_postgresql96 != 0 ]]; then
-
 		echo "ERROR : it is not possible to enable the ${rhpg_pkg} environment"
 		exit 1
 	fi
 
 	if [[ $status_devtoolset != 0 ]]; then
-
 		echo "ERROR : it is not possible to enable the ${rhgcc_pkg} environment"
 		exit 1
 	fi
 
 	if [[ $status_pg_isready != 0 ]]; then
-
 		echo "ERROR : the command pg_isready is not available"
 		exit 1
 	fi
@@ -163,22 +155,20 @@ fi
 
 # Checks if the FOGLAMP_ROOT environment is defined
 if [[ "${FOGLAMP_ROOT}" == "" ]]; then
-
     # Set FOGLAMP_ROOT as the default directory
-	export FOGLAMP_ROOT="/usr/local/foglamp"
+    export FOGLAMP_ROOT="/usr/local/foglamp"
 fi
 
 if [[ ! -d "${FOGLAMP_ROOT}" ]]; then
-
   echo "No FOGLAMP_ROOT directory found in the path ${FOGLAMP_ROOT} - Program exit."
   exit 1
 fi
 
 version=`cat ${FOGLAMP_ROOT}/VERSION | tr -d ' ' | grep 'foglamp_version=' | head -1 | sed -e 's/\(.*\)=\(.*\)/\2/g'`
-BUILD_ROOT="${PKG_ROOT}/packages/rpmbuild/BUILDROOT"
+BUILD_ROOT="${PKG_ROOT}/packages/RPM/build/BUILDROOT"
 
-mkdir -p ${PKG_ROOT}/packages/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
-mkdir -p ${PKG_ROOT}/packages/rpmbuild/RPMS/x86_64
+mkdir -p ${PKG_ROOT}/packages/RPM/build/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+mkdir -p ${PKG_ROOT}/packages/RPM/build/RPMS/x86_64
 
 # Final package name
 package_name="${pkg_name}-${version}-1.${architecture}"
@@ -187,7 +177,7 @@ package_name="${pkg_name}-${version}-1.${architecture}"
 echo "The package root directory is : ${PKG_ROOT}"
 echo "The FogLAMP directory is      : ${FOGLAMP_ROOT}"
 echo "The FogLAMP version is        : ${version}"
-echo "The package will be built in  : ${PKG_ROOT}/packages/rpmbuild/RPMS/${architecture}"
+echo "The package will be built in  : ${PKG_ROOT}/packages/RPM/build/RPMS/${architecture}"
 echo "The package name is           : ${package_name}"
 echo
 
@@ -214,9 +204,9 @@ mkdir "${package_name}"
 echo -n "Populating the package and updating version in control file..."
 cd "${package_name}"
 
-sed -i "s/__NAME__/${pkg_name}/g"     ${PKG_ROOT}/packages/rpmbuild/SPECS/foglamp.spec
-sed -i "s/__VERSION__/${version}/g"   ${PKG_ROOT}/packages/rpmbuild/SPECS/foglamp.spec
-sed -i "s/__ARCH__/${architecture}/g" ${PKG_ROOT}/packages/rpmbuild/SPECS/foglamp.spec
+sed -i "s/__NAME__/${pkg_name}/g"     ${PKG_ROOT}/packages/RPM/SPECS/foglamp.spec
+sed -i "s/__VERSION__/${version}/g"   ${PKG_ROOT}/packages/RPM/SPECS/foglamp.spec
+sed -i "s/__ARCH__/${architecture}/g" ${PKG_ROOT}/packages/RPM/SPECS/foglamp.spec
 
 mkdir -p usr/local/foglamp
 cd usr/local/foglamp
@@ -225,10 +215,15 @@ echo "Done."
 
 # Prepare new data directory
 echo "Prepare data directory"
-cd data
+mv data data.new
+cd data.new
+rm -rf backup
 rm -rf core.err
 rm -rf ./etc/certs/*
 rm -rf foglamp.db*
+rm -rf logs
+rm -rf scripts
+rm -rf support
 rm -rf var
 
 # Build the package
@@ -249,7 +244,11 @@ fi
 
 echo "Building the new package..."
 base_dir=${PKG_ROOT}/packages
-rpmbuild --define "_topdir ${base_dir}/rpmbuild"   --noclean -bb ${base_dir}/rpmbuild/SPECS/foglamp.spec
+rpmbuild --define "_topdir ${base_dir}/RPM/build" --noclean -bb ${base_dir}/RPM/SPECS/foglamp.spec
 echo "Building Complete."
+
+if [[ $skip_build == 0 ]]; then
+  rm -rf /tmp/${repo_name}
+fi
 
 exit 0
