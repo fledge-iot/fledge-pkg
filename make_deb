@@ -127,9 +127,13 @@ echo "Done."
 echo "Prepare data directory"
 mv data data.new
 cd data.new
+rm -rf backup
 rm -rf core.err
 rm -rf etc/certs/*
 rm -rf fledge.db
+rm -rf logs
+rm -rf scripts
+rm -rf support
 rm -rf var
 
 # Add customised files

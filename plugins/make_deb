@@ -230,6 +230,12 @@ EOF
         cp -R --preserve=links ${GIT_ROOT}/build/lib* "plugins/${plugin_type_install}/${plugin_install_dirname}" 2>/dev/null || \
         cp -R --preserve=links ${GIT_ROOT}/*.json "plugins/${plugin_type_install}/${plugin_install_dirname}" 2>/dev/null || \
         echo "Unable to find libraries in ${GIT_ROOT}/build and json config files in ${GIT_ROOT}, cannot proceed..."
+        # Special Case for ubs4704 south plugin
+        if [ "${plugin_name}" = "usb4704" ]; then
+            cd -
+            mkdir -p usr/lib
+            cp -R --preserve=links /usr/lib/libbiodaq* usr/lib
+        fi
     fi
     echo "Done."
 
