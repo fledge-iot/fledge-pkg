@@ -152,8 +152,8 @@ Next, *x86* is the only currently supported architecture for RedHat/Centos.
 
   $ ./make_rpm
   The package root directory is : /home/fledge/fledge-pkg
-  The FogLAMP directory is      : /home/fledge/Fledge
-  The FogLAMP version is        : 1.7.0
+  The Fledge directory is      : /home/fledge/Fledge
+  The Fledge version is        : 1.7.0
   The package will be built in  : /home/fledge/fledge-pkg/packages/RPM/build/RPMS/x86_64
   The package name is           : fledge-1.7.0-1.x86_64
 
@@ -187,8 +187,8 @@ If you execute the ``make_rpm`` command again, you will see:
 
   $ ./make_rpm
   The package root directory is : /home/fledge/fledge-pkg
-  The FogLAMP directory is      : /home/fledge/Fledge
-  The FogLAMP version is        : 1.7.0
+  The Fledge directory is      : /home/fledge/Fledge
+  The Fledge version is        : 1.7.0
   The package will be built in  : /home/fledge/fledge-pkg/packages/RPM/build/RPMS/x86_64
   The package name is           : fledge-1.7.0-1.x86_64
 
