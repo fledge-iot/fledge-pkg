@@ -18,7 +18,7 @@ Internal Structure
 The repository contains the following set of files:
 
 - Files named with **make_** prefix, such as ``make_deb``, ``make_rpm``, are the shell scripts used to build the package. The script runs as per the architecture to build.
-- The **packages** folder contains the list package types to build. It contains *Debian* and *rpmbuild*, latter for RedHat/Centos RPM creation.
+- The **packages** folder contains the list package types to build. It contains *Debian* and *RPM*, latter for RedHat/Centos RPM creation.
 
   - Inside the *packages/Debian* folder, we have the **architecture** folders, plus a *common* folder containing files that are common to all the architectures. The architectures that we provide at the moment are *aarch64*, *armv7l* and *x86_64*.
 
@@ -28,6 +28,11 @@ The repository contains the following set of files:
   - After the first build, the *packages/Debian* will also contain a **build/architecture** folder. This folder contains a copy of what will be used to build the package (in a directory with the same name of the package) and the package itself.
 
     - In the *build/architecture* folder, folders and files that have a sequence number are a previous package build.
+
+  - Inside the *packages/RPM/SPECS* folder, which contains RPM spec-based file, i.e. foglamp.spec needed for the creation of the package.
+
+    - In the *packages/RPM/build/RPMS/x86_64* folder which contains the actual rpm package.
+    - In the *packages/RPM/build/BUILDROOT/foglamp-1.7.0-1.x86_64* folder which contains the RPM package file structure
 
 
 The make_deb Script
@@ -121,45 +126,49 @@ The make_rpm Script
 ===================
 .. code-block:: console
 
-  $ ./make_rpm --help
-  make_rpm help [clean|cleanall]
-  This script is used to create the RPM package of FogLAMP
-  Arguments:
-   help     - Display this help text
-   clean    - Remove all the old versions saved in format .XXXX
-   cleanall - Remove all the versions, including the last one
+  $ ./make_rpm -h
+    make_rpm [-h] [-c] [-a] [-s] [-b <branch>]
+    This script is used to create the RPM package of FogLAMP
+
+    Arguments:
+     -h - Display this help text
+     -c - Remove all the old versions saved in format .XXXX
+     -a - Remove all the versions, including the last one
+     -s - Skip FogLAMP building using the binaries already available
+     -b - Branch to base package on
   $
 
 Building a RPM Package
 ======================
 
-First, make sure that FogLAMP is properly installed via ``make install`` somewhere on your environment (default is */usr/local/foglamp*).
+``make_rpm`` script automatically do FogLAMP clone repo with branch master (by default) and then ``sudo make install`` followed by some prerequisite
+
+You may override the branch with ``-b`` or skip FogLAMP build with ``-s``. For more info just see its help ``-h``
+
 Next, *x86* is the only currently supported architecture for RedHat/Centos.
-Finally, run the ``make_rpm`` command:
+
 
 .. code-block:: console
 
   $ ./make_rpm
-  The package root directory is : /home/foglamp/repos/foglamp-pkg
-  The FogLAMP directory is      : /home/foglamp/foglamp
-  The FogLAMP version is        : 1.5.2
-  The package will be built in  : /home/foglamp/repos/foglamp-pkg/packages/rpmbuild/RPMS/x86_64
-  The package name is           : foglamp-1.5.2-1.x86_64
+  The package root directory is : /home/foglamp/foglamp-pkg
+  The FogLAMP directory is      : /home/foglamp/FogLAMP
+  The FogLAMP version is        : 1.7.0
+  The package will be built in  : /home/foglamp/foglamp-pkg/packages/RPM/build/RPMS/x86_64
+  The package name is           : foglamp-1.7.0-1.x86_64
 
-  Saving the old working environment as foglamp-1.5.2-1.x86_64.0077
   Populating the package and updating version in control file...Done.
   Prepare data directory
-  Saving the old package as foglamp-1.5.2-1.x86_64.rpm.0001
   Building the new package...
-  Processing files: foglamp-1.5.2-1.x86_64
-  Provides: foglamp = 1.5.2-1 foglamp(x86-64) = 1.5.2-1
+  Processing files: foglamp-1.7.0-1.x86_64
+  Provides: foglamp = 1.7.0-1 foglamp(x86-64) = 1.7.0-1
   Requires(interp): /bin/sh /bin/sh /bin/sh
   Requires(rpmlib): rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1 rpmlib(CompressedFileNames) <= 3.0.4-1
   Requires(pre): /bin/sh
   Requires(post): /bin/sh
   Requires(preun): /bin/sh
-  Checking for unpackaged file(s): /usr/lib/rpm/check-files /home/foglamp/repos/foglamp-pkg/packages/rpmbuild/BUILDROOT/foglamp-1.5.2-1.x86_64
-  Wrote: /home/foglamp/repos/foglamp-pkg/packages/rpmbuild/RPMS/x86_64/foglamp-1.5.2-1.x86_64.rpm
+  Checking for unpackaged file(s): /usr/lib/rpm/check-files /home/foglamp/foglamp-pkg/packages/RPM/build/BUILDROOT/foglamp-1.7.0-1.x86_64
+  Wrote: /home/foglamp/foglamp-pkg/packages/RPM/build/RPMS/x86_64/foglamp-1.7.0-1.x86_64.rpm
   Building Complete.
   $
 
@@ -167,9 +176,9 @@ The result will be:
 
 .. code-block:: console
 
-  $ ls -l packages/rpmbuild/RPMS/x86_64
+  $ ls -l packages/RPM/build/RPMS/x86_64
   total 6444
-  -rw-rw-r-- 1 foglamp foglamp 6597376 May 10 02:08 foglamp-1.5.2-1.x86_64.rpm
+  -rw-rw-r-- 1 foglamp foglamp 9715306 Sep 27 02:08 foglamp-1.7.0-1.x86_64.rpm
   $
 
 If you execute the ``make_rpm`` command again, you will see:
@@ -177,31 +186,31 @@ If you execute the ``make_rpm`` command again, you will see:
 .. code-block:: console
 
   $ ./make_rpm
-  The package root directory is : /home/foglamp/repos/foglamp-pkg
-  The FogLAMP directory is      : /home/foglamp/foglamp
-  The FogLAMP version is        : 1.5.2
-  The package will be built in  : /home/foglamp/repos/foglamp-pkg/packages/rpmbuild/RPMS/x86_64
-  The package name is           : foglamp-1.5.2-1.x86_64
+  The package root directory is : /home/foglamp/foglamp-pkg
+  The FogLAMP directory is      : /home/foglamp/FogLAMP
+  The FogLAMP version is        : 1.7.0
+  The package will be built in  : /home/foglamp/foglamp-pkg/packages/RPM/build/RPMS/x86_64
+  The package name is           : foglamp-1.7.0-1.x86_64
 
-  Saving the old working environment as foglamp-1.5.2-1.x86_64.0079
+  Saving the old working environment as foglamp-1.7.0-1.x86_64.0001
   Populating the package and updating version in control file...Done.
   Prepare data directory
-  Saving the old package as foglamp-1.5.2-1.x86_64.rpm.0001
+  Saving the old package as foglamp-1.7.0-1.x86_64.rpm.0001
   Building the new package...
-  Processing files: foglamp-1.5.2-1.x86_64
-  Provides: foglamp = 1.5.2-1 foglamp(x86-64) = 1.5.2-1
+  Processing files: foglamp-1.7.0-1.x86_64
+  Provides: foglamp = 1.7.0-1 foglamp(x86-64) = 1.7.0-1
   Requires(interp): /bin/sh /bin/sh /bin/sh
   Requires(rpmlib): rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1 rpmlib(CompressedFileNames) <= 3.0.4-1
   Requires(pre): /bin/sh
   Requires(post): /bin/sh
   Requires(preun): /bin/sh
-  Checking for unpackaged file(s): /usr/lib/rpm/check-files /home/foglamp/repos/foglamp-pkg/packages/rpmbuild/BUILDROOT/foglamp-1.5.2-1.x86_64
-  Wrote: /home/foglamp/repos/foglamp-pkg/packages/rpmbuild/RPMS/x86_64/foglamp-1.5.2-1.x86_64.rpm
+  Checking for unpackaged file(s): /usr/lib/rpm/check-files /home/foglamp/foglamp-pkg/packages/RPM/build/BUILDROOT/foglamp-1.7.0-1.x86_64
+  Wrote: /home/foglamp/foglamp-pkg/packages/RPM/build/RPMS/x86_64/foglamp-1.7.0-1.x86_64.rpm
   Building Complete.
-  $ ls -l packages/rpmbuild/RPMS/x86_64
+  $ ls -l packages/RPM/build/RPMS/x86_64
   total 12888
-  -rw-rw-r-- 1 foglamp foglamp 6597420 May 10 02:10 foglamp-1.5.2-1.x86_64.rpm
-  -rw-rw-r-- 1 foglamp foglamp 6597376 May 10 02:08 foglamp-1.5.2-1.x86_64.rpm.0001
+  -rw-rw-r-- 1 foglamp foglamp 9715306 Sep 27 02:10 foglamp-1.7.0-1.x86_64.rpm
+  -rw-rw-r-- 1 foglamp foglamp 9715326 Sep 27 02:08 foglamp-1.7.0-1.x86_64.rpm.0001
   $
 
 ... where the previous build is now marked with the suffix *.0001*.
@@ -211,8 +220,16 @@ If you execute the ``make_rpm`` command again, you will see:
 Cleaning the Package Folder
 ===========================
 
+a) Debian
+
 Use the ``clean`` option to remove all the old packages and the files used to make the package.
 Use the ``cleanall`` option to remove all the packages and the files used to make the package.
+
+b) RPM
+
+Use the ``-a`` option to remove all the RPM packages and the files used to make the package.
+Use the ``-c`` option to remove all the old versions of RPM packages and the files used to make the package.
+
 
 
 Packaging for Plugins
