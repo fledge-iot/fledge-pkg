@@ -27,9 +27,16 @@
 
 set -e
 
+remove_unused_files () {
+  find /usr/local/foglamp/ -maxdepth 1 -mindepth 1 -type d | egrep -v -w '(/usr/local/foglamp/data)' | xargs rm -rf
+}
+
 remove_foglamp_sudoer_file() {
     rm -rf /etc/sudoers.d/foglamp
 }
+
+echo "Cleanup of files"
+remove_unused_files
 
 echo "Remove foglamp sudoers file"
 remove_foglamp_sudoer_file

@@ -151,7 +151,7 @@ echo "Calling FogLAMP package update script"
 call_package_update_script
 echo "Linking update task"
 link_update_task
-echo "Copying sodoers file"
+echo "Copying sudoers file"
 copy_foglamp_sudoer_file
 echo "Setting setuid bit of cmdutil"
 setuid_cmdutil

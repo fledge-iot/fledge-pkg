@@ -201,18 +201,6 @@ reset_systemctl () {
     systemctl reset-failed
 }
 
-remove_pycache_files () {
-    set +e
-    find /usr/local/foglamp -name "*.pyc" -exec rm -rf {} \;
-    find /usr/local/foglamp -name "__pycache__" -exec rm -rf {} \;
-    set -e
-}
-
-remove_data_files () {
-	rm -rf /usr/local/foglamp/data
-
-}
-
 # main
 
 IS_FOGLAMP_RUNNING=$(is_foglamp_running)
@@ -226,10 +214,6 @@ then
     kill_foglamp
 fi
 
-#echo "Remove data directory."
-#remove_data_files
-echo "Remove python cache files."
-remove_pycache_files
 echo "Disable FogLAMP service."
 disable_foglamp_service
 echo "Remove FogLAMP service script"
@@ -421,7 +405,7 @@ set_files_ownership
 #echo "Linking update task"
 #link_update_task
 
-echo "Copying sodoers file"
+echo "Copying sudoers file"
 copy_foglamp_sudoer_file
 
 echo "Enabling FogLAMP service"
@@ -460,9 +444,16 @@ start_foglamp_service
 
 set -e
 
+remove_unused_files () {
+  find /usr/local/foglamp/ -maxdepth 1 -mindepth 1 -type d | egrep -v -w '(/usr/local/foglamp/data)' | xargs rm -rf
+}
+
 remove_foglamp_sudoer_file() {
     rm -rf /etc/sudoers.d/foglamp
 }
+
+echo "Cleanup of files"
+remove_unused_files
 
 echo "Remove foglamp sudoers file"
 remove_foglamp_sudoer_file
