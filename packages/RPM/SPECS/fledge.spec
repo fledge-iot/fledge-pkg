@@ -201,18 +201,6 @@ reset_systemctl () {
     systemctl reset-failed
 }
 
-remove_pycache_files () {
-    set +e
-    find /usr/local/fledge -name "*.pyc" -exec rm -rf {} \;
-    find /usr/local/fledge -name "__pycache__" -exec rm -rf {} \;
-    set -e
-}
-
-remove_data_files () {
-	rm -rf /usr/local/fledge/data
-
-}
-
 # main
 
 IS_FLEDGE_RUNNING=$(is_fledge_running)
@@ -226,10 +214,6 @@ then
     kill_fledge
 fi
 
-#echo "Remove data directory."
-#remove_data_files
-echo "Remove python cache files."
-remove_pycache_files
 echo "Disable Fledge service."
 disable_fledge_service
 echo "Remove Fledge service script"
@@ -421,7 +405,7 @@ set_files_ownership
 #echo "Linking update task"
 #link_update_task
 
-echo "Copying sodoers file"
+echo "Copying sudoers file"
 copy_fledge_sudoer_file
 
 echo "Enabling Fledge service"
@@ -460,9 +444,16 @@ start_fledge_service
 
 set -e
 
+remove_unused_files () {
+  find /usr/local/fledge/ -maxdepth 1 -mindepth 1 -type d | egrep -v -w '(/usr/local/fledge/data)' | xargs rm -rf
+}
+
 remove_fledge_sudoer_file() {
     rm -rf /etc/sudoers.d/fledge
 }
+
+echo "Cleanup of files"
+remove_unused_files
 
 echo "Remove fledge sudoers file"
 remove_fledge_sudoer_file
