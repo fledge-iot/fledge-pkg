@@ -96,7 +96,7 @@ do
 		echo WARNING: Repository $repos already exists, using the existing copy
 		(cd $repos; git pull; git checkout "$branch")
 	else
-		git clone -b "$branch" https://github.com/fledge/${repos}.git
+		git clone -b "$branch" https://github.com/fledge-iot/${repos}.git
 	fi
 
 	GIT_ROOT=/tmp/"$repos"

@@ -9,7 +9,7 @@ RUN apt-get install -y git rsyslog
 
 WORKDIR /fledge-core
 
-RUN git clone --single-branch -b $FLEDGE_BRANCH https://github.com/fledge/Fledge.git 
+RUN git clone --single-branch -b $FLEDGE_BRANCH https://github.com/fledge-iot/fledge.git
 
 RUN cd Fledge && \
 	chmod +x requirements.sh && \
