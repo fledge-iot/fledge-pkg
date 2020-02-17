@@ -83,7 +83,7 @@ while getopts ":hcasb:" opt; do
   esac
 done
 
-if [ ! -f packages/rpmbuild/SPECS/fledge.spec ] ; then
+if [ ! -f packages/RPM/SPECS/fledge.spec ] ; then
 	echo You must run this script from the fledge-pkg directory
 	exit 1
 fi
@@ -167,7 +167,7 @@ if [[ ! -d "${FLEDGE_ROOT}" ]]; then
 fi
 
 version=`cat ${FLEDGE_ROOT}/VERSION | tr -d ' ' | grep 'fledge_version=' | head -1 | sed -e 's/\(.*\)=\(.*\)/\2/g'`
-BUILD_ROOT="${PKG_ROOT}/packages/rpmbuild/BUILDROOT"
+BUILD_ROOT="${PKG_ROOT}/packages/RPM/BUILDROOT"
 
 mkdir -p ${PKG_ROOT}/packages/RPM/build/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 mkdir -p ${PKG_ROOT}/packages/RPM/build/RPMS/x86_64
