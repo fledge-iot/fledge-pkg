@@ -9,9 +9,9 @@ RUN apt-get install -y git rsyslog
 
 WORKDIR /fledge-core
 
-RUN git clone --single-branch -b $FLEDGE_BRANCH https://github.com/fledge/Fledge.git 
+RUN git clone --single-branch -b $FLEDGE_BRANCH https://github.com/fledge-iot/fledge.git
 
-RUN cd Fledge && \
+RUN cd fledge && \
 	chmod +x requirements.sh && \
 	./requirements.sh && \
 	make install
@@ -28,7 +28,7 @@ VOLUME /usr/local/fledge/data
 
 # These Volumes will be used in future when we want to install plugins
 VOLUME /usr/local/fledge
-VOLUME /fledge-core/Fledge
+VOLUME /fledge-core/fledge
 
 EXPOSE 8081 1995
 

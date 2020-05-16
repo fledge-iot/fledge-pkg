@@ -22,7 +22,7 @@
 set -e
 
 PKG_ROOT=`pwd`               # The script must be executed from the root git directory
-repo_name="Fledge"           # Name of the Git repository
+repo_name="fledge"           # Name of the Git repository
 branch="master"              # Default Git branch to use
 pkg_name="fledge"           # Name of the package to build
 architecture="x86_64"        # The architecture for which the rpm should be created
@@ -83,7 +83,7 @@ while getopts ":hcasb:" opt; do
   esac
 done
 
-if [ ! -f packages/rpmbuild/SPECS/fledge.spec ] ; then
+if [ ! -f packages/RPM/SPECS/fledge.spec ] ; then
 	echo You must run this script from the fledge-pkg directory
 	exit 1
 fi
@@ -97,7 +97,7 @@ if [[ $skip_build == 0 ]]; then
 		echo WARNING: Repository ${repo_name} already exists, using the existing copy
 		(cd ${repo_name}; git fetch --all; git pull ; git checkout "$branch")
 	else
-		git clone -b "$branch" https://github.com/fledge/${repo_name}.git
+		git clone -b "$branch" https://github.com/fledge-iot/${repo_name}.git
 	fi
 
 	GIT_ROOT=/tmp/"${repo_name}"
@@ -167,7 +167,7 @@ if [[ ! -d "${FLEDGE_ROOT}" ]]; then
 fi
 
 version=`cat ${FLEDGE_ROOT}/VERSION | tr -d ' ' | grep 'fledge_version=' | head -1 | sed -e 's/\(.*\)=\(.*\)/\2/g'`
-BUILD_ROOT="${PKG_ROOT}/packages/rpmbuild/BUILDROOT"
+BUILD_ROOT="${PKG_ROOT}/packages/RPM/build/BUILDROOT"
 
 mkdir -p ${PKG_ROOT}/packages/RPM/build/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 mkdir -p ${PKG_ROOT}/packages/RPM/build/RPMS/x86_64

@@ -83,7 +83,7 @@ do
 		echo WARNING: Repository ${REPO_NAME} already exists, using the existing copy
 		(cd ${REPO_NAME}; git pull; git checkout "${BRANCH_NAME}")
 	else
-		git clone -b ${BRANCH_NAME} --single-branch https://github.com/fledge/${REPO_NAME}.git
+		git clone -b ${BRANCH_NAME} --single-branch https://github.com/fledge-iot/${REPO_NAME}.git
 	fi
 
 	GIT_ROOT=/tmp/"${REPO_NAME}"
@@ -235,6 +235,13 @@ EOF
             cd -
             mkdir -p usr/lib
             cp -R --preserve=links /usr/lib/libbiodaq* usr/lib
+        fi
+        if [ "${plugin_name}" = "gcp-gateway" -o "${plugin_name}" = "gcp" ]; then
+            cd -
+            mkdir -p usr/local/lib
+            cp -R --preserve=links /usr/local/lib/libjwt* usr/local/lib
+            cp -R --preserve=links /usr/local/lib/libjansson* usr/local/lib
+            cp -R --preserve=links /usr/local/lib/libpaho* usr/local/lib
         fi
     fi
     echo "Done."

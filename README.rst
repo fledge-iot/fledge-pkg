@@ -1,6 +1,6 @@
 
 .. Links
-.. _main repository: https://github.com/fledge/Fledge
+.. _main repository: https://github.com/fledge-iot/fledge
 
 
 *****************************
