@@ -230,18 +230,32 @@ EOF
         cp -R --preserve=links ${GIT_ROOT}/build/lib* "plugins/${plugin_type_install}/${plugin_install_dirname}" 2>/dev/null || \
         cp -R --preserve=links ${GIT_ROOT}/*.json "plugins/${plugin_type_install}/${plugin_install_dirname}" 2>/dev/null || \
         echo "Unable to find libraries in ${GIT_ROOT}/build and json config files in ${GIT_ROOT}, cannot proceed..."
-        # Special Case for ubs4704 south plugin
-        if [ "${plugin_name}" = "usb4704" ]; then
+        if [ "${additional_libs}" != "" ]; then
+            echo "Additional libs added for ${plugin_name}..."
             cd -
-            mkdir -p usr/lib
-            cp -R --preserve=links /usr/lib/libbiodaq* usr/lib
-        fi
-        if [ "${plugin_name}" = "gcp-gateway" -o "${plugin_name}" = "gcp" ]; then
-            cd -
-            mkdir -p usr/local/lib
-            cp -R --preserve=links /usr/local/lib/libjwt* usr/local/lib
-            cp -R --preserve=links /usr/local/lib/libjansson* usr/local/lib
-            cp -R --preserve=links /usr/local/lib/libpaho* usr/local/lib
+            for i in $(echo ${additional_libs} | sed "s/,/ /g")
+            do
+            if [[ "${i}" == *":"* ]]; then
+                libs=`echo ${i} | sed "s/:/ /g"`
+                ITER=0
+                for j in $(echo ${libs} | sed "s/ / /g")
+                do
+                    if [[ ${ITER} = "0" ]]; then
+                        echo "Directory is :"${j}
+                        dir=${j}
+                        echo "DIR is :"${dir}
+                        mkdir -p ${dir}
+                    else
+                        echo "File is :"${j}
+                        cp -R --preserve=links ${j} ${dir}
+                    fi
+                    ITER=$(expr $ITER + 1)
+                done
+            else
+                echo "Either directory or filename argument is missing for ${i} input. Also use syntax <dirname:libfullpath> and a comma separated list if multiple entries"
+                exit 1
+            fi
+            done
         fi
     fi
     echo "Done."
