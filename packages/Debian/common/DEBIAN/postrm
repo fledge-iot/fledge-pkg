@@ -35,8 +35,8 @@ remove_fledge_sudoer_file() {
     rm -rf /etc/sudoers.d/fledge
 }
 
-echo "Cleanup of files"
-remove_unused_files
+#echo "Cleanup of files"
+#remove_unused_files
 
 echo "Remove fledge sudoers file"
 remove_fledge_sudoer_file
