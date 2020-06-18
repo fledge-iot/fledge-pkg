@@ -76,9 +76,6 @@ if [ "$IS_FLEDGE_INSTALLED" -eq "1" ]
 then
     echo "Fledge is already installed: this is an upgrade/downgrade."
 
-    # Avoid the execution of the function during an upgrade
-    sed -i -e 's/^remove_unused_files$/#remove_unused_files/' /var/lib/dpkg/info/fledge.postrm
-
     # exit if fledge is running
     IS_FLEDGE_RUNNING=$(is_fledge_running)
     if [ "$IS_FLEDGE_RUNNING" -eq "1" ]
@@ -86,6 +83,9 @@ then
         echo "*** ERROR. Fledge is currently running. Stop Fledge and try again. ***"
         exit 1
     fi
+
+    # Avoid the execution of the function during an upgrade
+    sed -i -e 's/^remove_unused_files$/#remove_unused_files/' /var/lib/dpkg/info/fledge.postrm
 
     # Persist current version in case of upgrade/downgrade
     installed_version=`dpkg -s ${PKG_NAME} | grep '^Version:' | awk '{print $2}'`
