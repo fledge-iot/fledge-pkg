@@ -84,6 +84,9 @@ then
         exit 1
     fi
 
+    # Avoid the execution of the function during an upgrade
+    sed -i -e 's/^remove_unused_files$/#remove_unused_files/' /var/lib/dpkg/info/fledge.postrm
+
     # Persist current version in case of upgrade/downgrade
     installed_version=`dpkg -s ${PKG_NAME} | grep '^Version:' | awk '{print $2}'`
     if [ "${installed_version}" ]
