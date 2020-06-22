@@ -84,7 +84,8 @@ then
         exit 1
     fi
 
-    # Avoid the execution of the function during an upgrade
+    # Below workaround needed only when we upgrade from 1.8.0 ONLY
+    # As Debian flow be like 1.8.0.prerm => .next.preinst => 1.8.0.postrm => .next.postinst
     sed -i -e 's/^remove_unused_files$/#remove_unused_files/' /var/lib/dpkg/info/fledge.postrm
 
     # Persist current version in case of upgrade/downgrade
