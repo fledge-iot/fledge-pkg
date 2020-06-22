@@ -35,5 +35,24 @@ remove_fledge_sudoer_file() {
     rm -rf /etc/sudoers.d/fledge
 }
 
-echo "Remove fledge sudoers file"
-remove_fledge_sudoer_file
+case "$1" in
+  remove|purge)
+    echo "Cleanup of files"
+    remove_unused_files
+    echo "Remove fledge sudoers file"
+    remove_fledge_sudoer_file
+    ;;
+  disappear)
+    ;;
+  upgrade)
+    ;;
+  failed-upgrade)
+    ;;
+  abort-install)
+    ;;
+  abort-upgrade)
+    ;;
+  *) echo "$0: didn't understand being called with \`$1'" 1>&2
+     exit 0;;
+esac
+exit 0
