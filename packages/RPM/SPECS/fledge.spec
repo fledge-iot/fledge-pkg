@@ -134,9 +134,10 @@ reset_systemctl () {
 
 # main
 if [ $1 == 1 ];then
-    echo "pre step: ${PKG_NAME} is getting installed."
+    echo "pre scriptlet is called: ${PKG_NAME} is getting installed."
+    # Add steps here for the fresh installed case for this scriptlet
 elif [ $1 == 2 ];then
-    echo "preun step: ${PKG_NAME} is getting upgraded"
+    echo "pre scriptlet is called: ${PKG_NAME} is getting upgraded."
     IS_FLEDGE_RUNNING=$(is_fledge_running)
     if [ "$IS_FLEDGE_RUNNING" -eq "1" ]
     then
@@ -251,9 +252,9 @@ reset_systemctl () {
 
 # main
 if [ $1 == 1 ];then
-    echo "preun step: ${PKG_NAME} is getting upgraded. But Nothing to upgrade."
+    echo "preun scriptlet is called: ${PKG_NAME} is getting upgraded."
 elif [ $1 == 0 ];then
-    echo "preun step: ${PKG_NAME} is getting removed/uninstalled"
+    echo "preun scriptlet is called: ${PKG_NAME} is getting removed/uninstalled."
     IS_FLEDGE_RUNNING=$(is_fledge_running)
     if [ "$IS_FLEDGE_RUNNING" -eq "1" ]
     then
@@ -505,9 +506,10 @@ remove_fledge_sudoer_file() {
 
 # main
 if [ $1 == 1 ];then
-    echo "postun step: ${PKG_NAME} is getting upgraded. But nothing to upgrade."
+    echo "postun scriptlet is called: ${PKG_NAME} is getting upgraded."
+    # Add steps here for the upgrade case for this scriptlet
 elif [ $1 == 0 ];then
-    echo "postun step: ${PKG_NAME} is getting removed/uninstalled"
+    echo "postun scriptlet is called: ${PKG_NAME} is getting removed/uninstalled."
     echo "Cleanup of files"
     remove_unused_files
     echo "Remove fledge sudoers file"
