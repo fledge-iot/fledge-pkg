@@ -84,6 +84,10 @@ then
         exit 1
     fi
 
+    # Below workaround needed only when we upgrade from 1.8.0 ONLY
+    # As Debian flow be like 1.8.0.prerm => .next.preinst => 1.8.0.postrm => .next.postinst
+    sed -i -e 's/^remove_unused_files$/#remove_unused_files/' /var/lib/dpkg/info/fledge.postrm
+
     # Persist current version in case of upgrade/downgrade
     installed_version=`dpkg -s ${PKG_NAME} | grep '^Version:' | awk '{print $2}'`
     if [ "${installed_version}" ]
