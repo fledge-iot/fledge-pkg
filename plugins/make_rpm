@@ -130,8 +130,11 @@ do
 	fi
 	echo Version is $version
 	BUILD_ROOT="${GIT_ROOT}/packages/build"
-	pkg_name="fledge-${plugin_type}-${plugin_name}"
-
+    if [ "${plugin_package_name}" ]; then
+        pkg_name=${plugin_package_name}
+    else
+        pkg_name="fledge-${plugin_type}-${plugin_name}"
+    fi
 	# Final package name
 	package_name="${pkg_name}-${version}"
 
