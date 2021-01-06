@@ -190,6 +190,10 @@ do
     # Debian file structure
     mkdir -p usr/local/fledge
     cd usr/local/fledge
+    if [ "${service_name}" = "notification" ]; then
+        mkdir -p plugins/notificationDelivery
+        mkdir -p plugins/notificationRule
+    fi
     mkdir -p ${install_dir}
     cp "${GIT_ROOT}/build/C/${install_dir}/${service_name}/${exec_name}" "${install_dir}/${exec_name}"
     echo "Done."
