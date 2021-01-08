@@ -218,6 +218,10 @@ EOF
 
     mkdir -p usr/local/fledge
     cd usr/local/fledge
+    if [ "${service_name}" = "notification" ]; then
+        mkdir -p plugins/notificationDelivery
+        mkdir -p plugins/notificationRule
+    fi
     mkdir -p ${install_dir}
     cp -R --preserve=links ${GIT_ROOT}/build/C/${install_dir}/notification/fledge* "${install_dir}/"
     echo "Done."
