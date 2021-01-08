@@ -22,7 +22,7 @@
 set -e
 
 # Default branch to package
-branch=master
+branch=main
 
 usage="$(basename "$0") [-a] [-c] [-h] [-b <branch>] repository ...
 This script is used to create the RPM package for a Fledge plugin
