@@ -1,0 +1,129 @@
+#!/bin/bash
+
+##--------------------------------------------------------------------
+## Copyright (c) 2021 Dianomic Systems Inc.
+##
+## Licensed under the Apache License, Version 2.0 (the "License");
+## you may not use this file except in compliance with the License.
+## You may obtain a copy of the License at
+##
+##     http://www.apache.org/licenses/LICENSE-2.0
+##
+## Unless required by applicable law or agreed to in writing, software
+## distributed under the License is distributed on an "AS IS" BASIS,
+## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+## See the License for the specific language governing permissions and
+## limitations under the License.
+##--------------------------------------------------------------------
+##
+## Author: Ashish Jabble
+##
+
+set -e
+
+USAGE="$(basename "$0") [-h] [-a] ...
+This script is used to create the Debian package for to support other additional libraries as separately such as mqtt
+
+Arguments:
+  -h	- Display this help text
+  -a	- Remove all the archive versions"
+
+while getopts ":ha" opt; do
+	case "$opt" in
+		a)
+			if [ -d "./archive" ]; then
+				echo -n "Cleaning the package archive folder..."
+				rm -rf ./archive/*
+				echo "Done."
+			else
+				echo "No archive folder, skipping cleanall"
+			fi
+			exit 0
+			;;
+		h)
+			echo "${USAGE}"
+			exit 0
+			;;
+		\?)
+			echo "Invalid option -$OPTARG"
+			exit 1
+			;;
+		:)
+			echo "-$OPTARG requires an argument"
+			exit 1
+	esac
+done
+shift $((OPTIND -1))
+
+ADDITIONAL_LIB_NAME=$1
+if [ "${ADDITIONAL_LIB_NAME}" = "" ]; then
+	echo You must specify additional library name to package
+	exit 1
+fi
+
+# VERSION
+if [ -f scripts/${ADDITIONAL_LIB_NAME}/VERSION ]; then
+    version=`cat scripts/${ADDITIONAL_LIB_NAME}/VERSION | tr -d ' ' | grep "fledge_${ADDITIONAL_LIB_NAME}_version" | head -1 | sed -e 's/\(.*\)=\(.*\)/\2/g'`
+    fledge_version=`cat scripts/${ADDITIONAL_LIB_NAME}/VERSION | tr -d ' ' | grep 'fledge_version' | head -1 | sed -e 's/\(.*\)version\(.*\)/\2/g'`
+else
+    echo VERSION file is missing for ${ADDITIONAL_LIB_NAME} in "others/scripts/" directory
+    exit 1
+fi
+
+# Description
+if [ -f scripts/${ADDITIONAL_LIB_NAME}/Description ]; then
+    description=`cat "scripts/${ADDITIONAL_LIB_NAME}/Description"`
+else
+    echo Description file is missing for ${ADDITIONAL_LIB_NAME} in "others/scripts/" directory
+    exit 1
+fi
+
+# requirements.sh
+if [ -f scripts/${ADDITIONAL_LIB_NAME}/requirements.sh ]; then
+    ./scripts/${ADDITIONAL_LIB_NAME}/requirements.sh
+else
+    echo Requirement script is missing for ${ADDITIONAL_LIB_NAME} "others/scripts/" directory
+    exit 1
+fi
+
+architecture=`arch`
+PKG_ROOT=`pwd`
+archive=${PKG_ROOT}/archive/DEBIAN
+pkg_name="fledge-${ADDITIONAL_LIB_NAME}"
+arch_name=$(dpkg --print-architecture)
+package_name="${pkg_name}-${version}-${architecture}"
+
+if [ ! -d "${archive}/${architecture}" ]; then
+    mkdir -p "${archive}/${architecture}/${package_name}"
+fi
+
+# Print the summary of findings
+echo "Additional ${ADDITIONAL_LIB_NAME} Package version is : ${version}"
+echo "The Fledge required version is                       : ${fledge_version}"
+echo "The architecture is set as                           : ${architecture}"
+echo "The package will be built in                         : ${archive}/${architecture}"
+echo "The package name is                                  : ${package_name}"
+echo
+
+echo -n "Populating the package and updating version file..."
+cd "${archive}/${architecture}/${package_name}"
+mkdir -p DEBIAN
+cp -R ${PKG_ROOT}/packages/DEBIAN/* DEBIAN
+sed -i "s/__VERSION__/${version}/g" DEBIAN/control
+sed -i "s/__NAME__/${pkg_name}/g" DEBIAN/control
+sed -i "s/__ARCH__/${arch_name}/g" DEBIAN/control
+sed -i "s/__REQUIRES__/fledge (${fledge_version})/g" DEBIAN/control
+sed -i "s/__DESCRIPTION__/${description}/g" DEBIAN/control
+
+# Debian file structure
+mkdir -p usr/local/lib
+if [ "${ADDITIONAL_LIB_NAME}" == "mqtt" ];  then
+    cp -R --preserve=links /usr/local/lib/libpaho* usr/local/lib
+fi
+echo "Done."
+
+# Build the package
+cd "${archive}/${architecture}"
+echo "Building the ${package_name} package..."
+dpkg-deb --build ${package_name}
+echo "Building Complete."
