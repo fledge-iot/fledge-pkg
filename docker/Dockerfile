@@ -2,7 +2,7 @@ FROM ubuntu:18.04
 
 MAINTAINER Vaibhav Singhal "vaibhav@dianomic.com"
 
-ARG FLEDGE_BRANCH=master
+ARG FLEDGE_BRANCH=main
 ENV FLEDGE_BRANCH ${FLEDGE_BRANCH}
 RUN apt-get update && apt-get -y upgrade
 RUN apt-get install -y git rsyslog
