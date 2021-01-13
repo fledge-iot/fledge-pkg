@@ -135,6 +135,11 @@ do
         service_notification_version=`cat ${GIT_ROOT}/service_notification.version | tr -d ' ' | grep 'service_notification_version' | head -1 | sed -e 's/\(.*\)version\(.*\)/\2/g'`
         echo "The Service notification required version             : ${service_notification_version}"
     fi
+    if [ -f "${GIT_ROOT}/additional_lib.version" ]; then
+        additional_lib_name=`cat additional_lib.version | cut -d ":" -f1`
+        additional_lib_version=`cat additional_lib.version | cut -d ":" -f2`
+        echo "The Additional ${additional_lib_name} Library required version          : ${additional_lib_version}"
+    fi
     echo
 
     # Create the package directory. If a directory with the same name exists,
@@ -190,6 +195,9 @@ do
     sed -i "s/__DESCRIPTION__/${desc}/g" ${deb_path}/control
     if [ ! -z "${service_notification_version}" ] ; then
         sed -i "s/fledge-service-notification/fledge-service-notification (${service_notification_version})/" ${deb_path}/control
+    fi
+     if [ ! -z "${additional_lib_version}" ] ; then
+        sed -i "s/fledge-${additional_lib_name}/fledge-${additional_lib_name} (${additional_lib_version})/" ${deb_path}/control
     fi
     # install notes
     if [ -f "${GIT_ROOT}/install_notes.txt" ]; then
