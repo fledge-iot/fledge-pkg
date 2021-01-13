@@ -11,7 +11,9 @@
 # Build
 packages/Debian/build/
 packages/RPM/build/
+others/paho.mqtt.c/
 
 # Archived packages
 plugins/archive
 service/archive
+others/archive
