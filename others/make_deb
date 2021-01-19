@@ -22,7 +22,7 @@
 set -e
 
 USAGE="$(basename "$0") [-h] [-a] ...
-This script is used to create the Debian package for to support other additional libraries as separately such as mqtt
+This script is used to create the Debian package for to support other additional libraries as separately such as mqtt, gcp
 
 Arguments:
   -h	- Display this help text
@@ -94,7 +94,7 @@ arch_name=$(dpkg --print-architecture)
 package_name="${pkg_name}-${version}-${architecture}"
 
 if [ ! -d "${archive}/${architecture}" ]; then
-    mkdir -p "${archive}/${architecture}/${package_name}"
+    mkdir -p "${archive}/${architecture}"
 fi
 
 # Print the summary of findings
@@ -106,6 +106,9 @@ echo "The package name is                                  : ${package_name}"
 echo
 
 echo -n "Populating the package and updating version file..."
+if [ ! -d "${archive}/${architecture}/${package_name}" ]; then
+    mkdir -p "${archive}/${architecture}/${package_name}"
+fi
 cd "${archive}/${architecture}/${package_name}"
 mkdir -p DEBIAN
 cp -R ${PKG_ROOT}/packages/DEBIAN/* DEBIAN
@@ -119,6 +122,10 @@ sed -i "s/__DESCRIPTION__/${description}/g" DEBIAN/control
 mkdir -p usr/local/lib
 if [ "${ADDITIONAL_LIB_NAME}" == "mqtt" ];  then
     cp -R --preserve=links /usr/local/lib/libpaho* usr/local/lib
+fi
+if [ "${ADDITIONAL_LIB_NAME}" == "gcp" ];  then
+    cp -R --preserve=links /usr/local/lib/libjwt* usr/local/lib
+    cp -R --preserve=links /usr/local/lib/libjansson* usr/local/lib
 fi
 echo "Done."
 
