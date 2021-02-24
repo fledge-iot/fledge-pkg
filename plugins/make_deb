@@ -22,7 +22,7 @@
 set -e
 
 # Default branch to package
-BRANCH_NAME=master
+BRANCH_NAME=main
 USAGE="$(basename "$0") [-h] [-a] [-b <branch>] repository ...
 This script is used to create the Debian package for a Fledge plugin
 
@@ -191,6 +191,17 @@ do
     if [ ! -z "${service_notification_version}" ] ; then
         sed -i "s/fledge-service-notification/fledge-service-notification (${service_notification_version})/" ${deb_path}/control
     fi
+    if [ -f "${GIT_ROOT}/additional_lib.version" ]; then
+        while read line ; do
+            if [ ! -z "$line" ]; then
+                additional_lib_name=`echo ${line} | cut -d ":" -f1`
+                additional_lib_version=`echo ${line} | cut -d ":" -f2`
+                echo "The Additional ${additional_lib_name} Library required version: ${additional_lib_version}"
+                sed -i "s/fledge-${additional_lib_name}/fledge-${additional_lib_name} (${additional_lib_version})/" ${deb_path}/control
+            fi
+        done < "${GIT_ROOT}/additional_lib.version"
+    fi
+
     # install notes
     if [ -f "${GIT_ROOT}/install_notes.txt" ]; then
         cat > /tmp/sed.script.$$ << EOF
