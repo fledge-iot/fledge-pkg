@@ -22,7 +22,7 @@ https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/
 ### Build fledge image
 
 ```
-    $ docker build --tag fledge --build-arg FLEDGE_BRANCH=develop .
+    $ docker build --tag fledge:dev --build-arg FLEDGE_BRANCH=develop .
 ```
 
 where name of the image is fledge, FLEDGE_BRANCH is the branch to build (develop, master, 1.5.2 ,etc)
@@ -31,7 +31,7 @@ where name of the image is fledge, FLEDGE_BRANCH is the branch to build (develop
 
 
 ```
-    $ docker run -d -v ~/fledge-data:/usr/local/fledge/data --name fledge -p 8081:8081 -p 1995:1995 fledge
+    $ docker run -d -v ~/fledge-data:/usr/local/fledge/data --name fledge -p 8081:8081 -p 1995:1995 -p 8082:80 fledge:dev
 ```
 
 	-d : run fledge container in detached mode
@@ -53,11 +53,11 @@ where name of the image is fledge, FLEDGE_BRANCH is the branch to build (develop
 
 ### notes...
 
-docker save -o fledge-nightly.tar fledge:nightly
+docker save -o fledge-dev.tar fledge:dev
 
 
-docker load < fledge-nightly.tar.gz
-docker load --input fledge-nightly.tar.gz
+docker load < fledge-dev.tar.gz
+docker load --input fledge-dev.tar.gz
 
-docker run -d -v ~/fledge-data:/usr/local/fledge/data --name fledge -p 8081:8081 -p 1995:1995 -p 8082:80 fledge:nightly
-docker run -d --name fledge -p 8081:8081 -p 1995:1995 -p 8082:80 fledge:nightly
+docker run -d -v ~/fledge-data:/usr/local/fledge/data --name fledge -p 8081:8081 -p 1995:1995 -p 8082:80 fledge:dev
+docker run -d --name fledge -p 8081:8081 -p 1995:1995 -p 8082:80 fledge:dev
