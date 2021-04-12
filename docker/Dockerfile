@@ -5,9 +5,6 @@ LABEL maintainer="info@dianomic.com"
 ARG FLEDGE_BRANCH=develop
 ENV FLEDGE_BRANCH ${FLEDGE_BRANCH}
 RUN apt-get update && apt-get -y upgrade
-# Ubuntu 20.04 LTS
-# https://serverfault.com/questions/949991/how-to-install-tzdata-on-a-ubuntu-docker-image
-# RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
 RUN apt-get install -y git rsyslog sudo wget
 # TODO: https://scaledb.atlassian.net/browse/FOGL-4809
 # RUN apt-get install -y sqlite3
