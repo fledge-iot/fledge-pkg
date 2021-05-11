@@ -89,8 +89,8 @@ do
 	GIT_ROOT=/tmp/"${REPO_NAME}"
 	cd ${GIT_ROOT}
 
-	if [ ! -f "${GIT_ROOT}/Package" ]; then
-		echo Repository ${REPO_NAME} is missing package directive file
+	if [ ! -s "${GIT_ROOT}/Package" ]; then
+		echo Repository ${REPO_NAME} is missing package directive file or it is empty
 		rm -rf "${GIT_ROOT}"
 		exit 1
 	fi
@@ -98,8 +98,8 @@ do
 	. "${GIT_ROOT}"/Package
 	pkg_name="${REPO_NAME}"
 
-	if [ ! -f "${GIT_ROOT}/Description" ]; then
-		echo WARNING: Repository ${REPO_NAME} is missing package description file
+	if [ ! -s "${GIT_ROOT}/Description" ]; then
+		echo WARNING: Repository ${REPO_NAME} is missing package description file or it is empty
 		echo "${plugin_name} ${plugin_type} plugin" > "${GIT_ROOT}/Description"
 	fi	
 
