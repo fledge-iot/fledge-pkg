@@ -94,15 +94,14 @@ do
 		rm -rf "${GIT_ROOT}"
 		exit 1
 	fi
-
-	if [ ! -f "${GIT_ROOT}/Description" ]; then
-		echo Repository ${REPO_NAME} is missing package description file
-		rm -rf "${GIT_ROOT}"
-		exit 1
-	fi
-
+ 
 	. "${GIT_ROOT}"/Package
 	pkg_name="${REPO_NAME}"
+
+	if [ ! -f "${GIT_ROOT}/Description" ]; then
+		echo WARNING: Repository ${REPO_NAME} is missing package description file
+		echo "${plugin_name} ${plugin_type} plugin" > "${GIT_ROOT}/Description"
+	fi	
 
     if [ -f "${GIT_ROOT}/VERSION" ]; then
         version=`cat "${GIT_ROOT}/VERSION"`
@@ -187,6 +186,7 @@ do
     sed -i "s|__INSTALL_DIR__|${installs}|g" ${deb_path}/postinst
     sed -i "s/__PLUGIN_NAME__/${plugin_name}/g" ${deb_path}/postinst
     desc=`cat "${GIT_ROOT}/Description"`
+    desc="$(echo "${desc}" | sed ':a;N;$!ba;s/\n/\\n /g')"
     sed -i "s/__DESCRIPTION__/${desc}/g" ${deb_path}/control
     if [ ! -z "${service_notification_version}" ] ; then
         sed -i "s/fledge-service-notification/fledge-service-notification (${service_notification_version})/" ${deb_path}/control

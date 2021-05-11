@@ -108,14 +108,13 @@ do
 		exit 1
 	fi
 
-	if [ ! -f "${GIT_ROOT}/Description" ]; then
-		echo Repository $repos is missing package description file
-		rm -rf "${GIT_ROOT}"
-		exit 1
-	fi
-
 	. "${GIT_ROOT}"/Package
 	pkg_name="$repos"
+  
+	if [ ! -f "${GIT_ROOT}/Description" ]; then
+		echo WARNING: Repository $repos is missing package description file
+		echo "${plugin_name} ${plugin_type} plugin" > "${GIT_ROOT}/Description"
+	fi
 
 	if [ -f "${GIT_ROOT}/VERSION" ]; then
 		version=`cat "${GIT_ROOT}/VERSION"`
