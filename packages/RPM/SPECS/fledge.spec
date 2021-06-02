@@ -462,8 +462,14 @@ copy_fledge_sudoer_file
 echo "Enabling Fledge service"
 enable_fledge_service
 
-echo "Starting Fledge service"
-start_fledge_service
+# Skipping the start of fledge when package is upgraded, because of other related packages
+# upgrade transaction mechanism is cauing issues in fledge (FOGL-5506).
+if [ $1 == 1 ];then
+    echo "Please start fledge once upgrade process is complete using 'systemctl start fledge'"
+elif [ $1 == 0 ];then
+    echo "Starting Fledge service"
+    start_fledge_service
+fi
 
 
 %postun
