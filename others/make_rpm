@@ -1,0 +1,155 @@
+#!/bin/bash
+
+##--------------------------------------------------------------------------
+## Copyright (c) 2021 Dianomic Systems
+##
+## Licensed under the Apache License, Version 2.0 (the "License");
+## you may not use this file except in compliance with the License.
+## You may obtain a copy of the License at
+##
+##     http://www.apache.org/licenses/LICENSE-2.0
+##
+## Unless required by applicable law or agreed to in writing, software
+## distributed under the License is distributed on an "AS IS" BASIS,
+## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+## See the License for the specific language governing permissions and
+## limitations under the License.
+##-------------------------------------------------------------------------
+##
+## Author: Ashish Jabble
+##
+
+set -e
+
+USAGE="$(basename "$0") [-h] [-a] ...
+This script is used to create the RPM package for to support other additional libraries as separately such as mqtt
+
+Arguments:
+  -h	- Display this help text
+  -a	- Remove all the archive versions"
+
+while getopts ":ha" opt; do
+	case "$opt" in
+		a)
+			if [ -d "./archive" ]; then
+				echo -n "Cleaning the package archive folder..."
+				rm -rf ./archive/*
+				echo "Done."
+			else
+				echo "No archive folder, skipping cleanall"
+			fi
+			exit 0
+			;;
+		h)
+			echo "${USAGE}"
+			exit 0
+			;;
+		\?)
+			echo "Invalid option -$OPTARG"
+			exit 1
+			;;
+		:)
+			echo "-$OPTARG requires an argument"
+			exit 1
+	esac
+done
+shift $((OPTIND -1))
+
+ADDITIONAL_LIB_NAME=$1
+if [ "${ADDITIONAL_LIB_NAME}" = "" ]; then
+	echo "You must specify additional library name to package. For example: mqtt"
+	exit 1
+fi
+
+# VERSION
+if [ -f scripts/${ADDITIONAL_LIB_NAME}/VERSION ]; then
+    VERSION=`cat scripts/${ADDITIONAL_LIB_NAME}/VERSION | tr -d ' ' | grep "fledge_${ADDITIONAL_LIB_NAME}_version" | head -1 | sed -e 's/\(.*\)=\(.*\)/\2/g'`
+    FLEDGE_VERSION=`cat scripts/${ADDITIONAL_LIB_NAME}/VERSION | tr -d ' ' | grep 'fledge_version' | head -1 | sed -e 's/\(.*\)version\([>=|>|<|<=|=]*\)\(.*\)/\2 \3/g'`
+else
+    echo VERSION file is missing for ${ADDITIONAL_LIB_NAME} in "others/scripts/" directory
+    exit 1
+fi
+
+# Description
+if [ -f scripts/${ADDITIONAL_LIB_NAME}/Description ]; then
+    DESCRIPTION=`cat "scripts/${ADDITIONAL_LIB_NAME}/Description"`
+else
+    echo Description file is missing for ${ADDITIONAL_LIB_NAME} in "others/scripts/" directory
+    exit 1
+fi
+
+# requirements.sh
+if [ -f scripts/${ADDITIONAL_LIB_NAME}/requirements.sh ]; then
+    ./scripts/${ADDITIONAL_LIB_NAME}/requirements.sh
+else
+    echo Requirement script is missing for ${ADDITIONAL_LIB_NAME} "others/scripts/" directory
+    exit 1
+fi
+
+GIT_ROOT=`pwd`
+ARCHIVE_PATH=${GIT_ROOT}/archive/RPM
+PKG_NAME="fledge-${ADDITIONAL_LIB_NAME}"
+ARCHITECTURE=`arch`
+PACKAGE_NAME="${PKG_NAME}-${VERSION}"
+BUILD_ROOT="${GIT_ROOT}/packages/build"
+
+if [ ! -d "${ARCHIVE_PATH}/${ARCHITECTURE}" ]; then
+    mkdir -p "${ARCHIVE_PATH}/${ARCHITECTURE}"
+fi
+
+# Print the summary of findings
+echo "Additional ${ADDITIONAL_LIB_NAME} Package version is : ${VERSION}"
+echo "The Fledge required version is                       : ${FLEDGE_VERSION}"
+echo "The architecture is set as                           : ${ARCHITECTURE}"
+echo "The package root directory is                        : ${GIT_ROOT}"
+echo "The package will be built in                         : ${BUILD_ROOT}"
+echo "The package name is                                  : ${PACKAGE_NAME}"
+echo
+
+# First, create the BUILD_ROOT folder, if necessary
+if [ ! -L "${BUILD_ROOT}" -a ! -d "${BUILD_ROOT}" ]; then
+    mkdir -p ${BUILD_ROOT}
+fi
+
+# Check old copy of PACKAGE_NAME; if exists then remove
+if [ -d "${BUILD_ROOT}/${PACKAGE_NAME}" ]; then
+    rm -rf ${BUILD_ROOT}/${PACKAGE_NAME}*
+fi
+
+# Populate the package directory with RPM files
+echo -n "Populating the package and updating version file..."
+cd ${BUILD_ROOT}
+mkdir -p ${PACKAGE_NAME}
+cd ${PACKAGE_NAME}
+cp -R ${GIT_ROOT}/packages/RPM/* SPECS
+sed -i "s/__NAME__/${PKG_NAME}/g" SPECS/others.spec
+sed -i "s/__VERSION__/${VERSION}/g" SPECS/others.spec
+sed -i "s/__ARCH__/${ARCHITECTURE}/g" SPECS/others.spec
+sed -i "s/__REQUIRES__/fledge ${FLEDGE_VERSION}/g" SPECS/others.spec
+sed -i "s/__DESCRIPTION__/${DESCRIPTION}/g" SPECS/others.spec
+echo "Done."
+
+# RPM file structure
+echo "Copying artifacts..."
+mkdir -p BUILDROOT
+cd BUILDROOT
+mkdir -p ${PACKAGE_NAME}-1.${ARCHITECTURE}
+cd ${PACKAGE_NAME}-1.${ARCHITECTURE}
+mkdir -p usr/local/lib64
+if [ "${ADDITIONAL_LIB_NAME}" == "mqtt" ];  then
+    cp -R --preserve=links /usr/local/lib64/libpaho* usr/local/lib64
+fi
+# TODO: FOGL-3632 - Blocked with its compilation
+#if [ "${ADDITIONAL_LIB_NAME}" == "gcp" ];  then
+#    cp -R --preserve=links /usr/local/lib64/libjwt* usr/local/lib64
+#    cp -R --preserve=links /usr/local/lib64/libjansson* usr/local/lib64
+#fi
+echo "Done."
+find -L . -type f -exec echo '/'{} \; >> ../../SPECS/others.spec
+echo "Building the RPM package..."
+cd ${BUILD_ROOT}
+rpmbuild --define "_topdir ${BUILD_ROOT}/${PACKAGE_NAME}" --noclean -bb ${BUILD_ROOT}/${PACKAGE_NAME}/SPECS/others.spec
+echo "Building Complete."
+echo "Artifacts copied to "${ARCHIVE_PATH}/${ARCHITECTURE}
+PKG_NAME_WITH_EXT="${PACKAGE_NAME}-1.${ARCHITECTURE}.rpm"
+cp ${BUILD_ROOT}/${PACKAGE_NAME}/RPMS/${ARCHITECTURE}/${PKG_NAME_WITH_EXT} ${ARCHIVE_PATH}/${ARCHITECTURE}/${PKG_NAME_WITH_EXT}
