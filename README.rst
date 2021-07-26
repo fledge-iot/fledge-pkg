@@ -141,7 +141,7 @@ The make_rpm Script
 Building a RPM Package
 ======================
 
-``make_rpm`` script automatically do Fledge clone repo with branch master (by default) and then ``sudo make install`` followed by some prerequisite
+``make_rpm`` script automatically do Fledge clone repo with branch main (by default) and then ``sudo make install`` followed by some prerequisite
 
 You may override the branch with ``-b`` or skip Fledge build with ``-s``. For more info just see its help ``-h``
 

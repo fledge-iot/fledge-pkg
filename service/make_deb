@@ -22,7 +22,7 @@
 set -e
 
 # Default branch to package
-BRANCH_NAME=master
+BRANCH_NAME=main
 
 USAGE="$(basename "$0") [-h] [-a] [-b <branch>] repository ...
 This script is used to create the Debian package for a Fledge service
@@ -190,6 +190,10 @@ do
     # Debian file structure
     mkdir -p usr/local/fledge
     cd usr/local/fledge
+    if [ "${service_name}" = "notification" ]; then
+        mkdir -p plugins/notificationDelivery
+        mkdir -p plugins/notificationRule
+    fi
     mkdir -p ${install_dir}
     cp "${GIT_ROOT}/build/C/${install_dir}/${service_name}/${exec_name}" "${install_dir}/${exec_name}"
     echo "Done."

@@ -11,7 +11,10 @@
 # Build
 packages/Debian/build/
 packages/RPM/build/
+others/paho.mqtt.c/
+others/jansson
 
 # Archived packages
 plugins/archive
 service/archive
+others/archive

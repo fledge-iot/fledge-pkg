@@ -25,7 +25,7 @@ https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/
     $ docker build --tag fledge:dev --build-arg FLEDGE_BRANCH=develop .
 ```
 
-where name of the image is fledge, FLEDGE_BRANCH is the branch to build (develop, master, 1.5.2 ,etc)
+where name of the image is fledge, FLEDGE_BRANCH is the branch to build (develop, main, 1.5.2 ,etc)
 
 ### Run container
 
