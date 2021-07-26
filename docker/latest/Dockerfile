@@ -22,12 +22,8 @@ RUN chmod 755 /usr/bin/systemctl
 RUN wget -q -O - http://archives.fledge-iot.org/KEY.gpg | apt-key add - && \
 add-apt-repository "deb ${FLEDGE_PKGS_ARCHIVES_LINK} / "
 
-# Install fledge and few south plugins
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y fledge \
-fledge-south-sinusoid \
-fledge-south-randomwalk \
-fledge-south-random \
-fledge-south-expression
+# Install fledge
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y fledge
 
 # Fix and install fledge-gui
 RUN apt-get download fledge-gui && \
