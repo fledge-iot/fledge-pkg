@@ -22,7 +22,7 @@ Default will be built with latest stable relase.
 ```
 
 	-d : run fledge container in detached mode
-	-v : maps host volume /fledge-data to container volume /usr/local/fledge/data
+	-v : maps host volume ~/fledge-data to container volume /usr/local/fledge/data
 	--name : name of the container (fledge)
 	-p : map the port of host machine (8081) and container (:8081)
 	fledge : name of the image created in earlier step, with tag latest
