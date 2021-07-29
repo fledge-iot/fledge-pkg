@@ -1,0 +1,50 @@
+FROM ubuntu:18.04
+
+LABEL maintainer="info@dianomic.com"
+
+ENV ARCHITECTURE="x86_64"
+ENV OS="ubuntu1804"
+
+ARG PKG_VERSION="latest"
+
+ENV FLEDGE_PKGS_ARCHIVES_LINK="http://archives.fledge-iot.org/${PKG_VERSION}/${OS}/${ARCHITECTURE}/"
+
+# Install pre-requisites
+RUN apt-get update && \
+    apt-get install -y rsyslog curl wget jq nginx-light software-properties-common
+
+
+# Fake service control as docker container doesn't use it
+RUN printf '#!/bin/bash \nexit 0' > /usr/bin/systemctl
+RUN chmod 755 /usr/bin/systemctl
+
+# Install Fledge repo within container
+RUN wget -q -O - http://archives.fledge-iot.org/KEY.gpg | apt-key add - && \
+add-apt-repository "deb ${FLEDGE_PKGS_ARCHIVES_LINK} / "
+
+# Install fledge
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y fledge
+
+# Fix and install fledge-gui
+RUN apt-get download fledge-gui && \
+dpkg --unpack fledge-gui*.deb && \
+sed -i 's/grep/echo/g' /var/lib/dpkg/info/fledge-gui.postinst && \
+dpkg --configure fledge-gui
+
+# Build the Start Script
+RUN echo "service rsyslog start" > start.sh && \
+    echo "service nginx start" >> start.sh && \
+    echo "/usr/local/fledge/bin/fledge start" >> start.sh && \
+    echo "tail -f /var/log/syslog" >> start.sh && \
+    chmod +x start.sh
+
+RUN usermod -aG www-data root
+
+ENV FLEDGE_ROOT=/usr/local/fledge
+
+# VOLUME /usr/local/fledge/data
+
+# Fledge API and Fledge GUI ports
+EXPOSE 8081 1995 80
+
+CMD ["bash", "./start.sh"]
