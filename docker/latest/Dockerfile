@@ -42,7 +42,7 @@ RUN usermod -aG www-data root
 
 ENV FLEDGE_ROOT=/usr/local/fledge
 
-VOLUME /usr/local/fledge/data
+# VOLUME /usr/local/fledge/data
 
 # Fledge API and Fledge GUI ports
 EXPOSE 8081 1995 80
