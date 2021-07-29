@@ -23,7 +23,7 @@ set -e
 
 PKG_ROOT=`pwd`               # The script must be executed from the root git directory
 repo_name="fledge"           # Name of the Git repository
-branch="master"              # Default Git branch to use
+branch="main"              # Default Git branch to use
 pkg_name="fledge"           # Name of the package to build
 architecture="x86_64"        # The architecture for which the rpm should be created
 rhpg_pkg="rh-postgresql96"   # Name of the Red Hat package for postgres

@@ -18,7 +18,7 @@ Default will be built with latest stable relase.
 
 
 ```
-    $ docker run -d -v /Users/praveen-garg/Desktop/blah/fledge-data:/usr/local/fledge/data --name fledge -p 8081:8081 -p 1995:1995 fledge:latest
+    $ docker run -d -v ~/fledge-data:/usr/local/fledge/data --name fledge -p 8081:8081 -p 1995:1995 -p 8082:80 fledge:latest
 ```
 
 	-d : run fledge container in detached mode
@@ -33,6 +33,6 @@ Default will be built with latest stable relase.
 
 # Tag and push to registry
 
-  $ sudo docker tag fledge:latest 52.3.255.136:5000/fledge:latest
+  $ sudo docker tag fledge:latest 100.25.163.15:5000/fledge:latest
   
-  $ sudo docker push 52.3.255.136:5000/fledge:latest
+  $ sudo docker push 100.25.163.15:5000/fledge:latest
