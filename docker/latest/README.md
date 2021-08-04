@@ -7,7 +7,7 @@
 Default image will be built with latest stable relase.
 
 ```
-    $ docker build --tag fledge:nightly --build-arg PKG_VERSION=nightly .
+    $ docker build --tag fledge:nightly --build-arg PKG_VERSION=nightly -f Dockerfile.ubuntu1804 .
 ```
 
 
