@@ -1,13 +1,13 @@
-### Build fledge image
+### Build fledge Ubuntu 18.04 image
 
 ```
-    $ docker build --no-cache --tag fledge:latest .
+    $ docker build --no-cache --tag fledge:latest -f Dockerfile.ubuntu1804 .
 ```
 
-Default will be built with latest stable relase.
+Default image will be built with latest stable relase.
 
 ```
-    $ docker build --tag fledge:nightly --build-arg PKG_VERSION=nightly .
+    $ docker build --tag fledge:nightly --build-arg PKG_VERSION=nightly -f Dockerfile.ubuntu1804 .
 ```
 
 
