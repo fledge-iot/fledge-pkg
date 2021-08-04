@@ -1,0 +1,52 @@
+FROM centos:7
+
+LABEL maintainer="info@dianomic.com"
+
+ENV ARCHITECTURE="x86_64"
+ENV OS="centos7"
+
+ARG PKG_VERSION="latest"
+
+ENV FLEDGE_PKGS_ARCHIVES_LINK="http://archives.fledge-iot.org/${PKG_VERSION}/${OS}/${ARCHITECTURE}/"
+
+# Install pre-requisites
+RUN yum update -y && \
+    yum install -y rsyslog curl wget jq centos-release-scl-rh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
+    yum install -y nginx
+
+
+# Fake service control as docker container doesn't use it
+RUN printf '#!/bin/bash \nexit 0' > /usr/bin/systemctl
+RUN chmod 755 /usr/bin/systemctl
+
+# Install Fledge repo within container
+RUN echo -e "[fledge]\n\
+name=fledge Repository\n\
+baseurl=${FLEDGE_PKGS_ARCHIVES_LINK}\n\
+enabled=1\n\
+gpgkey=http://archives.fledge-iot.org/RPM-GPG-KEY-fledge\n\
+gpgcheck=1" > /etc/yum.repos.d/fledge.repo
+
+# Install fledge
+RUN yum update -y && yum install -y fledge
+
+# Fix and install fledge-gui
+RUN rm -f /usr/share/nginx/html/index.html && \
+yum install -y fledge-gui
+
+# Build the Start Script
+RUN echo "service rsyslog start" > start.sh && \
+    echo "nginx" >> start.sh && \
+    echo "/usr/local/fledge/bin/fledge start" >> start.sh && \
+    echo "tail -f /var/log/messages" >> start.sh && \
+    chmod +x start.sh
+
+
+ENV FLEDGE_ROOT=/usr/local/fledge
+
+# VOLUME /usr/local/fledge/data
+
+# Fledge API and Fledge GUI ports
+EXPOSE 8081 1995 80
+
+CMD ["bash", "./start.sh"]
