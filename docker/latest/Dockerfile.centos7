@@ -31,6 +31,8 @@ gpgcheck=1" > /etc/yum.repos.d/fledge.repo
 RUN yum update -y && yum install -y fledge
 
 # Fix and install fledge-gui
+# With fledge-gui PR https://github.com/fledge-iot/fledge-gui/pull/105, 
+# below fix will not be required, next to the 1.9.1 releases.
 RUN rm -f /usr/share/nginx/html/index.html && \
 yum install -y fledge-gui
 
