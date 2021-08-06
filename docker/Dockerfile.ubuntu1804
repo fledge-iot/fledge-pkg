@@ -9,6 +9,10 @@ RUN apt-get install -y git rsyslog sudo wget
 # TODO: https://scaledb.atlassian.net/browse/FOGL-4809
 # RUN apt-get install -y sqlite3
 
+# Fake service control as docker container doesn't use it
+RUN printf '#!/bin/bash \nexit 0' > /usr/bin/systemctl
+RUN chmod 755 /usr/bin/systemctl
+
 WORKDIR /fledge-core
 
 RUN git clone -b $FLEDGE_BRANCH https://github.com/fledge-iot/fledge.git
