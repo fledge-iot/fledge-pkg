@@ -229,7 +229,7 @@ EOF
     cp -R --preserve=links ${GIT_ROOT}/build/C/${install_dir}/notification/fledge* "${install_dir}/"
     echo "Done."
     cd ..
-    find -L . -exec echo '%{install_path}/'{} \; >> ../../../../SPECS/service.spec
+    find -L . -type f -exec echo '%{install_path}/'{} \; >> ../../../../SPECS/service.spec
     cd "${BUILD_ROOT}"
     echo "Building the RPM package..."
     rpmbuild --define "_topdir ${BUILD_ROOT}/${package_name}" --noclean -bb ${BUILD_ROOT}/${package_name}/SPECS/service.spec

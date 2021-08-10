@@ -29,7 +29,7 @@ PKG_NAME="__PACKAGE_NAME__"
 %post
 set -e
 set_files_ownership () {
-	chown -R root:root /usr/local/fledge/__INSTALL_DIR__
+    chown -R root:root /usr/local/fledge/__INSTALL_DIR__
 }
 
 # main
@@ -38,3 +38,7 @@ set_files_ownership
 
 
 %files
+%{install_path}/fledge/plugins/notificationDelivery
+%{install_path}/fledge/plugins/notificationRule
+%{install_path}/fledge/python/fledge/plugins/notificationDelivery
+%{install_path}/fledge/python/fledge/plugins/notificationRule
