@@ -128,12 +128,13 @@ do
     package_name="${pkg_name}-${version}-${architecture}"
 
     # Print the summary of findings
-    echo "The package root directory is     : ${GIT_ROOT}"
-    echo "The package build directory is    : ${BUILD_ROOT}"
-    echo "The Fledge required version      : ${fledge_version}"
-    echo "The architecture is set as        : ${architecture}"
-    echo "The package will be built in      : ${archive}/${architecture}"
-    echo "The package name is               : ${package_name}"
+    echo "The package root directory is                           : ${GIT_ROOT}"
+    echo "The package build directory is                          : ${BUILD_ROOT}"
+    echo "The Fledge required version                             : ${fledge_version}"
+    echo "The Fledge service ${service_name} version is              : ${version}"
+    echo "The architecture is set as                              : ${architecture}"
+    echo "The package will be built in                            : ${archive}/${architecture}"
+    echo "The package name is                                     : ${package_name}"
     echo
 
     # Create the package directory. If a directory with the same name exists,
@@ -193,6 +194,8 @@ do
     if [ "${service_name}" = "notification" ]; then
         mkdir -p plugins/notificationDelivery
         mkdir -p plugins/notificationRule
+        mkdir -p python/fledge/plugins/notificationDelivery
+        mkdir -p python/fledge/plugins/notificationRule
     fi
     mkdir -p ${install_dir}
     cp "${GIT_ROOT}/build/C/${install_dir}/${service_name}/${exec_name}" "${install_dir}/${exec_name}"

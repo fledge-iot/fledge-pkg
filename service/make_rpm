@@ -156,8 +156,8 @@ do
     # Print the summary of findings
     echo "The package root directory is                           : ${GIT_ROOT}"
     echo "The package build directory is                          : ${BUILD_ROOT}"
-    echo "The Fledge required version                            : ${fledge_version}"
-    echo "The Fledge service ${service_name} version is          : ${version}"
+    echo "The Fledge required version                             : ${fledge_version}"
+    echo "The Fledge service ${service_name} version is              : ${version}"
     echo "The architecture is set as                              : ${arch}"
     echo "The package will be built in                            : ${archive}/${architecture}"
     echo "The package name is                                     : ${package_name}"
@@ -221,6 +221,8 @@ EOF
     if [ "${service_name}" = "notification" ]; then
         mkdir -p plugins/notificationDelivery
         mkdir -p plugins/notificationRule
+        mkdir -p python/fledge/plugins/notificationDelivery
+        mkdir -p python/fledge/plugins/notificationRule
     fi
     mkdir -p ${install_dir}
     cp -R --preserve=links ${GIT_ROOT}/build/C/${install_dir}/notification/fledge* "${install_dir}/"
