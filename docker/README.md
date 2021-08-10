@@ -22,7 +22,7 @@ https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/
 ### Build fledge image
 
 ```
-    $ docker build --tag fledge:dev --build-arg FLEDGE_BRANCH=develop .
+    $ docker build --tag fledge:dev --build-arg FLEDGE_BRANCH=develop -f Dockerfile.ubuntu1804 .
 ```
 
 where name of the image is fledge, FLEDGE_BRANCH is the branch to build (develop, main, 1.5.2 ,etc)
