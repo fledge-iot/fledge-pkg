@@ -187,7 +187,7 @@ do
     if [ -d "${package_name}" ]; then
         rm -rf ${package_name}*
     fi
-    mkdir "${package_name}"
+    mkdir -p "${package_name}"
 
     # Populate the package directory with RPM files
     echo -n "Populating the package and updating version file..."
@@ -211,11 +211,12 @@ EOF
     sed -i -f /tmp/sed.script.$$ SPECS/service.spec
     rm /tmp/sed.script.$$
 
-    mkdir BUILDROOT
+    # RPM file structure
+    echo "Copying artifacts..."
+    mkdir -p BUILDROOT
     cd BUILDROOT
     mkdir -p ${package_name}-1.${arch}
     cd ${package_name}-1.${arch}
-
     mkdir -p usr/local/fledge
     cd usr/local/fledge
     if [ "${service_name}" = "notification" ]; then
@@ -227,21 +228,18 @@ EOF
     mkdir -p ${install_dir}
     cp -R --preserve=links ${GIT_ROOT}/build/C/${install_dir}/notification/fledge* "${install_dir}/"
     echo "Done."
-
     cd ..
-    find -L . -type f -exec echo '%{install_path}/'{} \; >> ../../../../SPECS/service.spec
+    find -L . -exec echo '%{install_path}/'{} \; >> ../../../../SPECS/service.spec
     cd "${BUILD_ROOT}"
-    echo "Building the package..."
+    echo "Building the RPM package..."
     rpmbuild --define "_topdir ${BUILD_ROOT}/${package_name}" --noclean -bb ${BUILD_ROOT}/${package_name}/SPECS/service.spec
     echo "Building Complete."
-
     # Full Package name
     fullname="${package_name}-1.${arch}.rpm"
-
     # Move final package and its spec file to archive/arch directory
     cp ${BUILD_ROOT}/${package_name}/RPMS/${arch}/${fullname} ${archive}/${arch}/${fullname}
     cp ${BUILD_ROOT}/${package_name}/SPECS/service.spec ${archive}/${arch}
-
+    # Remove /tmp cloned directory
     rm -rf /tmp/${REPO_NAME}
     exit 0
 done
