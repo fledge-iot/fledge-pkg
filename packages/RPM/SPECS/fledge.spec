@@ -7,7 +7,8 @@ Release:       1
 BuildArch:     __ARCH__
 Summary:       Fledge, the open source platform for the Internet of Things
 License:       Apache License
-Group: 	       IOT
+Group: 	       IoT
+Packager:      Dianomic Systems, Inc.
 URL:           http://www.dianomic.com
 
 %define install_path	/usr/local
