@@ -5,6 +5,7 @@ LABEL maintainer="info@dianomic.com"
 ENV ARCHITECTURE="x86_64"
 ENV OS="centos7"
 
+# v1.9.2 onwards only
 ARG PKG_VERSION="latest"
 
 ENV FLEDGE_PKGS_ARCHIVES_LINK="http://archives.fledge-iot.org/${PKG_VERSION}/${OS}/${ARCHITECTURE}/"
@@ -30,11 +31,8 @@ gpgcheck=1" > /etc/yum.repos.d/fledge.repo
 # Install fledge
 RUN yum update -y && yum install -y fledge
 
-# Fix and install fledge-gui
-# With fledge-gui PR https://github.com/fledge-iot/fledge-gui/pull/105, 
-# below fix will not be required, next to the 1.9.1 releases.
-RUN rm -f /usr/share/nginx/html/index.html && \
-yum install -y fledge-gui
+# Install fledge-gui
+RUN yum install -y fledge-gui
 
 # Build the Start Script
 RUN echo "service rsyslog start" > start.sh && \

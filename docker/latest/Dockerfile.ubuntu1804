@@ -5,6 +5,7 @@ LABEL maintainer="info@dianomic.com"
 ENV ARCHITECTURE="x86_64"
 ENV OS="ubuntu1804"
 
+# v1.9.2 onwards only
 ARG PKG_VERSION="latest"
 
 ENV FLEDGE_PKGS_ARCHIVES_LINK="http://archives.fledge-iot.org/${PKG_VERSION}/${OS}/${ARCHITECTURE}/"
@@ -25,11 +26,8 @@ add-apt-repository "deb ${FLEDGE_PKGS_ARCHIVES_LINK} / "
 # Install fledge
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y fledge
 
-# Fix and install fledge-gui
-RUN apt-get download fledge-gui && \
-dpkg --unpack fledge-gui*.deb && \
-sed -i 's/grep/echo/g' /var/lib/dpkg/info/fledge-gui.postinst && \
-dpkg --configure fledge-gui
+# Install fledge-gui
+RUN apt-get install -y fledge-gui
 
 # Build the Start Script
 RUN echo "service rsyslog start" > start.sh && \
