@@ -309,12 +309,12 @@ SSL_DAYS="365"
 AUTH_NAME="ca"
 
 link_update_task() {
-    echo "Changing setuid of update_task.rpm"
-    chmod ugo+s /usr/local/fledge/bin/update_task.rpm
+    echo "Changing setuid of update_task.yum"
+    chmod ugo+s /usr/local/fledge/bin/update_task.yum
     echo "Removing task/update"
     [ -e /usr/local/fledge/scripts/tasks/update ] && rm  /usr/local/fledge/scripts/tasks/update
     echo "Create link file"
-    ln -s /usr/local/fledge/bin/update_task.rpm /usr/local/fledge/scripts/tasks/update
+    ln -s /usr/local/fledge/bin/update_task.yum /usr/local/fledge/scripts/tasks/update
 }
 
 copy_fledge_sudoer_file() {
@@ -452,9 +452,8 @@ set_files_ownership
 # TODO: DISABLED - to be implemented
 #call_package_update_script
 
-#TODO: DISABLED - to be implemented
-#echo "Linking update task"
-#link_update_task
+echo "Linking update task"
+link_update_task
 
 echo "Copying sudoers file"
 copy_fledge_sudoer_file
