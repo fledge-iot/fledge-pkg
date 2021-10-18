@@ -135,12 +135,13 @@ do
     else
         pkg_name="fledge-${plugin_type}-${plugin_name}"
     fi
+  git_tag_info=$(git describe --tags) && commit_count=$(echo ${git_tag_info} | cut -d- -f2) || { commit_count=$(git rev-list --count HEAD); git_tag_info="v$version-$commit_count-g$(git rev-parse --short HEAD)"; }
 	# Final package name
-	package_name="${pkg_name}-${version}"
+  if [[ ${branch} != "main" ]] && [[ ! ${branch} =~ ^[0-9]+\.[0-9]+\.[0-9]+RC ]]; then package_name="${pkg_name}_${version}-${commit_count}"; version=${git_tag_info:1}; else package_name="${pkg_name}-${version}"; fi
 
 	# Print the summary of findings
 	echo "The package root directory is                        : ${GIT_ROOT}"
-	echo "The Fledge ${plugin_type} ${plugin_name} version is : ${version}"
+	echo "The Fledge ${plugin_type} ${plugin_name} version is  : ${version}"
 	echo "The package will be built in                         : ${BUILD_ROOT}"
 	echo "The package name is                                  : ${package_name}"
 	if [ -f "${GIT_ROOT}/service_notification.version" ]; then

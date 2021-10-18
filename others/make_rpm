@@ -92,6 +92,9 @@ PKG_NAME="fledge-${ADDITIONAL_LIB_NAME}"
 ARCHITECTURE=`arch`
 PACKAGE_NAME="${PKG_NAME}-${VERSION}"
 BUILD_ROOT="${GIT_ROOT}/packages/build"
+GIT_TAG_INFO=$(git describe --tags) && commit_count=$(echo ${git_tag_info} | cut -d- -f2) || { commit_count=$(git rev-list --count HEAD); git_tag_info="v$version-$commit_count-g$(git rev-parse --short HEAD)"; }
+BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+if [[ ${BRANCH_NAME} != "main" ]] && [[ ! ${BRANCH_NAME} =~ ^[0-9]+\.[0-9]+\.[0-9]+RC ]]; then package_name="${PKG_NAME}-${VERSION}-${commit_count}"; VERSION=${GIT_TAG_INFO:1}; else package_name="${PKG_NAME}-${VERSION}"; fi
 
 if [ ! -d "${ARCHIVE_PATH}/${ARCHITECTURE}" ]; then
     mkdir -p "${ARCHIVE_PATH}/${ARCHITECTURE}"
