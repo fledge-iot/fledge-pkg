@@ -92,7 +92,8 @@ archive=${PKG_ROOT}/archive/DEBIAN
 pkg_name="fledge-${ADDITIONAL_LIB_NAME}"
 arch_name=$(dpkg --print-architecture)
 git_tag_info=$(git describe --tags) && commit_count=$(echo ${git_tag_info} | cut -d- -f2) || { commit_count=$(git rev-list --count HEAD); git_tag_info="v$version-$commit_count-g$(git rev-parse --short HEAD)"; }
-package_name="${pkg_name}_${version}-${commit_count}_${architecture}"
+branch_name=$(git rev-parse --abbrev-ref HEAD)
+if [[ ${branch_name} != "main" ]] && [[ ! ${branch_name} =~ ^[0-9]+\.[0-9]+\.[0-9]+RC ]]; then package_name="${pkg_name}_${version}-${commit_count}_${architecture}"; version=${git_tag_info:1}; else package_name="${pkg_name}-${version}-${architecture}"; fi
 
 if [ ! -d "${archive}/${architecture}" ]; then
     mkdir -p "${archive}/${architecture}"
@@ -113,7 +114,7 @@ fi
 cd "${archive}/${architecture}/${package_name}"
 mkdir -p DEBIAN
 cp -R ${PKG_ROOT}/packages/DEBIAN/* DEBIAN
-sed -i "s/__VERSION__/${git_tag_info:1}/g" DEBIAN/control
+sed -i "s/__VERSION__/${version}/g" DEBIAN/control
 sed -i "s/__NAME__/${pkg_name}/g" DEBIAN/control
 sed -i "s/__ARCH__/${arch_name}/g" DEBIAN/control
 sed -i "s/__REQUIRES__/fledge (${fledge_version})/g" DEBIAN/control
