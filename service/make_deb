@@ -189,6 +189,7 @@ do
     desc=`cat "${GIT_ROOT}/Description"`
     sed -i "s/__DESCRIPTION__/${desc}/g" ${deb_path}/control
     sed -i "s|__INSTALL_DIR__|${install_dir}|g" ${deb_path}/postinst
+    if [[ ${BRANCH_NAME} = "main" ]] || [[ ${BRANCH_NAME} =~ ^[0-9]+\.[0-9]+\.[0-9]+RC ]]; then echo "Build: ${git_tag_info:1}" >> ${deb_path}/control; fi
 
     # Debian file structure
     mkdir -p usr/local/fledge

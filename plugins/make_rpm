@@ -22,7 +22,7 @@
 set -e
 
 # Default branch to package
-branch=main
+BRANCH_NAME=main
 
 usage="$(basename "$0") [-a] [-c] [-h] [-b <branch>] repository ...
 This script is used to create the RPM package for a Fledge plugin
@@ -57,7 +57,7 @@ while getopts ":hcab:" opt; do
 			exit 0
 			;;
 		b)
-			branch=$OPTARG
+			BRANCH_NAME=$OPTARG
 			;;
 		\?)
 			echo "Invalid option -$OPTARG"
@@ -69,14 +69,14 @@ while getopts ":hcab:" opt; do
 	esac
 done
 shift $((OPTIND -1))
-repos=$1
+REPO_NAME=$1
 
-if [ "$repos" = "" ]; then
+if [ "$REPO_NAME" = "" ]; then
 	echo You must specifify plugin repository name to package
 	exit 1
 fi
 
-while [ "$repos" != "" ]
+while [ "$REPO_NAME" != "" ]
 do
 	package_manager=rpm
 	arch=`arch`
@@ -92,30 +92,30 @@ do
 	fi
 
 	cd /tmp
-	if [ -d "$repos" ]; then
-		echo WARNING: Repository $repos already exists, using the existing copy
-		(cd $repos; git pull; git checkout "$branch")
+	if [ -d "$REPO_NAME" ]; then
+		echo WARNING: Repository $REPO_NAME already exists, using the existing copy
+		(cd $REPO_NAME; git pull; git checkout "$BRANCH_NAME")
 	else
-		git clone -b "$branch" https://github.com/fledge-iot/${repos}.git
+		git clone -b "$BRANCH_NAME" https://github.com/fledge-iot/${REPO_NAME}.git
 	fi
 
-	GIT_ROOT=/tmp/"$repos"
+	GIT_ROOT=/tmp/"$REPO_NAME"
 	cd ${GIT_ROOT}
 
 	if [ ! -f "${GIT_ROOT}/Package" ]; then
-		echo Repository $repos is missing package directive file
+		echo Repository $REPO_NAME is missing package directive file
 		rm -rf "${GIT_ROOT}"
 		exit 1
 	fi
 
 	if [ ! -f "${GIT_ROOT}/Description" ]; then
-		echo Repository $repos is missing package description file
+		echo Repository $REPO_NAME is missing package description file
 		rm -rf "${GIT_ROOT}"
 		exit 1
 	fi
 
 	. "${GIT_ROOT}"/Package
-	pkg_name="$repos"
+	pkg_name="$REPO_NAME"
 
 	if [ -f "${GIT_ROOT}/VERSION" ]; then
 		version=`cat "${GIT_ROOT}/VERSION"`
@@ -135,9 +135,10 @@ do
     else
         pkg_name="fledge-${plugin_type}-${plugin_name}"
     fi
-  git_tag_info=$(git describe --tags) && commit_count=$(echo ${git_tag_info} | cut -d- -f2) || { commit_count=$(git rev-list --count HEAD); git_tag_info="v$version-$commit_count-g$(git rev-parse --short HEAD)"; }
-	# Final package name
-  if [[ ${branch} != "main" ]] && [[ ! ${branch} =~ ^[0-9]+\.[0-9]+\.[0-9]+RC ]]; then package_name="${pkg_name}_${version}-${commit_count}"; version=${git_tag_info:1}; else package_name="${pkg_name}-${version}"; fi
+  git_tag_info=$(git describe --tags | sed 's/-/_/g') && commit_count=$(echo ${git_tag_info} | cut -d_ -f2) || { commit_count=$(git rev-list --count HEAD); git_tag_info="v$version_$commit_count_g$(git rev-parse --short HEAD)"; }
+  if [[ ${BRANCH_NAME} = "main" ]] || [[ ${BRANCH_NAME} =~ ^[0-9]+\.[0-9]+\.[0-9]+RC ]]; then commit_count=1; fi
+  # Final package name
+  package_name="${pkg_name}-${version}-${commit_count}"
 
 	# Print the summary of findings
 	echo "The package root directory is                        : ${GIT_ROOT}"
@@ -190,6 +191,7 @@ do
 	cd "${package_name}"
 	cp -R ${PKG_ROOT}/packages/RPM/* .
 	sed -i "s/__VERSION__/${version}/g" SPECS/plugin.spec
+  sed -i "s/__RELEASE__/${commit_count}/g" SPECS/plugin.spec
 	sed -i "s/__NAME__/${pkg_name}/g" SPECS/plugin.spec
 	sed -i "s/__PLUGIN_NAME__/${plugin_name}/g" SPECS/plugin.spec
 	sed -i "s/__ARCH__/${arch}/g" SPECS/plugin.spec
@@ -198,6 +200,7 @@ do
 	sed -i "s/__REQUIRES__/${requirements}/g" SPECS/plugin.spec
 	sed -i "s/fledge,/fledge ${fledge_version},/" SPECS/plugin.spec
 	sed -i "s/fledge$/fledge ${fledge_version}/" SPECS/plugin.spec
+  sed -i "s/__VCS__/${git_tag_info:1}/g" SPECS/plugin.spec
 
 	if [ ! -z "${service_notification_version}" ] ; then
 	    sed -i "s/fledge-service-notification/fledge-service-notification ${service_notification_version}/" SPECS/plugin.spec
@@ -223,8 +226,8 @@ EOF
 
 	mkdir BUILDROOT
 	cd BUILDROOT
-	mkdir -p ${package_name}-1.${arch}
-	cd ${package_name}-1.${arch}
+	mkdir -p ${package_name}.${arch}
+	cd ${package_name}.${arch}
 
 	mkdir -p usr/local/fledge
 	cd usr/local/fledge
@@ -266,7 +269,7 @@ EOF
 	rpmbuild --define "_topdir ${BUILD_ROOT}/${package_name}" --noclean -bb ${BUILD_ROOT}/${package_name}/SPECS/plugin.spec
 	echo "Building Complete."
 
-	fullname="${package_name}-1.${arch}.rpm"
+	fullname="${package_name}.${arch}.rpm"
 
 	# Save the old versions
 	existing_pkgs=`find ${archive}/${arch} -maxdepth 1 -name "${fullname}.????" | wc -l`
@@ -280,9 +283,9 @@ EOF
 
 	cp ${BUILD_ROOT}/${package_name}/RPMS/${arch}/${fullname} ${archive}/${arch}/${fullname}
 
-	rm -rf /tmp/${repos}
+	rm -rf /tmp/${REPO_NAME}
 	shift
-	repos=$1
+	REPO_NAME=$1
 	cd ${PKG_ROOT}
 done
 exit 0
