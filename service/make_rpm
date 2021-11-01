@@ -151,7 +151,9 @@ do
     else
         pkg_name="fledge-service-${service_name}"
     fi
-    package_name="${pkg_name}-${version}"
+    git_tag_info=$(git describe --tags | sed 's/-/_/g') && commit_count=$(echo ${git_tag_info} | cut -d_ -f2) || { commit_count=$(git rev-list --count HEAD); git_tag_info="v$version_$commit_count_g$(git rev-parse --short HEAD)"; }
+    if [[ ${BRANCH_NAME} = "main" ]] || [[ ${BRANCH_NAME} =~ ^[0-9]+\.[0-9]+\.[0-9]+RC ]]; then commit_count=1; fi
+    package_name="${pkg_name}-${version}-${commit_count}"
 
     # Print the summary of findings
     echo "The package root directory is                           : ${GIT_ROOT}"
@@ -194,6 +196,7 @@ do
     cd "${package_name}"
     cp -R ${PKG_ROOT}/packages/RPM/* .
     sed -i "s/__VERSION__/${version}/g" SPECS/service.spec
+    sed -i "s/__RELEASE__/${commit_count}/g" SPECS/service.spec
     sed -i "s/__NAME__/${pkg_name}/g" SPECS/service.spec
     sed -i "s/__ARCH__/${arch}/g" SPECS/service.spec
     sed -i "s/__PACKAGE_NAME__/${package_name}/g" SPECS/service.spec
@@ -201,6 +204,7 @@ do
     sed -i "s/__REQUIRES__/${requirements}/g" SPECS/service.spec
     sed -i "s/fledge,/fledge ${fledge_version},/" SPECS/service.spec
     sed -i "s/fledge$/fledge ${fledge_version}/" SPECS/service.spec
+    sed -i "s/__VCS__/${git_tag_info:1}/g" SPECS/service.spec
 
     cat > /tmp/sed.script.$$ << EOF
         /__DESCRIPTION__/ {
@@ -215,8 +219,8 @@ EOF
     echo "Copying artifacts..."
     mkdir -p BUILDROOT
     cd BUILDROOT
-    mkdir -p ${package_name}-1.${arch}
-    cd ${package_name}-1.${arch}
+    mkdir -p ${package_name}.${arch}
+    cd ${package_name}.${arch}
     mkdir -p usr/local/fledge
     cd usr/local/fledge
     if [ "${service_name}" = "notification" ]; then
@@ -235,7 +239,7 @@ EOF
     rpmbuild --define "_topdir ${BUILD_ROOT}/${package_name}" --noclean -bb ${BUILD_ROOT}/${package_name}/SPECS/service.spec
     echo "Building Complete."
     # Full Package name
-    fullname="${package_name}-1.${arch}.rpm"
+    fullname="${package_name}.${arch}.rpm"
     # Move final package and its spec file to archive/arch directory
     cp ${BUILD_ROOT}/${package_name}/RPMS/${arch}/${fullname} ${archive}/${arch}/${fullname}
     cp ${BUILD_ROOT}/${package_name}/SPECS/service.spec ${archive}/${arch}

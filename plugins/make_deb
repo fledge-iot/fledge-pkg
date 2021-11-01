@@ -122,13 +122,15 @@ do
     else
         pkg_name="fledge-${plugin_type}-${plugin_name}"
     fi
+    
+    git_tag_info=$(git describe --tags) && commit_count=$(echo ${git_tag_info} | cut -d- -f2) || { commit_count=$(git rev-list --count HEAD); git_tag_info="v$version-$commit_count-g$(git rev-parse --short HEAD)"; }
     # Final package name
     archname=$(dpkg --print-architecture)
-    package_name="${pkg_name}-${version}-${arch}"
+    if [[ ${BRANCH_NAME} != "main" ]] && [[ ! ${BRANCH_NAME} =~ ^[0-9]+\.[0-9]+\.[0-9]+RC ]]; then package_name="${pkg_name}_${version}-${commit_count}_${arch}"; version=${git_tag_info:1}; else package_name="${pkg_name}-${version}-${arch}"; fi
 
     # Print the summary of findings
     echo "The package root directory is                         : ${GIT_ROOT}"
-    echo "The Fledge ${plugin_type} ${plugin_name}  version is : ${version}"
+    echo "The Fledge ${plugin_type} ${plugin_name} version is   : ${version}"
     echo "The package will be built in                          : ${BUILD_ROOT}"
     echo "The package name is                                   : ${package_name}"
     if [ -f "${GIT_ROOT}/service_notification.version" ]; then
@@ -201,6 +203,7 @@ do
             fi
         done < "${GIT_ROOT}/additional_lib.version"
     fi
+    if [[ ${BRANCH_NAME} = "main" ]] || [[ ${BRANCH_NAME} =~ ^[0-9]+\.[0-9]+\.[0-9]+RC ]]; then echo "Build: ${git_tag_info:1}" >> ${deb_path}/control; fi
 
     # install notes
     if [ -f "${GIT_ROOT}/install_notes.txt" ]; then

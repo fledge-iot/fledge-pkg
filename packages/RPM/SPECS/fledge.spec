@@ -3,12 +3,14 @@
 Name:          __NAME__
 Vendor:        Dianomic Systems, Inc. <info@dianomic.com>
 Version:       __VERSION__
-Release:       1
+Release:       __RELEASE__
 BuildArch:     __ARCH__
 Summary:       Fledge, the open source platform for the Internet of Things
 License:       Apache License
-Group: 	       IOT
+Group: 	       IoT
+Packager:      Dianomic Systems, Inc.
 URL:           http://www.dianomic.com
+VCS:           __VCS__
 
 %define install_path	/usr/local
 
