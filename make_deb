@@ -129,7 +129,7 @@ fi
 version=`cat ${FLEDGE_ROOT}/VERSION | tr -d ' ' | grep 'fledge_version=' | head -1 | sed -e 's/\(.*\)=\(.*\)/\2/g'`
 BUILD_ROOT="${PKG_ROOT}/packages/Debian/build/${architecture}"
 # Final package name
-if [[ $skip_build == 0 ]] && ([[ ${branch} != "main" ]] && [[ ! ${branch} =~ ^[0-9]+\.[0-9]+\.[0-9]+RC ]]); then package_name="fledge_${version}-${commit_count}_${architecture}"; version=${git_tag_info:1}; else package_name="fledge-${version}-${architecture}"; fi
+if [[ $skip_build == 0 ]] && ([[ ${branch} != "main" ]] && [[ ! ${branch} =~ ^[0-9]+\.[0-9]+\.[0-9]+RC ]]); then package_name="fledge_${version}-${commit_count}_${architecture}"; version=${git_tag_info:1}; else package_name="fledge_${version}_${architecture}"; fi
 
 # Print the summary of findings
 echo "The package root directory is : ${PKG_ROOT}"
