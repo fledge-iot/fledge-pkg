@@ -109,7 +109,7 @@ do
 	pkg_name="${REPO_NAME}"
 
     if [ -f "${GIT_ROOT}/VERSION" ]; then
-        version=`cat ${GIT_ROOT}/VERSION | tr -d ' ' | grep 'notification_version' | head -1 | sed -e 's/\(.*\)version=\(.*\)/\2/g'`
+        version=`cat ${GIT_ROOT}/VERSION | tr -d ' ' | grep "${service_name}_version" | head -1 | sed -e 's/\(.*\)version=\(.*\)/\2/g'`
         fledge_version=`cat ${GIT_ROOT}/VERSION | tr -d ' ' | grep 'fledge_version' | head -1 | sed -e 's/\(.*\)version\(.*\)/\2/g'`
     else
         echo Unable to determine version of package to create
