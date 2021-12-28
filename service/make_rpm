@@ -72,14 +72,14 @@ fi
 # Check if the default directory exists
 echo FLEDGE_ROOT = ${FLEDGE_ROOT}
 if [ "${FLEDGE_ROOT}" = "" ]; then
-echo "Notification server cannot be compiled: FLEDGE_ROOT environment variable is not set."
+echo "${REPO_NAME} service cannot be compiled: FLEDGE_ROOT environment variable is not set."
 echo "Specify the base directory for Fledge and set the variable with:"
 echo "export FLEDGE_ROOT=<basedir>"
 exit 1
 fi
 
 if [ ! -d "${FLEDGE_ROOT}" ]; then
-echo "Notification server cannot be compiled: ${FLEDGE_ROOT} is not a valid directory."
+echo "${REPO_NAME} service cannot be compiled: ${FLEDGE_ROOT} is not a valid directory."
 echo "Specify the base directory for Fledge and set the variable with:"
 echo "export FLEDGE_ROOT=<basedir>"
 exit 1
@@ -137,7 +137,7 @@ do
     pkg_name="${REPO_NAME}"
 
     if [ -f "${GIT_ROOT}/VERSION" ]; then
-        version=`cat "${GIT_ROOT}/VERSION" | tr -d ' ' | grep "notification_version" | head -1 | sed -e 's/\(.*\)version\([>=|>|<|<=|=]*\)\(.*\)/\3/g'`
+        version=`cat "${GIT_ROOT}/VERSION" | tr -d ' ' | grep "${service_name}_version" | head -1 | sed -e 's/\(.*\)version\([>=|>|<|<=|=]*\)\(.*\)/\3/g'`
         fledge_version=`cat ${GIT_ROOT}/VERSION| tr -d ' ' | grep 'fledge_version' | head -1 | sed -e 's/\(.*\)version\([>=|>|<|<=|=]*\)\(.*\)/\2 \3/g'`
     else
         echo Unable to determine version of package to create
@@ -207,6 +207,7 @@ do
     sed -i "s/fledge,/fledge ${fledge_version},/" SPECS/service.spec
     sed -i "s/fledge$/fledge ${fledge_version}/" SPECS/service.spec
     sed -i "s/__VCS__/${git_tag_info:1}/g" SPECS/service.spec
+    sed -i "s/__SERVICE_NAME__/${service_name}/g" SPECS/service.spec
 
     cat > /tmp/sed.script.$$ << EOF
         /__DESCRIPTION__/ {
@@ -232,7 +233,7 @@ EOF
         mkdir -p python/fledge/plugins/notificationRule
     fi
     mkdir -p ${install_dir}
-    cp -R --preserve=links ${GIT_ROOT}/build/C/${install_dir}/notification/fledge* "${install_dir}/"
+    cp -R --preserve=links ${GIT_ROOT}/build/C/${install_dir}/${service_name}/fledge* "${install_dir}/"
     echo "Done."
     cd ..
     find -L . -type f -exec echo '%{install_path}/'{} \; >> ../../../../SPECS/service.spec
@@ -243,8 +244,9 @@ EOF
     # Full Package name
     fullname="${package_name}.${arch}.rpm"
     # Move final package and its spec file to archive/arch directory
-    cp ${BUILD_ROOT}/${package_name}/RPMS/${arch}/${fullname} ${archive}/${arch}/${fullname}
-    cp ${BUILD_ROOT}/${package_name}/SPECS/service.spec ${archive}/${arch}
+    mkdir -p "${archive}/$arch/${service_name}"
+    cp ${BUILD_ROOT}/${package_name}/RPMS/${arch}/${fullname} ${archive}/${arch}/${service_name}/${fullname}
+    cp ${BUILD_ROOT}/${package_name}/SPECS/service.spec ${archive}/${arch}/${service_name}
     # Remove /tmp cloned directory
     rm -rf /tmp/${REPO_NAME}
     exit 0

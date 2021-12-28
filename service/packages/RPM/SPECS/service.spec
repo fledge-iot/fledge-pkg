@@ -12,6 +12,7 @@ URL:           http://www.dianomic.com
 VCS:           __VCS__
 
 %define install_path    /usr/local
+%define service_name    __SERVICE_NAME__
 
 Prefix:        /usr/local
 Requires:      __REQUIRES__
@@ -26,7 +27,6 @@ __DESCRIPTION__
 %preun
 PKG_NAME="__PACKAGE_NAME__"
 
-
 %post
 set -e
 set_files_ownership () {
@@ -37,9 +37,10 @@ set_files_ownership () {
 echo "Setting ownership of Fledge files"
 set_files_ownership
 
-
 %files
+%if "%{service_name}" == "notification"
 %{install_path}/fledge/plugins/notificationDelivery
 %{install_path}/fledge/plugins/notificationRule
 %{install_path}/fledge/python/fledge/plugins/notificationDelivery
 %{install_path}/fledge/python/fledge/plugins/notificationRule
+%endif
