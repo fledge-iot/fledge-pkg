@@ -15,7 +15,7 @@ VCS:           __VCS__
 %define install_path	/usr/local
 
 Prefix:        /usr/local
-Requires:      dbus-devel, glib2-devel, boost, openssl, rh-python36, yum-utils, gcc, autoconf, curl, libtool,  rsyslog,  wget, zlib, libuuid, avahi, sudo, krb5-workstation, curl-devel
+Requires:      dbus-devel, glib2-devel, boost, openssl, rh-python36, yum-utils, gcc, autoconf, curl, libtool,  rsyslog,  wget, zlib, libuuid, avahi, sudo, krb5-workstation, curl-devel, python3-numpy
 AutoReqProv:   no
 
 %description
