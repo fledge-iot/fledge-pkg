@@ -15,7 +15,7 @@ VCS:           __VCS__
 %define install_path	/usr/local
 
 Prefix:        /usr/local
-Requires:      dbus-devel, glib2-devel, boost, openssl, rh-python36, yum-utils, gcc, autoconf, curl, libtool,  rsyslog,  wget, zlib, libuuid, avahi, sudo, krb5-workstation, curl-devel, python3-numpy
+Requires:      dbus-devel, glib2-devel, boost, openssl, rh-python36, yum-utils, gcc, autoconf, curl, libtool,  rsyslog,  wget, zlib, libuuid, avahi, sudo, krb5-workstation, curl-devel
 AutoReqProv:   no
 
 %description
@@ -407,7 +407,7 @@ install_pip3_packages () {
     # TODO: we may need with --no-cache-dir
 	pip3 install -Ir /usr/local/fledge/python/requirements.txt
 
-	sudo bash -c 'source scl_source enable rh-python36;pip3 install dbus-python'
+	sudo bash -c 'source scl_source enable rh-python36; python3 -m pip install dbus-python numpy==1.19.5'
 	set -e
 }
 
