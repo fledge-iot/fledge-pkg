@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ##--------------------------------------------------------------------
-## Copyright (c) 2019 Dianomic Systems
+## Copyright (c) 2022 Dianomic Systems Inc.
 ##
 ## Licensed under the Apache License, Version 2.0 (the "License");
 ## you may not use this file except in compliance with the License.
@@ -196,6 +196,7 @@ do
   sed -i "s/__RELEASE__/${commit_count}/g" SPECS/plugin.spec
 	sed -i "s/__NAME__/${pkg_name}/g" SPECS/plugin.spec
 	sed -i "s/__PLUGIN_NAME__/${plugin_name}/g" SPECS/plugin.spec
+	sed -i "s/__PLUGIN_TYPE__/${plugin_type_install}/g" SPECS/plugin.spec
 	sed -i "s/__ARCH__/${arch}/g" SPECS/plugin.spec
 	sed -i "s/__PACKAGE_NAME__/${package_name}/g" SPECS/plugin.spec
 	sed -i "s|__INSTALL_DIR__|${installs}|g" SPECS/plugin.spec
@@ -241,6 +242,10 @@ EOF
 	    fi
 	    # plugin info version replaced in ${plugin_name}.py
 	    sed -i "s/'version':.*$/'version': '${version}',/g" ${GIT_ROOT}/python/fledge/plugins/${plugin_type}/${plugin_name}/${plugin_name}.py
+	    # Move python requirements to the plugin installed directory
+	    if [ -f "${GIT_ROOT}/python/requirements-${plugin_name}.txt" ]; then
+	        mv ${GIT_ROOT}/python/requirements-${plugin_name}.txt ${GIT_ROOT}/${installs}/requirements.txt
+	    fi
 	    cp -R ${GIT_ROOT}/python .
 	    cp -R ${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name} ./python/fledge/plugins/${plugin_type}/${plugin_name}
 	else
