@@ -188,6 +188,7 @@ do
     sed -i "s/fledge$/fledge (${fledge_version})/" ${deb_path}/control
     sed -i "s|__INSTALL_DIR__|${installs}|g" ${deb_path}/postinst
     sed -i "s/__PLUGIN_NAME__/${plugin_name}/g" ${deb_path}/postinst
+    sed -i "s/__PLUGIN_TYPE__/${plugin_type_install}/g" ${deb_path}/postinst
     desc=`cat "${GIT_ROOT}/Description"`
     sed -i "s/__DESCRIPTION__/${desc}/g" ${deb_path}/control
     if [ ! -z "${service_notification_version}" ] ; then
@@ -232,6 +233,10 @@ EOF
         fi
         # plugin info version replaced in ${plugin_name}.py
         sed -i "s/'version':.*$/'version': '${version}',/g" ${GIT_ROOT}/python/fledge/plugins/${plugin_type}/${plugin_name}/${plugin_name}.py
+        # Move python requirements to the plugin installed directory
+        if [ -f "${GIT_ROOT}/python/requirements-${plugin_name}.txt" ]; then
+            mv ${GIT_ROOT}/python/requirements-${plugin_name}.txt ${GIT_ROOT}/${installs}/requirements.txt
+        fi
         cp -R ${GIT_ROOT}/python .
         cp -R ${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name} ./python/fledge/plugins/${plugin_type}/${plugin_name}
     else
