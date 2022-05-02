@@ -25,7 +25,7 @@ __DESCRIPTION__
 #!/usr/bin/env bash
 
 ##--------------------------------------------------------------------
-## Copyright (c) 2019 Dianomic Systems Inc.
+## Copyright (c) 2022 Dianomic Systems Inc.
 ##
 ## Licensed under the Apache License, Version 2.0 (the "License");
 ## you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ __DESCRIPTION__
 #!/usr/bin/env bash
 
 ##--------------------------------------------------------------------
-## Copyright (c) 2019 Dianomic Systems Inc.
+## Copyright (c) 2022 Dianomic Systems Inc.
 ##
 ## Licensed under the Apache License, Version 2.0 (the "License");
 ## you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ PKG_NAME="__PACKAGE_NAME__"
 #!/usr/bin/env bash
 
 ##--------------------------------------------------------------------
-## Copyright (c) 2019 Dianomic Systems Inc.
+## Copyright (c) 2022 Dianomic Systems Inc.
 ##
 ## Licensed under the Apache License, Version 2.0 (the "License");
 ## you may not use this file except in compliance with the License.
@@ -128,11 +128,13 @@ if [ -f /usr/local/fledge/python/extras_install___PLUGIN_NAME__.sh ]; then
 fi
 
 # Install any Python dependencies
-if [ -f /usr/local/fledge/python/requirements-__PLUGIN_NAME__.txt ]; then
+if [ -f /usr/local/fledge/__INSTALL_DIR__/requirements.txt ]; then
 	bash << EOF
 scl enable rh-python36 bash
-pip install -Ir /usr/local/fledge/python/requirements-__PLUGIN_NAME__.txt
+pip install -Ir /usr/local/fledge/__INSTALL_DIR__/requirements.txt
 EOF
 fi
+
+echo __PLUGIN_NAME__ __PLUGIN_TYPE__ plugin is installed.
 
 %files
