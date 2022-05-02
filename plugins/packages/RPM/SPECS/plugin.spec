@@ -11,8 +11,6 @@ Group:         IOT
 URL:           http://www.dianomic.com
 VCS:           __VCS__
 
-%define install_path    /usr/local
-
 Prefix:        /usr/local
 Requires:      __REQUIRES__
 AutoReqProv:   no
