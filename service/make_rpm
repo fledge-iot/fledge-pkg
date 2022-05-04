@@ -154,7 +154,7 @@ do
     # Get git tag info from "git describe" cmd and if that fails try another method
     # Note: git describe command fails when repo does not have release/tag
     git_tag_info=$(git describe --tags) && git_tag_info=$(echo ${git_tag_info} | sed 's/-/_/g') && commit_count=$(echo ${git_tag_info} | cut -d_ -f2) || { commit_count=$(git rev-list --count HEAD); git_tag_info="v${version}_${commit_count}_g$(git rev-parse --short HEAD)"; }
-    if [[ ${BRANCH_NAME} = "main" ]] || [[ ${BRANCH_NAME} =~ ^[0-9]+\.[0-9]+\.[0-9]+RC ]]; then commit_count=1; fi
+    if [[ ${BRANCH_NAME} = "main" ]] || [[ ${BRANCH_NAME} =~ ^[0-9]+\.[0-9]+\.[0-9]+RC ]] || [[ ${BRANCH_NAME} =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then commit_count=1; fi
     package_name="${pkg_name}-${version}-${commit_count}"
 
     # Print the summary of findings
