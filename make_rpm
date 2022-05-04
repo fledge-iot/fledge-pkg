@@ -174,7 +174,7 @@ BUILD_ROOT="${PKG_ROOT}/packages/RPM/build/BUILDROOT"
 mkdir -p ${PKG_ROOT}/packages/RPM/build/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 mkdir -p ${PKG_ROOT}/packages/RPM/build/RPMS/x86_64
 
-if [[ $skip_build == 1 ]] || ([[ ${branch} = "main" ]] || [[ ${branch} =~ ^[0-9]+\.[0-9]+\.[0-9]+RC ]]); then commit_count=1; fi
+if [[ $skip_build == 1 ]] || ([[ ${branch} = "main" ]] || [[ ${branch} =~ ^[0-9]+\.[0-9]+\.[0-9]+RC ]] || [[ ${branch} =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]); then commit_count=1; fi
 # Final package name
 package_name="${pkg_name}-${version}-${commit_count}.${architecture}"
 

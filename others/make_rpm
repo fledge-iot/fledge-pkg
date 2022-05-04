@@ -96,7 +96,8 @@ BUILD_ROOT="${GIT_ROOT}/packages/build"
 # Note: git describe command fails when repo does not have release/tag
 GIT_TAG_INFO=$(git describe --tags) && GIT_TAG_INFO=$(echo ${GIT_TAG_INFO} | sed 's/-/_/g') && COMMIT_COUNT=$(echo ${GIT_TAG_INFO} | cut -d_ -f2) || { COMMIT_COUNT=$(git rev-list --count HEAD); GIT_TAG_INFO="v${VERSION}_${COMMIT_COUNT}_g$(git rev-parse --short HEAD)"; }
 branch_name=$(git rev-parse --abbrev-ref HEAD)
-if [[ ${branch_name} = "main" ]] || [[ ${branch_name} =~ ^[0-9]+\.[0-9]+\.[0-9]+RC ]]; then COMMIT_COUNT=1; fi
+if [[ $branch_name == "HEAD" ]]; then branch_name=$(git describe --tags); fi
+if [[ ${branch_name} = "main" ]] || [[ ${branch_name} =~ ^[0-9]+\.[0-9]+\.[0-9]+RC ]] || [[ ${branch_name} =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then COMMIT_COUNT=1; fi
 PACKAGE_NAME="${PKG_NAME}-${VERSION}-${COMMIT_COUNT}"
 
 if [ ! -d "${ARCHIVE_PATH}/${ARCHITECTURE}" ]; then
