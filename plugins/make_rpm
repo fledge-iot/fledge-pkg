@@ -44,7 +44,7 @@ while getopts ":hcab:" opt; do
 			;;
 		a)
 			if [ -d "./archive" ]; then
-				echo -n "Cleaning the package archieve folder..."
+				echo -n "Cleaning the package archive folder..."
 				rm -rf ./archive/*
 				echo "Done."
 			else
@@ -249,50 +249,75 @@ EOF
 	    cp -R ${GIT_ROOT}/python .
 	    cp -R ${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name} ./python/fledge/plugins/${plugin_type}/${plugin_name}
 	else
-		(cd ${GIT_ROOT}; 
-			if [ -f requirements.sh ]; then
-				./requirements.sh
-			fi
-			if [ -f build.sh ]; then
-				./build.sh
-			else
-				mkdir -p build; cd build; cmake ..; make
-			fi)
-		mkdir -p "plugins/${plugin_type_install}/${plugin_install_dirname}"
-	        cp -R --preserve=links ${GIT_ROOT}/build/lib* "plugins/${plugin_type_install}/${plugin_install_dirname}" 2>/dev/null || \
-        	cp -R --preserve=links ${GIT_ROOT}/*.json "plugins/${plugin_type_install}/${plugin_install_dirname}" 2>/dev/null || \
-        	echo "Unable to find libraries in ${GIT_ROOT}/build and json config files in ${GIT_ROOT}, cannot proceed..."
-
+      (cd ${GIT_ROOT};
+      if [ -f requirements.sh ]; then
+          ./requirements.sh
+      fi
+      if [ -f build.sh ]; then
+          ./build.sh
+      else
+          mkdir -p build; cd build; cmake ..; make
+      fi)
+      mkdir -p "plugins/${plugin_type_install}/${plugin_install_dirname}"
+      cp -R --preserve=links ${GIT_ROOT}/build/lib* "plugins/${plugin_type_install}/${plugin_install_dirname}" 2>/dev/null || \
+      cp -R --preserve=links ${GIT_ROOT}/*.json "plugins/${plugin_type_install}/${plugin_install_dirname}" 2>/dev/null || \
+      echo "Unable to find libraries in ${GIT_ROOT}/build and json config files in ${GIT_ROOT}, cannot proceed..."
+      if [ "${additional_libs}" != "" ]; then
+          echo "Additional libs adding for ${plugin_name}..."
+          cd -
+          for i in $(echo ${additional_libs} | sed "s/,/ /g")
+          do
+          if [[ "${i}" == *":"* ]]; then
+              libs=`echo ${i} | sed "s/:/ /g"`
+              ITER=0
+              for j in $(echo ${libs} | sed "s/ / /g")
+              do
+                  if [[ ${ITER} = "0" ]]; then
+                      echo "Directory is :"${j}
+                      dir=${j}
+                      echo "DIR is :"${dir}
+                      mkdir -p ${dir}
+                  else
+                      echo "File is :"${j}
+                      cp -R --preserve=links ${j} ${dir}
+                  fi
+                  ITER=$(expr $ITER + 1)
+              done
+          else
+              echo "Either directory or filename argument is missing for ${i} input. Also use syntax <dirname:libfullpath> and a comma separated list if multiple entries"
+              exit 1
+          fi
+          done
+          cd -
+      fi
 	fi
 	echo "Done."
 
-	cd ..
-	find -L . -type f -exec echo '%{install_path}/'{} \; >> ../../../../SPECS/plugin.spec
+  cd ../../../
+  find -L . -type f -exec echo '/'{} \; >> ${BUILD_ROOT}/${package_name}/SPECS/plugin.spec
 
-	# Build the package
-	cd "${BUILD_ROOT}"
+  # Build the package
+  echo "Building the new package..."
+  rpmbuild --define "_topdir ${BUILD_ROOT}/${package_name}" --noclean -bb ${BUILD_ROOT}/${package_name}/SPECS/plugin.spec
+  echo "Building Complete."
 
-	echo "Building the new package..."
-	rpmbuild --define "_topdir ${BUILD_ROOT}/${package_name}" --noclean -bb ${BUILD_ROOT}/${package_name}/SPECS/plugin.spec
-	echo "Building Complete."
+  fullname="${package_name}.${arch}.rpm"
 
-	fullname="${package_name}.${arch}.rpm"
+  # Save the old versions
+  existing_pkgs=`find ${archive}/${arch} -maxdepth 1 -name "${fullname}.????" | wc -l`
+  existing_pkgs=$((existing_pkgs+1))
+  new_stored_pkg=$(printf "${fullname}.%04d" "${existing_pkgs}")
 
-	# Save the old versions
-	existing_pkgs=`find ${archive}/${arch} -maxdepth 1 -name "${fullname}.????" | wc -l`
-	existing_pkgs=$((existing_pkgs+1))
-	new_stored_pkg=$(printf "${fullname}.%04d" "${existing_pkgs}")
+  if [ -e "${archive}/${arch}/${fullname}" ]; then
+      echo "Saving the old package as ${new_stored_pkg}"
+      mv "${archive}/${arch}/${fullname}" "${archive}/${arch}/${new_stored_pkg}"
+  fi
 
-	if [ -e "${archive}/${arch}/${fullname}" ]; then
-	    echo "Saving the old package as ${new_stored_pkg}"
-	    mv "${archive}/${arch}/${fullname}" "${archive}/${arch}/${new_stored_pkg}"
-	fi
+  cp ${BUILD_ROOT}/${package_name}/RPMS/${arch}/${fullname} ${archive}/${arch}/${fullname}
 
-	cp ${BUILD_ROOT}/${package_name}/RPMS/${arch}/${fullname} ${archive}/${arch}/${fullname}
-
-	rm -rf /tmp/${REPO_NAME}
-	shift
-	REPO_NAME=$1
-	cd ${PKG_ROOT}
+  rm -rf /tmp/${REPO_NAME}
+  shift
+  REPO_NAME=$1
+  cd ${PKG_ROOT}
 done
 exit 0
