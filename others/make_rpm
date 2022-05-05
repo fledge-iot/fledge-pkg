@@ -153,6 +153,10 @@ fi
 #    cp -R --preserve=links /usr/local/lib64/libjwt* usr/local/lib64
 #    cp -R --preserve=links /usr/local/lib64/libjansson* usr/local/lib64
 #fi
+if [ "${ADDITIONAL_LIB_NAME}" == "iec" ];  then
+    cp -R --preserve=links /usr/local/lib/liblib60870* usr/local/lib
+    cp -R --preserve=links /usr/local/lib64/libiec61850* usr/local/lib64
+fi
 echo "Done."
 find -L . -type f -exec echo '/'{} \; >> ../../SPECS/others.spec
 echo "Building the RPM package..."
