@@ -131,6 +131,10 @@ if [ "${ADDITIONAL_LIB_NAME}" == "gcp" ];  then
     cp -R --preserve=links /usr/local/lib/libjwt* usr/local/lib
     cp -R --preserve=links /usr/local/lib/libjansson* usr/local/lib
 fi
+if [ "${ADDITIONAL_LIB_NAME}" == "iec" ];  then
+    cp -R --preserve=links /usr/local/lib/liblib60870* usr/local/lib
+    cp -R --preserve=links /usr/local/lib/libiec61850* usr/local/lib
+fi
 echo "Done."
 
 # Build the package

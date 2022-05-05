@@ -13,6 +13,8 @@ packages/Debian/build/
 packages/RPM/build/
 others/paho.mqtt.c/
 others/jansson
+others/lib60870
+others/libiec61850
 
 # Archived packages
 plugins/archive
