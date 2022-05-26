@@ -1,0 +1,12 @@
+--- CMakeLists.txt	2021-04-27 14:35:52.359863999 +0530
++++ CMakeLists.txt.updated	2021-04-27 14:26:16.551912000 +0530
+@@ -248,7 +248,9 @@
+   check_c_compiler_flag("-pthread" HAVE_PTHREADS_FLAG)
+   if (HAVE_PTHREADS_FLAG)
+     add_definitions("-pthread")
+-    add_link_options("-pthread")
++    set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pthread")
++    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
++    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
+   endif()
+ endif()
