@@ -29,10 +29,10 @@ index 693c63ab0..24c67dac2 100644
  
  /**
 diff --git a/src/ClientServer/frontend/client_wrapper/state_machine.c b/src/ClientServer/frontend/client_wrapper/state_machine.c
-index 1ab4df97d..b2eef008a 100644
+index 34fbdaa34..bdc2e2d7e 100644
 --- a/src/ClientServer/frontend/client_wrapper/state_machine.c
 +++ b/src/ClientServer/frontend/client_wrapper/state_machine.c
-@@ -1298,10 +1298,12 @@ static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t
+@@ -1288,10 +1288,12 @@ static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t
          assert(SOPC_ExtObjBodyEncoding_Object == pNotifMsg->NotificationData[0].Encoding);
          assert(&OpcUa_DataChangeNotification_EncodeableType == pNotifMsg->NotificationData[0].Body.Object.ObjType);
          pDataNotif = (OpcUa_DataChangeNotification*) pNotifMsg->NotificationData[0].Body.Object.Value;
@@ -44,7 +44,7 @@ index 1ab4df97d..b2eef008a 100644
 +			Helpers_Log(SOPC_LOG_LEVEL_INFO, "%s:%d: i=%d, plsVal->type=%d", "StaMac_ProcessMsg_PublishResponse", __LINE__, i, plsVal->type);
              if (SOPC_STATUS_OK == status)
              {
-                 if (NULL != pSM->cbkLibSubDataChanged)
+                 if (NULL != pSM->pCbkLibSubDataChanged)
 diff --git a/src/ClientServer/frontend/client_wrapper/toolkit_helpers.c b/src/ClientServer/frontend/client_wrapper/toolkit_helpers.c
 index e2fa388ff..b4babe046 100644
 --- a/src/ClientServer/frontend/client_wrapper/toolkit_helpers.c
