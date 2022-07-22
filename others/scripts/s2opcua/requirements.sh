@@ -68,12 +68,6 @@ git clone https://gitlab.com/systerel/S2OPC.git
 	cd S2OPC
 	cp ../scripts/s2opcua/S2OPC.patch .
 	git apply S2OPC.patch
-	cp ./src/Common/opcua_types/sopc_encodeabletype.h ../scripts/s2opcua/include
-	ed ../scripts/s2opcua/include/sopc_encodeabletype.h << EOED
-,s/typedef const struct SOPC_EncodeableType/typedef struct SOPC_EncodeableType/1
-w
-q
-EOED
 	BUILD_SHARED_LIBS=OFF
 	CMAKE_INSTALL_PREFIX=/usr/local
 	./build.sh
