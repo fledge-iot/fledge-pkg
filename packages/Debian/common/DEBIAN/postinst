@@ -155,6 +155,15 @@ echo "Copying sudoers file"
 copy_fledge_sudoer_file
 echo "Setting setuid bit of cmdutil"
 setuid_cmdutil
+echo "DEBUGGGING SVC MGT..."
+ls -ltra /usr/local/fledge/python/fledge/services/management || :
+ls -ltra /usr/local/fledge/python/fledge/services/management/data || :
+chmod -f 775 /usr/local/fledge/python/fledge/services/management/data/management.db || :
+echo "AFTER CHANGING PERMISSIONS...."
+ls -ltra /usr/local/fledge/python/fledge/services/management || :
+ls -ltra /usr/local/fledge/python/fledge/services/management/data || :
+ls -ltra /usr/local/fledge/python/fledge/services/management/data/migration/up || :
+ls -ltra /usr/local/fledge/python/fledge/services/management/data/migration/down || :
 echo "Enabling Fledge service"
 enable_fledge_service
 echo "Starting Fledge service"
