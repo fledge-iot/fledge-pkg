@@ -158,7 +158,8 @@ setuid_cmdutil
 echo "DEBUGGGING SVC MGT..."
 ls -ltra /usr/local/fledge/python/fledge/services/management || :
 ls -ltra /usr/local/fledge/python/fledge/services/management/data || :
-chmod -f 775 /usr/local/fledge/python/fledge/services/management/data/management.db || :
+#chmod -f 775 /usr/local/fledge/python/fledge/services/management/data/management.db || :
+chmod -R 775 /usr/local/foglamp/python/foglamp/services/management/data || :
 echo "AFTER CHANGING PERMISSIONS...."
 ls -ltra /usr/local/fledge/python/fledge/services/management || :
 ls -ltra /usr/local/fledge/python/fledge/services/management/data || :
