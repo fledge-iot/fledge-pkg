@@ -113,6 +113,7 @@ copy_new_data () {
 }
 
 install_pip3_packages () {
+    pip3 install --upgrade pip
     pip3 install -r /usr/local/fledge/python/requirements.txt
 }
 
