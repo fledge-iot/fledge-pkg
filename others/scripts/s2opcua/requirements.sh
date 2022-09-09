@@ -63,7 +63,8 @@ tar xf check-0.15.2.tar.gz
 # S2OPC:
 rm -rf S2OPC
 echo "Fetching S2OPC OPC UA Toolkit libraries..."
-git clone https://gitlab.com/systerel/S2OPC.git
+git clone --depth 1 -b S2OPC_Toolkit_1.2.0 https://gitlab.com/systerel/S2OPC.git
+
 (
 	cd S2OPC
 	cp ../scripts/s2opcua/S2OPC.patch .
