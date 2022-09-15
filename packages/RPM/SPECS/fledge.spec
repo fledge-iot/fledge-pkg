@@ -3,12 +3,14 @@
 Name:          __NAME__
 Vendor:        Dianomic Systems, Inc. <info@dianomic.com>
 Version:       __VERSION__
-Release:       1
+Release:       __RELEASE__
 BuildArch:     __ARCH__
 Summary:       Fledge, the open source platform for the Internet of Things
 License:       Apache License
-Group: 	       IOT
+Group: 	       IoT
+Packager:      Dianomic Systems, Inc.
 URL:           http://www.dianomic.com
+VCS:           __VCS__
 
 %define install_path	/usr/local
 
@@ -309,12 +311,12 @@ SSL_DAYS="365"
 AUTH_NAME="ca"
 
 link_update_task() {
-    echo "Changing setuid of update_task.rpm"
-    chmod ugo+s /usr/local/fledge/bin/update_task.rpm
+    echo "Changing setuid of update_task.yum"
+    chmod ugo+s /usr/local/fledge/bin/update_task.yum
     echo "Removing task/update"
     [ -e /usr/local/fledge/scripts/tasks/update ] && rm  /usr/local/fledge/scripts/tasks/update
     echo "Create link file"
-    ln -s /usr/local/fledge/bin/update_task.rpm /usr/local/fledge/scripts/tasks/update
+    ln -s /usr/local/fledge/bin/update_task.yum /usr/local/fledge/scripts/tasks/update
 }
 
 copy_fledge_sudoer_file() {
@@ -405,7 +407,7 @@ install_pip3_packages () {
     # TODO: we may need with --no-cache-dir
 	pip3 install -Ir /usr/local/fledge/python/requirements.txt
 
-	sudo bash -c 'source scl_source enable rh-python36;pip3 install dbus-python'
+	sudo bash -c 'source scl_source enable rh-python36; python3 -m pip install dbus-python numpy==1.19.5'
 	set -e
 }
 
@@ -452,9 +454,8 @@ set_files_ownership
 # TODO: DISABLED - to be implemented
 #call_package_update_script
 
-#TODO: DISABLED - to be implemented
-#echo "Linking update task"
-#link_update_task
+echo "Linking update task"
+link_update_task
 
 echo "Copying sudoers file"
 copy_fledge_sudoer_file

@@ -2,7 +2,7 @@ FROM ubuntu:18.04
 
 LABEL maintainer="info@dianomic.com"
 
-ENV ARCHITECTURE="x86_64"
+ENV ARCHITECTURE="aarch64"
 ENV OS="ubuntu1804"
 
 # v1.9.2 onwards only

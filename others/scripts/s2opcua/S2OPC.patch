@@ -1,0 +1,114 @@
+diff --git a/CommonDefs.cmake b/CommonDefs.cmake
+index 7cca75030..b22079425 100644
+--- a/CommonDefs.cmake
++++ b/CommonDefs.cmake
+@@ -29,8 +29,8 @@ endforeach(OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
+ ## Manage static/shared property of external libraries
+ 
+ # Make CMake use static version of all dependencies by default
+-option(USE_STATIC_EXT_LIBS "S2OPC libraries and binaries depend on static version of external libraries" ON)
+-option(BUILD_SHARED_LIBS "Build dynamic libraries for S2OPC instead of static libraries" OFF)
++option(USE_STATIC_EXT_LIBS "S2OPC libraries and binaries depend on static version of external libraries" OFF)
++option(BUILD_SHARED_LIBS "Build dynamic libraries for S2OPC instead of static libraries" ON)
+ if(USE_STATIC_EXT_LIBS)
+   set(USE_STATIC_MBEDTLS_LIB ${USE_STATIC_EXT_LIBS})
+   set(USE_STATIC_EXPAT_LIB ${USE_STATIC_EXT_LIBS})
+diff --git a/src/ClientServer/frontend/client_wrapper/libs2opc_client.h b/src/ClientServer/frontend/client_wrapper/libs2opc_client.h
+index 693c63ab0..24c67dac2 100644
+--- a/src/ClientServer/frontend/client_wrapper/libs2opc_client.h
++++ b/src/ClientServer/frontend/client_wrapper/libs2opc_client.h
+@@ -129,7 +129,9 @@ typedef enum
+     SOPC_LibSub_DataType_integer = 2,
+     SOPC_LibSub_DataType_string = 3,
+     SOPC_LibSub_DataType_bytestring = 4,
+-    SOPC_LibSub_DataType_other = 5
++    SOPC_LibSub_DataType_float = 5,
++	SOPC_LibSub_DataType_double = 6,
++    SOPC_LibSub_DataType_other = 7
+ } SOPC_LibSub_DataType;
+ 
+ /**
+diff --git a/src/ClientServer/frontend/client_wrapper/state_machine.c b/src/ClientServer/frontend/client_wrapper/state_machine.c
+index 34fbdaa34..bdc2e2d7e 100644
+--- a/src/ClientServer/frontend/client_wrapper/state_machine.c
++++ b/src/ClientServer/frontend/client_wrapper/state_machine.c
+@@ -1288,10 +1288,12 @@ static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t
+         assert(SOPC_ExtObjBodyEncoding_Object == pNotifMsg->NotificationData[0].Encoding);
+         assert(&OpcUa_DataChangeNotification_EncodeableType == pNotifMsg->NotificationData[0].Body.Object.ObjType);
+         pDataNotif = (OpcUa_DataChangeNotification*) pNotifMsg->NotificationData[0].Body.Object.Value;
++		Helpers_Log(SOPC_LOG_LEVEL_INFO, "%s:%d: pDataNotif->NoOfMonitoredItems=%d", "StaMac_ProcessMsg_PublishResponse", __LINE__, pDataNotif->NoOfMonitoredItems);
+         for (i = 0; i < pDataNotif->NoOfMonitoredItems; ++i)
+         {
+             pMonItNotif = &pDataNotif->MonitoredItems[i];
+             status = Helpers_NewValueFromDataValue(&pMonItNotif->Value, &plsVal);
++			Helpers_Log(SOPC_LOG_LEVEL_INFO, "%s:%d: i=%d, plsVal->type=%d", "StaMac_ProcessMsg_PublishResponse", __LINE__, i, plsVal->type);
+             if (SOPC_STATUS_OK == status)
+             {
+                 if (NULL != pSM->pCbkLibSubDataChanged)
+diff --git a/src/ClientServer/frontend/client_wrapper/toolkit_helpers.c b/src/ClientServer/frontend/client_wrapper/toolkit_helpers.c
+index e2fa388ff..b4babe046 100644
+--- a/src/ClientServer/frontend/client_wrapper/toolkit_helpers.c
++++ b/src/ClientServer/frontend/client_wrapper/toolkit_helpers.c
+@@ -111,8 +111,8 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
+             status = SOPC_PKIProviderStack_CreateFromPaths(lPathsTrustedRoots, lPathsTrustedLinks, lPathsUntrustedRoots,
+                                                            lPathsUntrustedLinks, lPathsIssuedCerts, lPathsCRL, &pPki);
+             if (SOPC_STATUS_OK != status)
+-            {
+-                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to create PKI.");
++            {
++                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to create PKI, status=%d", status);
+             }
+         }
+         else
+@@ -536,9 +536,36 @@ SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSu
+             }
+             /* else we leave value NULL and length = 0 */
+             break;
++
++		case SOPC_Float_Id:
++            plsVal->type = SOPC_LibSub_DataType_float;
++            plsVal->value = SOPC_Malloc(sizeof(float));
++            if (NULL == plsVal->value)
++            {
++                status = SOPC_STATUS_OUT_OF_MEMORY;
++            }
++            else
++            {
++                *(float*) plsVal->value = (float) pVal->Value.Value.Floatv;
++            }
++            break;
++
++		case SOPC_Double_Id:
++            plsVal->type = SOPC_LibSub_DataType_double;
++            plsVal->value = SOPC_Malloc(sizeof(double));
++            if (NULL == plsVal->value)
++            {
++                status = SOPC_STATUS_OUT_OF_MEMORY;
++            }
++            else
++            {
++                *(double*) plsVal->value = (double) pVal->Value.Value.Doublev;
++            }
++            break;
++
+         case SOPC_Null_Id:
+-        case SOPC_Float_Id:
+-        case SOPC_Double_Id:
++        // case SOPC_Float_Id:
++        // case SOPC_Double_Id:
+         case SOPC_DateTime_Id:
+         case SOPC_Guid_Id:
+         case SOPC_XmlElement_Id:
+diff --git a/src/Common/configuration/sopc_common_constants.h b/src/Common/configuration/sopc_common_constants.h
+index 874129c1e..9e24ed808 100644
+--- a/src/Common/configuration/sopc_common_constants.h
++++ b/src/Common/configuration/sopc_common_constants.h
+@@ -77,7 +77,7 @@ bool SOPC_Common_SetEncodingConstants(SOPC_Common_EncodingConstants config);
+  *  Note: if 0 is chosen SOPC_RECEIVE_MAX_MESSAGE_LENGTH definition shall be changed not to use it and shall not be 0.
+  */
+ #ifndef SOPC_DEFAULT_RECEIVE_MAX_NB_CHUNKS
+-#define SOPC_DEFAULT_RECEIVE_MAX_NB_CHUNKS 5
++#define SOPC_DEFAULT_RECEIVE_MAX_NB_CHUNKS 10
+ #endif /* SOPC_DEFAULT_RECEIVE_MAX_NB_CHUNKS */
+ 
+ /** @brief Maximum message length accepted in reception (must be >= SOPC_TCP_UA_MAX_BUFFER_SIZE), 0 means no limit.

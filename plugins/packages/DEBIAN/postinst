@@ -1,7 +1,7 @@
 #!/bin/sh
 
 ##--------------------------------------------------------------------
-## Copyright (c) 2019 Dianomic Systems Inc.
+## Copyright (c) 2022 Dianomic Systems Inc.
 ##
 ## Licensed under the Apache License, Version 2.0 (the "License");
 ## you may not use this file except in compliance with the License.
@@ -34,16 +34,23 @@ set_files_ownership () {
 set_files_ownership
 
 # Install Prerequisite; if any
+
+# For Python based plugins
 if [ -f /usr/local/fledge/python/extras_install___PLUGIN_NAME__.sh ]; then
    sh /usr/local/fledge/python/extras_install___PLUGIN_NAME__.sh
 fi
-
-# Install Python dependencies; if any
-if [ -f /usr/local/fledge/python/requirements-__PLUGIN_NAME__.txt ]; then
-    pip3 install -Ir /usr/local/fledge/python/requirements-__PLUGIN_NAME__.txt
+# Install Python pip dependencies; if any
+if [ -f /usr/local/fledge/__INSTALL_DIR__/requirements.txt ]; then
+    pip3 install -Ir /usr/local/fledge/__INSTALL_DIR__/requirements.txt
 fi
 
-echo __PLUGIN_NAME__ plugin is installed.
+# For C based plugins
+if [ -f /usr/local/fledge/__INSTALL_DIR__/extras_install.sh ]; then
+    ./usr/local/fledge/__INSTALL_DIR__/extras_install.sh
+fi
+
+echo __PLUGIN_NAME__ __PLUGIN_TYPE__ plugin is installed.
+
 echo "
 __PLUGIN_NOTES__
 "

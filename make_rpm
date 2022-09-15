@@ -26,7 +26,7 @@ repo_name="fledge"           # Name of the Git repository
 branch="main"              # Default Git branch to use
 pkg_name="fledge"           # Name of the package to build
 architecture="x86_64"        # The architecture for which the rpm should be created
-rhpg_pkg="rh-postgresql96"   # Name of the Red Hat package for postgres
+rhpg_pkg="rh-postgresql13"   # Name of the Red Hat package for postgres
 rhgcc_pkg="devtoolset-7"     # Name of the Red Hat package for the newer g++
 skip_build=0                 # 1=skip Git repo extraction and Fledge build
 
@@ -102,6 +102,8 @@ if [[ $skip_build == 0 ]]; then
 
 	GIT_ROOT=/tmp/"${repo_name}"
 	cd ${GIT_ROOT}
+ 
+  git_tag_info=$(cd ${GIT_ROOT} && git describe --tags | sed 's/-/_/g') && commit_count=$(echo ${git_tag_info} | cut -d_ -f2)
 fi
 
 #
@@ -122,7 +124,7 @@ if [[ $skip_build == 0 ]]; then
 
 	# Enables/verifies the environment for the build
 	source scl_source enable ${rhpg_pkg}
-	status_rh_postgresql96=$?
+	status_rh_postgresql=$?
 
 	source scl_source enable ${rhgcc_pkg}
 	status_devtoolset=$?
@@ -130,7 +132,7 @@ if [[ $skip_build == 0 ]]; then
 	command -v pg_isready > /dev/null
 	status_pg_isready=$?
 
-	if [[ $status_rh_postgresql96 != 0 ]]; then
+	if [[ $status_rh_postgresql != 0 ]]; then
 		echo "ERROR : it is not possible to enable the ${rhpg_pkg} environment"
 		exit 1
 	fi
@@ -172,8 +174,10 @@ BUILD_ROOT="${PKG_ROOT}/packages/RPM/build/BUILDROOT"
 mkdir -p ${PKG_ROOT}/packages/RPM/build/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 mkdir -p ${PKG_ROOT}/packages/RPM/build/RPMS/x86_64
 
+if [[ $skip_build == 1 ]] || ([[ ${branch} = "main" ]] || [[ ${branch} =~ ^[0-9]+\.[0-9]+\.[0-9]+RC ]] || [[ ${branch} =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]); then commit_count=1; fi
 # Final package name
-package_name="${pkg_name}-${version}-1.${architecture}"
+package_name="${pkg_name}-${version}-${commit_count}.${architecture}"
+
 
 # Print the summary of findings
 echo "The package root directory is : ${PKG_ROOT}"
@@ -209,6 +213,8 @@ cd "${package_name}"
 sed -i "s/__NAME__/${pkg_name}/g"     ${PKG_ROOT}/packages/RPM/SPECS/fledge.spec
 sed -i "s/__VERSION__/${version}/g"   ${PKG_ROOT}/packages/RPM/SPECS/fledge.spec
 sed -i "s/__ARCH__/${architecture}/g" ${PKG_ROOT}/packages/RPM/SPECS/fledge.spec
+sed -i "s/__RELEASE__/${commit_count}/g" ${PKG_ROOT}/packages/RPM/SPECS/fledge.spec
+sed -i "s/__VCS__/${git_tag_info:1}/g" ${PKG_ROOT}/packages/RPM/SPECS/fledge.spec
 
 mkdir -p usr/local/fledge
 cd usr/local/fledge

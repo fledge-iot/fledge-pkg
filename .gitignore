@@ -13,6 +13,12 @@ packages/Debian/build/
 packages/RPM/build/
 others/paho.mqtt.c/
 others/jansson
+others/lib60870
+others/libiec61850
+others/S2OPC
+others/check-0.15.2.tar.gz
+others/check-0.15.2
+others/libexpat
 
 # Archived packages
 plugins/archive

@@ -3,14 +3,13 @@
 Name:          __NAME__
 Vendor:        Dianomic Systems, Inc. <info@dianomic.com>
 Version:       __VERSION__
-Release:       1
+Release:       __RELEASE__
 BuildArch:     __ARCH__
 Summary:       Fledge __NAME__ plugin, the open source platform for the Internet of Things
 License:       Apache License
 Group:         IOT
 URL:           http://www.dianomic.com
-
-%define install_path    /usr/local
+VCS:           __VCS__
 
 Prefix:        /usr/local
 Requires:      __REQUIRES__
@@ -24,7 +23,7 @@ __DESCRIPTION__
 #!/usr/bin/env bash
 
 ##--------------------------------------------------------------------
-## Copyright (c) 2019 Dianomic Systems Inc.
+## Copyright (c) 2022 Dianomic Systems Inc.
 ##
 ## Licensed under the Apache License, Version 2.0 (the "License");
 ## you may not use this file except in compliance with the License.
@@ -53,7 +52,7 @@ __DESCRIPTION__
 #!/usr/bin/env bash
 
 ##--------------------------------------------------------------------
-## Copyright (c) 2019 Dianomic Systems Inc.
+## Copyright (c) 2022 Dianomic Systems Inc.
 ##
 ## Licensed under the Apache License, Version 2.0 (the "License");
 ## you may not use this file except in compliance with the License.
@@ -86,7 +85,7 @@ PKG_NAME="__PACKAGE_NAME__"
 #!/usr/bin/env bash
 
 ##--------------------------------------------------------------------
-## Copyright (c) 2019 Dianomic Systems Inc.
+## Copyright (c) 2022 Dianomic Systems Inc.
 ##
 ## Licensed under the Apache License, Version 2.0 (the "License");
 ## you may not use this file except in compliance with the License.
@@ -127,11 +126,13 @@ if [ -f /usr/local/fledge/python/extras_install___PLUGIN_NAME__.sh ]; then
 fi
 
 # Install any Python dependencies
-if [ -f /usr/local/fledge/python/requirements-__PLUGIN_NAME__.txt ]; then
+if [ -f /usr/local/fledge/__INSTALL_DIR__/requirements.txt ]; then
 	bash << EOF
 scl enable rh-python36 bash
-pip install -Ir /usr/local/fledge/python/requirements-__PLUGIN_NAME__.txt
+pip install -Ir /usr/local/fledge/__INSTALL_DIR__/requirements.txt
 EOF
 fi
+
+echo __PLUGIN_NAME__ __PLUGIN_TYPE__ plugin is installed.
 
 %files

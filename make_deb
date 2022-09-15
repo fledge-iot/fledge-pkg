@@ -29,16 +29,18 @@ Arguments:
  clean    - Remove all the old versions saved in format .XXXX
  cleanall - Remove all the versions, including the last one"
 
-GIT_ROOT=`pwd`
+PKG_ROOT=`pwd`
 architecture=`arch`
+ARCH_NAME=$(dpkg --print-architecture)
+repo_name=fledge
+skip_build=0
 
-for i in "$@"
-do
-  case "$i" in
+while getopts ":hcasb:" opt; do
+  case "$opt" in
       clean)
-          if [ -d "${GIT_ROOT}/packages/Debian/build" ]; then
+          if [ -d "${PKG_ROOT}/packages/Debian/build" ]; then
             echo -n "Cleaning the build folder from older versions..."
-            find "${GIT_ROOT}/packages/Debian/build/${architecture}" -maxdepth 2 | grep '.*\.[0-9][0-9][0-9][0-9]' | xargs rm -rf
+            find "${PKG_ROOT}/packages/Debian/build/${architecture}" -maxdepth 2 | grep '.*\.[0-9][0-9][0-9][0-9]' | xargs rm -rf
             echo "Done."
           else
             echo "No build folder, skipping clean"
@@ -46,14 +48,20 @@ do
           exit 0
           ;;
       cleanall)
-          if [ -d "${GIT_ROOT}/packages/Debian/build" ]; then
+          if [ -d "${PKG_ROOT}/packages/Debian/build" ]; then
             echo -n "Cleaning the build folder..."
-            rm -rf ${GIT_ROOT}/packages/Debian/build
+            rm -rf ${PKG_ROOT}/packages/Debian/build
             echo "Done."
           else
             echo "No build folder, skipping cleanall"
           fi
           exit 0
+          ;;
+      s)
+          skip_build=1
+          ;;
+      b)
+          branch=$OPTARG
           ;;
       help)
           echo "${usage}"
@@ -65,6 +73,46 @@ do
         ;;
   esac
 done
+
+#
+# Clones/updates Git repository
+#
+if [[ $skip_build == 0 ]]; then
+	cd /tmp
+	if [ -d "${repo_name}" ]; then
+		echo WARNING: Repository ${repo_name} already exists, using the existing copy
+		(cd ${repo_name}; git fetch --all; git pull ; git checkout "$branch")
+	else
+		git clone -b "$branch" https://github.com/fledge-iot/${repo_name}.git
+	fi
+
+	GIT_ROOT=/tmp/"${repo_name}"
+	cd ${GIT_ROOT}
+ 
+  git_tag_info=$(cd ${GIT_ROOT} && git describe --tags) && commit_count=$(echo ${git_tag_info} | cut -d- -f2)
+fi
+
+#
+# Builds Fledge
+#
+if [[ $skip_build == 0 ]]; then
+  cd ${GIT_ROOT}
+  echo "Git log details for Fledge..."
+  git --no-pager log -1
+
+  if [ "${ARCH_NAME}" = "armhf" ]; then
+      sudo ./requirements.sh
+      sed -i 's/python_build python_requirements_user/python_build # python_requirements_user/g' Makefile
+      sed -i '/python_requirements \\/d' Makefile
+  fi
+  echo "install fledge"
+  if [ "${ARCH_NAME}" = "armhf" ]; then
+      cd ${GIT_ROOT} && sudo make install USE_PIP_CACHE=yes && export FLEDGE_ROOT=/usr/local/fledge
+  else
+      sudo ./requirements.sh
+      cd ${GIT_ROOT} && sudo make install && export FLEDGE_ROOT=/usr/local/fledge
+  fi
+fi
 
 # Check FLEDGE_ROOT
 if [ -z ${FLEDGE_ROOT+x} ]; then
@@ -79,13 +127,12 @@ if [ -z ${FLEDGE_ROOT+x} ]; then
 fi
 
 version=`cat ${FLEDGE_ROOT}/VERSION | tr -d ' ' | grep 'fledge_version=' | head -1 | sed -e 's/\(.*\)=\(.*\)/\2/g'`
-BUILD_ROOT="${GIT_ROOT}/packages/Debian/build/${architecture}"
-
+BUILD_ROOT="${PKG_ROOT}/packages/Debian/build/${architecture}"
 # Final package name
-package_name="fledge-${version}-${architecture}"
+if [[ $skip_build == 0 ]] && ([[ ${branch} != "main" ]] && [[ ! ${branch} =~ ^[0-9]+\.[0-9]+\.[0-9]+RC ]] && [[ ! ${branch} =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]); then package_name="fledge_${version}-${commit_count}_${architecture}"; version=${git_tag_info:1}; else package_name="fledge_${version}_${architecture}"; fi
 
 # Print the summary of findings
-echo "The package root directory is : ${GIT_ROOT}"
+echo "The package root directory is : ${PKG_ROOT}"
 echo "The Fledge directory is      : ${FLEDGE_ROOT}"
 echo "The Fledge version is        : ${version}"
 echo "The package will be built in  : ${BUILD_ROOT}"
@@ -115,9 +162,10 @@ mkdir "${package_name}"
 # First with files common to all pla
 echo -n "Populating the package and updating version in control file..."
 cd "${package_name}"
-cp -R ${GIT_ROOT}/packages/Debian/common/* .
-cp -R ${GIT_ROOT}/packages/Debian/${architecture}/* .
+cp -R ${PKG_ROOT}/packages/Debian/common/* .
+cp -R ${PKG_ROOT}/packages/Debian/${architecture}/* .
 sed -i "s/Version: 1.0.0/Version: ${version}/g" DEBIAN/control
+if [[ $skip_build == 0 ]] && ([[ ${branch} = "main" ]] || [[ ${branch} =~ ^[0-9]+\.[0-9]+\.[0-9]+RC ]] || [[ ${branch} =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]); then echo "Build: ${git_tag_info:1}" >> DEBIAN/control; fi
 mkdir -p usr/local/fledge
 cd usr/local/fledge
 cp -R ${FLEDGE_ROOT}/* .
@@ -139,10 +187,10 @@ rm -rf var
 # Add customised files
 #echo -n "Adding Fledge customization..."
 
-#cp -R ${GIT_ROOT}/share/* share/postgresql/.
+#cp -R ${PKG_ROOT}/share/* share/postgresql/.
 #cd ${BUILD_ROOT}/${package_name}/usr/local/fledge/plugins/storage/postgres
 #mkdir bin
-#cp ${GIT_ROOT}/scripts/* bin/.
+#cp ${PKG_ROOT}/scripts/* bin/.
 #echo "Done."
 
 # Build the package

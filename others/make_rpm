@@ -92,6 +92,13 @@ PKG_NAME="fledge-${ADDITIONAL_LIB_NAME}"
 ARCHITECTURE=`arch`
 PACKAGE_NAME="${PKG_NAME}-${VERSION}"
 BUILD_ROOT="${GIT_ROOT}/packages/build"
+# Get git tag info from "git describe" cmd and if that fails try another method
+# Note: git describe command fails when repo does not have release/tag
+GIT_TAG_INFO=$(git describe --tags) && GIT_TAG_INFO=$(echo ${GIT_TAG_INFO} | sed 's/-/_/g') && COMMIT_COUNT=$(echo ${GIT_TAG_INFO} | cut -d_ -f2) || { COMMIT_COUNT=$(git rev-list --count HEAD); GIT_TAG_INFO="v${VERSION}_${COMMIT_COUNT}_g$(git rev-parse --short HEAD)"; }
+branch_name=$(git rev-parse --abbrev-ref HEAD)
+if [[ $branch_name == "HEAD" ]]; then branch_name=$(git describe --tags); fi
+if [[ ${branch_name} = "main" ]] || [[ ${branch_name} =~ ^[0-9]+\.[0-9]+\.[0-9]+RC ]] || [[ ${branch_name} =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then COMMIT_COUNT=1; fi
+PACKAGE_NAME="${PKG_NAME}-${VERSION}-${COMMIT_COUNT}"
 
 if [ ! -d "${ARCHIVE_PATH}/${ARCHITECTURE}" ]; then
     mkdir -p "${ARCHIVE_PATH}/${ARCHITECTURE}"
@@ -124,17 +131,19 @@ cd ${PACKAGE_NAME}
 cp -R ${GIT_ROOT}/packages/RPM/* SPECS
 sed -i "s/__NAME__/${PKG_NAME}/g" SPECS/others.spec
 sed -i "s/__VERSION__/${VERSION}/g" SPECS/others.spec
+sed -i "s/__RELEASE__/${COMMIT_COUNT}/g" SPECS/others.spec
 sed -i "s/__ARCH__/${ARCHITECTURE}/g" SPECS/others.spec
 sed -i "s/__REQUIRES__/fledge ${FLEDGE_VERSION}/g" SPECS/others.spec
 sed -i "s/__DESCRIPTION__/${DESCRIPTION}/g" SPECS/others.spec
+sed -i "s/__VCS__/${GIT_TAG_INFO:1}/g" SPECS/others.spec
 echo "Done."
 
 # RPM file structure
 echo "Copying artifacts..."
 mkdir -p BUILDROOT
 cd BUILDROOT
-mkdir -p ${PACKAGE_NAME}-1.${ARCHITECTURE}
-cd ${PACKAGE_NAME}-1.${ARCHITECTURE}
+mkdir -p ${PACKAGE_NAME}.${ARCHITECTURE}
+cd ${PACKAGE_NAME}.${ARCHITECTURE}
 mkdir -p usr/local/lib64
 if [ "${ADDITIONAL_LIB_NAME}" == "mqtt" ];  then
     cp -R --preserve=links /usr/local/lib64/libpaho* usr/local/lib64
@@ -144,6 +153,11 @@ fi
 #    cp -R --preserve=links /usr/local/lib64/libjwt* usr/local/lib64
 #    cp -R --preserve=links /usr/local/lib64/libjansson* usr/local/lib64
 #fi
+if [ "${ADDITIONAL_LIB_NAME}" == "iec" ];  then
+    mkdir -p usr/local/lib
+    cp -R --preserve=links /usr/local/lib/liblib60870* usr/local/lib
+    cp -R --preserve=links /usr/local/lib64/libiec61850* usr/local/lib64
+fi
 echo "Done."
 find -L . -type f -exec echo '/'{} \; >> ../../SPECS/others.spec
 echo "Building the RPM package..."
@@ -151,5 +165,5 @@ cd ${BUILD_ROOT}
 rpmbuild --define "_topdir ${BUILD_ROOT}/${PACKAGE_NAME}" --noclean -bb ${BUILD_ROOT}/${PACKAGE_NAME}/SPECS/others.spec
 echo "Building Complete."
 echo "Artifacts copied to "${ARCHIVE_PATH}/${ARCHITECTURE}
-PKG_NAME_WITH_EXT="${PACKAGE_NAME}-1.${ARCHITECTURE}.rpm"
+PKG_NAME_WITH_EXT="${PACKAGE_NAME}.${ARCHITECTURE}.rpm"
 cp ${BUILD_ROOT}/${PACKAGE_NAME}/RPMS/${ARCHITECTURE}/${PKG_NAME_WITH_EXT} ${ARCHIVE_PATH}/${ARCHITECTURE}/${PKG_NAME_WITH_EXT}
