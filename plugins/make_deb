@@ -244,6 +244,8 @@ EOF
         if [ -f requirements.sh ]; then
             ./requirements.sh
         fi
+        # version replaced in VERSION file
+        echo ${version} > VERSION;
         mkdir -p build; cd build; cmake ..; make)
         mkdir -p "plugins/${plugin_type_install}/${plugin_install_dirname}"
         if [ -f "${GIT_ROOT}/extras_install.sh" ]; then
@@ -282,6 +284,7 @@ EOF
         fi
     fi
     echo "Done."
+
 
     # Build the package
     cd "${BUILD_ROOT}"
