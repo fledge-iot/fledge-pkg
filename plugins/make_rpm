@@ -253,6 +253,8 @@ EOF
       if [ -f requirements.sh ]; then
           ./requirements.sh
       fi
+      # version replaced in VERSION file
+      echo ${version} > VERSION;
       if [ -f build.sh ]; then
           ./build.sh
       else

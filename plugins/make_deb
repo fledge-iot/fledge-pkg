@@ -285,7 +285,6 @@ EOF
     fi
     echo "Done."
 
-
     # Build the package
     cd "${BUILD_ROOT}"
 
