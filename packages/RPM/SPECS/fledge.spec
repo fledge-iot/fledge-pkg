@@ -405,7 +405,7 @@ install_pip3_packages () {
 	source scl_source enable rh-python36
 
     # TODO: we may need with --no-cache-dir
-	pip3 install -Ir /usr/local/fledge/python/requirements.txt
+	python3 -m pip install -Ir /usr/local/fledge/python/requirements.txt
 
 	sudo bash -c 'source scl_source enable rh-python36; python3 -m pip install dbus-python numpy==1.19.5'
 	set -e
