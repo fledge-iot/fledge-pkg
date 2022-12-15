@@ -14,8 +14,15 @@ VCS:           __VCS__
 
 %define install_path	/usr/local
 
+OS_VERSION=$(grep -o '^VERSION_ID=.*' /etc/os-release | cut -f2 -d\" | sed 's/"//g')
+
 Prefix:        /usr/local
-Requires:      dbus-devel, glib2-devel, boost, openssl, rh-python36, yum-utils, gcc, autoconf, curl, libtool,  rsyslog,  wget, zlib, libuuid, avahi, sudo, krb5-workstation, curl-devel
+if [[ ${OS_VERSION} == *"7"* ]]
+then
+	Requires:      dbus-devel, glib2-devel, boost, openssl, rh-python36, yum-utils, gcc, autoconf, curl, libtool,  rsyslog,  wget, zlib, libuuid, avahi, sudo, krb5-workstation, curl-devel
+else
+	Requires:      dbus-devel, glib2-devel, boost, openssl, python3, yum-utils, gcc, autoconf, curl, libtool,  rsyslog,  wget, zlib, libuuid, avahi, sudo, krb5-workstation, curl-devel
+fi
 AutoReqProv:   no
 
 %description
