@@ -14,15 +14,12 @@ VCS:           __VCS__
 
 %define install_path	/usr/local
 
-OS_VERSION=$(grep -o '^VERSION_ID=.*' /etc/os-release | cut -f2 -d\" | sed 's/"//g')
-
 Prefix:        /usr/local
-if [[ ${OS_VERSION} == *"7"* ]]
-then
-	Requires:      dbus-devel, glib2-devel, boost, openssl, rh-python36, yum-utils, gcc, autoconf, curl, libtool,  rsyslog,  wget, zlib, libuuid, avahi, sudo, krb5-workstation, curl-devel
-else
-	Requires:      dbus-devel, glib2-devel, boost, openssl, python3, yum-utils, gcc, autoconf, curl, libtool,  rsyslog,  wget, zlib, libuuid, avahi, sudo, krb5-workstation, curl-devel
-fi
+%if ( 0%{?centos} >= 7 && 0%{?centos} < 8 ) || ( 0%{?rhel} >= 7 && 0%{?rhel} < 8 )
+Requires:      dbus-devel, glib2-devel, boost, openssl, rh-python36, yum-utils, gcc, autoconf, curl, libtool,  rsyslog,  wget, zlib, libuuid, avahi, sudo, krb5-workstation, curl-devel
+%else
+Requires:      dbus-devel, glib2-devel, boost, openssl, python3, yum-utils, gcc, autoconf, curl, libtool,  rsyslog,  wget, zlib, libuuid, avahi, sudo, krb5-workstation, curl-devel
+%endif
 AutoReqProv:   no
 
 %description
@@ -78,6 +75,7 @@ Fledge, the open source platform for the Internet of Things
 set -e
 
 PKG_NAME="fledge"
+OS_VERSION=$(grep -o '^VERSION_ID=.*' /etc/os-release | cut -f2 -d\" | sed 's/"//g')
 
 is_fledge_installed () {
 	set +e
