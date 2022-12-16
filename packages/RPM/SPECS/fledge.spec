@@ -407,14 +407,24 @@ install_pip3_packages () {
 	then
 		echo "# "                                   >> /home/${SUDO_USER}/.bashrc
 		echo "# ${foglam_test}"                     >> /home/${SUDO_USER}/.bashrc
-		echo "source scl_source enable rh-python36" >> /home/${SUDO_USER}/.bashrc
+		if [[ ${OS_VERSION} == *"7"* ]]
+		then
+			echo "source scl_source enable rh-python36" >> /home/${SUDO_USER}/.bashrc
+		fi
 	fi
-	source scl_source enable rh-python36
+	if [[ ${OS_VERSION} == *"7"* ]]
+	then
+		source scl_source enable rh-python36
+	fi
 
     # TODO: we may need with --no-cache-dir
 	python3 -m pip install -Ir /usr/local/fledge/python/requirements.txt
-
-	sudo bash -c 'source scl_source enable rh-python36; python3 -m pip install dbus-python numpy==1.19.5'
+	if [[ ${OS_VERSION} == *"7"* ]]
+	then
+		sudo bash -c 'source scl_source enable rh-python36; python3 -m pip install dbus-python numpy==1.19.5'
+	else
+		sudo bash -c 'python3 -m pip install dbus-python numpy==1.19.5'
+	fi
 	set -e
 }
 
