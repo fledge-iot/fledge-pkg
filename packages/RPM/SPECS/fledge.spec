@@ -75,7 +75,7 @@ Fledge, the open source platform for the Internet of Things
 set -e
 
 PKG_NAME="fledge"
-OS_VERSION=$(grep -o '^VERSION_ID=.*' /etc/os-release | cut -f2 -d\" | sed 's/"//g')
+OS_VERSION=$(cat /etc/os-release | grep 'VERSION_ID=' | cut -f2 -d= | sed 's/"//g')
 
 is_fledge_installed () {
 	set +e
@@ -216,6 +216,7 @@ fi
 set -e
 
 PKG_NAME="fledge"
+OS_VERSION=$(cat /etc/os-release | grep 'VERSION_ID=' | cut -f2 -d= | sed 's/"//g')
 
 get_fledge_script () {
     fledge_script=$(rpm -ql ${PKG_NAME} | grep 'fledge/bin/fledge$')
@@ -329,7 +330,12 @@ copy_fledge_sudoer_file() {
 }
 
 copy_service_file() {
-    cp /usr/local/fledge/extras/scripts/fledge.service /etc/init.d/fledge
+    if [[ ${OS_VERSION} == *"7"* ]]
+    then
+        cp /usr/local/fledge/extras/scripts/fledge.service /etc/init.d/fledge
+    else
+        cp /usr/local/fledge/extras/scripts/fledge.service /etc/rc.d/init.d//fledge
+    fi
 }
 
 enable_fledge_service() {
@@ -517,6 +523,7 @@ fi
 
 set -e
 PKG_NAME="fledge"
+OS_VERSION=$(cat /etc/os-release | grep 'VERSION_ID=' | cut -f2 -d= | sed 's/"//g')
 
 remove_unused_files () {
   find /usr/local/fledge/ -maxdepth 1 -mindepth 1 -type d | egrep -v -w '(/usr/local/fledge/data)' | xargs rm -rf
