@@ -15,7 +15,7 @@ VCS:           __VCS__
 %define install_path	/usr/local
 
 Prefix:        /usr/local
-%if ( 0%{?centos} >= 7 && 0%{?centos} < 8 ) || ( 0%{?rhel} >= 7 && 0%{?rhel} < 8 )
+%if 0%{?centos} < 9 || 0%{?rhel} < 9
 Requires:      dbus-devel, glib2-devel, boost, openssl, rh-python36, yum-utils, gcc, autoconf, curl, libtool,  rsyslog,  wget, zlib, libuuid, avahi, sudo, krb5-workstation, curl-devel
 %else
 Requires:      dbus-devel, glib2-devel, boost, openssl, python3, yum-utils, gcc, autoconf, curl, libtool,  rsyslog,  wget, zlib, libuuid, avahi, sudo, krb5-workstation, curl-devel
@@ -75,7 +75,6 @@ Fledge, the open source platform for the Internet of Things
 set -e
 
 PKG_NAME="fledge"
-OS_VERSION=$(cat /etc/os-release | grep 'VERSION_ID=' | cut -f2 -d= | sed 's/"//g')
 
 is_fledge_installed () {
 	set +e
@@ -334,7 +333,7 @@ copy_service_file() {
     then
         cp /usr/local/fledge/extras/scripts/fledge.service /etc/init.d/fledge
     else
-        cp /usr/local/fledge/extras/scripts/fledge.service /etc/rc.d/init.d//fledge
+        cp /usr/local/fledge/extras/scripts/fledge.service /etc/rc.d/init.d/fledge
     fi
 }
 
@@ -523,7 +522,6 @@ fi
 
 set -e
 PKG_NAME="fledge"
-OS_VERSION=$(cat /etc/os-release | grep 'VERSION_ID=' | cut -f2 -d= | sed 's/"//g')
 
 remove_unused_files () {
   find /usr/local/fledge/ -maxdepth 1 -mindepth 1 -type d | egrep -v -w '(/usr/local/fledge/data)' | xargs rm -rf
