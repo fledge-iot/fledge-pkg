@@ -15,7 +15,11 @@ VCS:           __VCS__
 %define install_path	/usr/local
 
 Prefix:        /usr/local
+%if 0%{?centos} < 9 || 0%{?rhel} < 9
 Requires:      dbus-devel, glib2-devel, boost, openssl, rh-python36, yum-utils, gcc, autoconf, curl, libtool,  rsyslog,  wget, zlib, libuuid, avahi, sudo, krb5-workstation, curl-devel
+%else
+Requires:      dbus-devel, glib2-devel, boost, openssl, python3, yum-utils, gcc, autoconf, curl, libtool,  rsyslog,  wget, zlib, libuuid, avahi, sudo, krb5-workstation, curl-devel
+%endif
 AutoReqProv:   no
 
 %description
@@ -211,6 +215,7 @@ fi
 set -e
 
 PKG_NAME="fledge"
+OS_VERSION=$(cat /etc/os-release | grep 'VERSION_ID=' | cut -f2 -d= | sed 's/"//g')
 
 get_fledge_script () {
     fledge_script=$(rpm -ql ${PKG_NAME} | grep 'fledge/bin/fledge$')
@@ -324,7 +329,12 @@ copy_fledge_sudoer_file() {
 }
 
 copy_service_file() {
-    cp /usr/local/fledge/extras/scripts/fledge.service /etc/init.d/fledge
+    if [[ ${OS_VERSION} == *"7"* ]]
+    then
+        cp /usr/local/fledge/extras/scripts/fledge.service /etc/init.d/fledge
+    else
+        cp /usr/local/fledge/extras/scripts/fledge.service /etc/rc.d/init.d/fledge
+    fi
 }
 
 enable_fledge_service() {
@@ -400,14 +410,24 @@ install_pip3_packages () {
 	then
 		echo "# "                                   >> /home/${SUDO_USER}/.bashrc
 		echo "# ${foglam_test}"                     >> /home/${SUDO_USER}/.bashrc
-		echo "source scl_source enable rh-python36" >> /home/${SUDO_USER}/.bashrc
+		if [[ ${OS_VERSION} == *"7"* ]]
+		then
+			echo "source scl_source enable rh-python36" >> /home/${SUDO_USER}/.bashrc
+		fi
 	fi
-	source scl_source enable rh-python36
+	if [[ ${OS_VERSION} == *"7"* ]]
+	then
+		source scl_source enable rh-python36
+	fi
 
     # TODO: we may need with --no-cache-dir
-	pip3 install -Ir /usr/local/fledge/python/requirements.txt
-
-	sudo bash -c 'source scl_source enable rh-python36; python3 -m pip install dbus-python numpy==1.19.5'
+	python3 -m pip install -Ir /usr/local/fledge/python/requirements.txt
+	if [[ ${OS_VERSION} == *"7"* ]]
+	then
+		sudo bash -c 'source scl_source enable rh-python36; python3 -m pip install dbus-python numpy==1.19.5'
+	else
+		sudo bash -c 'python3 -m pip install dbus-python numpy==1.19.5'
+	fi
 	set -e
 }
 

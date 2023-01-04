@@ -21,14 +21,16 @@
 
 set -e
 
-PKG_ROOT=`pwd`               # The script must be executed from the root git directory
+PKG_ROOT=$(pwd)               # The script must be executed from the root git directory
 repo_name="fledge"           # Name of the Git repository
 branch="main"              # Default Git branch to use
 pkg_name="fledge"           # Name of the package to build
 architecture="x86_64"        # The architecture for which the rpm should be created
-rhpg_pkg="rh-postgresql13"   # Name of the Red Hat package for postgres
-rhgcc_pkg="devtoolset-7"     # Name of the Red Hat package for the newer g++
 skip_build=0                 # 1=skip Git repo extraction and Fledge build
+
+# Check OS Name and OS Version
+os_name=$(grep -o '^NAME=.*' /etc/os-release | cut -f2 -d\" | sed 's/"//g')
+os_version=$(grep -o '^VERSION_ID=.*' /etc/os-release | cut -f2 -d\" | sed 's/"//g')
 
 usage="$(basename "$0") [-h] [-c] [-a] [-s] [-b <branch>]
 This script is used to create the RPM package of Fledge
@@ -121,26 +123,30 @@ if [[ $skip_build == 0 ]]; then
 
 	cd ${FLEDGE_ROOT}
 	sudo ./requirements.sh
+  # Use Red Hat packages and scl_source for postgres and newer g++ only if OS is RedHat/CentOS 7 
+  if [[ ( $os_name == *"Red Hat"* || $os_name == *"CentOS"* ) &&  $os_version == *"7"* ]]
+  then
+    rhpg_pkg="rh-postgresql13"   # Name of the Red Hat package for postgres
+    rhgcc_pkg="devtoolset-7"     # Name of the Red Hat package for the newer g++
 
-	# Enables/verifies the environment for the build
-	source scl_source enable ${rhpg_pkg}
-	status_rh_postgresql=$?
+    # Enables/verifies the environment for the build
+    source scl_source enable ${rhpg_pkg}
+    status_rh_postgresql=$?
+    if [[ $status_rh_postgresql != 0 ]]; then
+      echo "ERROR : it is not possible to enable the ${rhpg_pkg} environment"
+      exit 1
+    fi
 
-	source scl_source enable ${rhgcc_pkg}
-	status_devtoolset=$?
+    source scl_source enable ${rhgcc_pkg}
+    status_devtoolset=$?
+    if [[ $status_devtoolset != 0 ]]; then
+      echo "ERROR : it is not possible to enable the ${rhgcc_pkg} environment"
+      exit 1
+    fi
+  fi 
 
 	command -v pg_isready > /dev/null
 	status_pg_isready=$?
-
-	if [[ $status_rh_postgresql != 0 ]]; then
-		echo "ERROR : it is not possible to enable the ${rhpg_pkg} environment"
-		exit 1
-	fi
-
-	if [[ $status_devtoolset != 0 ]]; then
-		echo "ERROR : it is not possible to enable the ${rhgcc_pkg} environment"
-		exit 1
-	fi
 
 	if [[ $status_pg_isready != 0 ]]; then
 		echo "ERROR : the command pg_isready is not available"

@@ -41,7 +41,7 @@ if [ -f /usr/local/fledge/python/extras_install___PLUGIN_NAME__.sh ]; then
 fi
 # Install Python pip dependencies; if any
 if [ -f /usr/local/fledge/__INSTALL_DIR__/requirements.txt ]; then
-    pip3 install -Ir /usr/local/fledge/__INSTALL_DIR__/requirements.txt
+    python3 -m pip install -Ir /usr/local/fledge/__INSTALL_DIR__/requirements.txt
 fi
 
 # For C based plugins
