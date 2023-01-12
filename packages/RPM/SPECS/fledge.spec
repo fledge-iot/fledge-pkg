@@ -16,9 +16,9 @@ VCS:           __VCS__
 
 Prefix:        /usr/local
 %if 0%{?centos} < 9 || 0%{?rhel} < 9
-Requires:      dbus-devel, glib2-devel, boost, openssl, rh-python36, yum-utils, gcc, autoconf, curl, libtool,  rsyslog,  wget, zlib, libuuid, avahi, sudo, krb5-workstation, curl-devel
+Requires:      dbus-devel, glib2-devel, boost, openssl, rh-python36, yum-utils, gcc, autoconf, curl, libtool, rsyslog, wget, zlib, libuuid, avahi, sudo, krb5-workstation, curl-devel
 %else
-Requires:      dbus-devel, glib2-devel, boost, openssl, python3, yum-utils, gcc, autoconf, curl, libtool,  rsyslog,  wget, zlib, libuuid, avahi, sudo, krb5-workstation, curl-devel
+Requires:      dbus-devel, glib2-devel, boost, openssl, python3-devel, yum-utils, gcc, autoconf, curl, libtool, rsyslog, wget, zlib, libuuid, avahi, sudo, krb5-workstation, curl-devel, chkconfig
 %endif
 AutoReqProv:   no
 
@@ -124,9 +124,7 @@ kill_fledge () {
 }
 
 disable_fledge_service () {
-	set +e
-	/sbin/chkconfig fledge off
-    set -e
+    systemctl disable fledge
 }
 
 remove_fledge_service_file () {
@@ -162,11 +160,11 @@ elif [ $1 == 2 ];then
     reset_systemctl
 
     # Persist current version in case of upgrade/downgrade
-    installed_version=`rpm -qi ${PKG_NAME} | grep Version |awk '{print $3}'`
+    installed_version=$(rpm -qi ${PKG_NAME} | grep Version |awk '{print $3}')
     if [ "${installed_version}" ]
     then
         # Persist current ${PKG_NAME} version: it will be removed by postinstall script
-        this_dir=`pwd`
+        this_dir=$(pwd)
         cd /usr/local/fledge/
         echo "${installed_version}" > .current_installed_version
         cd ${this_dir}
@@ -215,7 +213,6 @@ fi
 set -e
 
 PKG_NAME="fledge"
-OS_VERSION=$(cat /etc/os-release | grep 'VERSION_ID=' | cut -f2 -d= | sed 's/"//g')
 
 get_fledge_script () {
     fledge_script=$(rpm -ql ${PKG_NAME} | grep 'fledge/bin/fledge$')
@@ -243,9 +240,7 @@ kill_fledge () {
 }
 
 disable_fledge_service () {
-	set +e
-	/sbin/chkconfig fledge off
-    set -e
+    systemctl disable fledge
 }
 
 remove_fledge_service_file () {
@@ -310,6 +305,8 @@ fi
 
 set -e
 
+OS_VERSION=$(cat /etc/os-release | grep 'VERSION_ID=' | cut -f2 -d= | sed 's/"//g')
+
 # certificate generation defaults
 SSL_NAME="fledge"
 SSL_DAYS="365"
@@ -329,16 +326,11 @@ copy_fledge_sudoer_file() {
 }
 
 copy_service_file() {
-    if [[ ${OS_VERSION} == *"7"* ]]
-    then
-        cp /usr/local/fledge/extras/scripts/fledge.service /etc/init.d/fledge
-    else
-        cp /usr/local/fledge/extras/scripts/fledge.service /etc/rc.d/init.d/fledge
-    fi
+    cp /usr/local/fledge/extras/scripts/fledge.service /etc/init.d/fledge
 }
 
 enable_fledge_service() {
-	/sbin/chkconfig fledge on
+	systemctl enable fledge
 }
 
 start_fledge_service() {
@@ -349,7 +341,6 @@ set_files_ownership () {
     chown root:root /etc/init.d/fledge
     chown -R root:root /usr/local/fledge
     chown -R ${SUDO_USER}:${SUDO_USER} /usr/local/fledge/data
-
 }
 
 generate_certs () {
@@ -393,42 +384,33 @@ copy_new_data () {
     else
         echo "Data directory already exists. Updating data/extras/fogbench/fogbench_sensor_coap.template.json only."
         if [ -f /usr/local/fledge/data.new/extras/fogbench/fogbench_sensor_coap.template.json  ]; then
-
             cp /usr/local/fledge/data.new/extras/fogbench/fogbench_sensor_coap.template.json /usr/local/fledge/data/extras/fogbench/fogbench_sensor_coap.template.json
-		fi
+        fi
         rm -rf /usr/local/fledge/data.new
     fi
 }
 
 install_pip3_packages () {
-	set +e
+    set +e
 
-	foglam_test="added by Fledge"
-	check_already_added=`cat /home/${SUDO_USER}/.bashrc | grep -c "${foglam_test}"`
+    foglam_test="added by Fledge"
+    check_already_added=$(cat /home/${SUDO_USER}/.bashrc | grep -c "${foglam_test}")
 
-	if [ "$check_already_added" -eq "0" ]
-	then
-		echo "# "                                   >> /home/${SUDO_USER}/.bashrc
-		echo "# ${foglam_test}"                     >> /home/${SUDO_USER}/.bashrc
-		if [[ ${OS_VERSION} == *"7"* ]]
-		then
-			echo "source scl_source enable rh-python36" >> /home/${SUDO_USER}/.bashrc
-		fi
-	fi
-	if [[ ${OS_VERSION} == *"7"* ]]
-	then
-		source scl_source enable rh-python36
-	fi
+    if [ "$check_already_added" -eq "0" ]
+    then
+        echo "# "                                   >> /home/${SUDO_USER}/.bashrc
+        echo "# ${foglam_test}"                     >> /home/${SUDO_USER}/.bashrc
+        if [[ ${OS_VERSION} == *"7"* ]]; then
+            echo "source scl_source enable rh-python36" >> /home/${SUDO_USER}/.bashrc
+        fi
+    fi
+    if [[ ${OS_VERSION} == *"7"* ]]; then source scl_source enable rh-python36; fi
 
     # TODO: we may need with --no-cache-dir
-	python3 -m pip install -Ir /usr/local/fledge/python/requirements.txt
-	if [[ ${OS_VERSION} == *"7"* ]]
-	then
-		sudo bash -c 'source scl_source enable rh-python36; python3 -m pip install dbus-python numpy==1.19.5'
-	else
-		sudo bash -c 'python3 -m pip install dbus-python numpy==1.19.5'
-	fi
-	set -e
+    python3 -m pip install -Ir /usr/local/fledge/python/requirements.txt
+    python3 -m pip install dbus-python numpy==1.19.5
+
+    set -e
 }
 
 # Call Fledge package update script
@@ -437,7 +419,7 @@ call_package_update_script () {
     # File created by presinstall hook
     installed_version_file="/usr/local/fledge/.current_installed_version"
     if [ -s "${installed_version_file}" ]; then
-        current_installed_version=`cat ${installed_version_file}`
+        current_installed_version=$(cat ${installed_version_file})
         update_script="/usr/local/fledge/scripts/package/rpm/package_update.sh"
         # Check update script exists
         if [ -x "${update_script}" ] && [ -s "${update_script}" ] && [ -O "${update_script}" ]; then
@@ -521,6 +503,7 @@ fi
 ##--------------------------------------------------------------------------
 
 set -e
+
 PKG_NAME="fledge"
 
 remove_unused_files () {
