@@ -111,6 +111,7 @@ PKG_NAME="__PACKAGE_NAME__"
 set -e
 
 
+OS_VERSION=$(cat /etc/os-release | grep 'VERSION_ID=' | cut -f2 -d= | sed 's/"//g')
 
 set_files_ownership () {
 	chown -R root:root /usr/local/fledge/__INSTALL_DIR__
@@ -127,10 +128,8 @@ fi
 
 # Install any Python dependencies
 if [ -f /usr/local/fledge/__INSTALL_DIR__/requirements.txt ]; then
-	bash << EOF
-scl enable rh-python36 bash
-pip install -Ir /usr/local/fledge/__INSTALL_DIR__/requirements.txt
-EOF
+    if [[ ${OS_VERSION} == *"7"* ]]; then source scl_source enable rh-python36 bash; fi
+    python3 -m pip install -Ir /usr/local/fledge/__INSTALL_DIR__/requirements.txt
 fi
 
 echo __PLUGIN_NAME__ __PLUGIN_TYPE__ plugin is installed.
