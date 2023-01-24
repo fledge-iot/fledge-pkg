@@ -18,7 +18,7 @@ Prefix:        /usr/local
 %if 0%{?centos} < 9 || 0%{?rhel} < 9
 Requires:      dbus-devel, glib2-devel, boost, openssl, rh-python36, yum-utils, gcc, autoconf, curl, libtool, rsyslog, wget, zlib, libuuid, avahi, sudo, krb5-workstation, curl-devel
 %else
-Requires:      dbus-devel, glib2-devel, boost, openssl, python3-devel, yum-utils, gcc, autoconf, curl, libtool, rsyslog, wget, zlib, libuuid, avahi, sudo, krb5-workstation, curl-devel, chkconfig
+Requires:      dbus-devel, glib2-devel, boost, openssl, python3-devel, yum-utils, gcc, autoconf, curl, libtool, rsyslog, wget, zlib, libuuid, avahi, sudo, krb5-workstation, curl-devel, chkconfig, sqlite
 %endif
 AutoReqProv:   no
 
