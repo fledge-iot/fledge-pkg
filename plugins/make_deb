@@ -194,6 +194,12 @@ do
     if [ ! -z "${service_notification_version}" ] ; then
         sed -i "s/fledge-service-notification/fledge-service-notification (${service_notification_version})/" ${deb_path}/control
     fi
+    if [ -d ${GIT_ROOT}/python ]; then
+        sed -i "s|__INSTALL_DIR__|${installs}|g" ${deb_path}/postrm
+    else
+        sed -i '/^remove_install_dir () {/,/}/d' ${deb_path}/postrm
+        sed -i 's/remove_install_dir$//g' ${deb_path}/postrm
+    fi
     if [ -f "${GIT_ROOT}/additional_lib.version" ]; then
         while read line ; do
             if [ ! -z "$line" ]; then
