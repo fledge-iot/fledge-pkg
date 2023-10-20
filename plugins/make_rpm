@@ -248,6 +248,7 @@ EOF
 	    fi
 	    cp -R ${GIT_ROOT}/python .
 	    cp -R ${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name} ./python/fledge/plugins/${plugin_type}/${plugin_name}
+	    echo ${pkg_name} > ./python/fledge/plugins/${plugin_type}/${plugin_name}/.Package
 	else
       (cd ${GIT_ROOT};
       if [ -f requirements.sh ]; then
@@ -261,6 +262,7 @@ EOF
           mkdir -p build; cd build; cmake ..; make
       fi)
       mkdir -p "plugins/${plugin_type_install}/${plugin_install_dirname}"
+      echo ${pkg_name} > plugins/${plugin_type_install}/${plugin_install_dirname}/.Package
       cp -R --preserve=links ${GIT_ROOT}/build/lib* "plugins/${plugin_type_install}/${plugin_install_dirname}" 2>/dev/null || \
       cp -R --preserve=links ${GIT_ROOT}/*.json "plugins/${plugin_type_install}/${plugin_install_dirname}" 2>/dev/null || \
       echo "Unable to find libraries in ${GIT_ROOT}/build and json config files in ${GIT_ROOT}, cannot proceed..."

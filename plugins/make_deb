@@ -194,6 +194,12 @@ do
     if [ ! -z "${service_notification_version}" ] ; then
         sed -i "s/fledge-service-notification/fledge-service-notification (${service_notification_version})/" ${deb_path}/control
     fi
+    if [ -d ${GIT_ROOT}/python ]; then
+        sed -i "s|__INSTALL_DIR__|${installs}|g" ${deb_path}/postrm
+    else
+        sed -i '/^remove_install_dir () {/,/}/d' ${deb_path}/postrm
+        sed -i 's/remove_install_dir$//g' ${deb_path}/postrm
+    fi
     if [ -f "${GIT_ROOT}/additional_lib.version" ]; then
         while read line ; do
             if [ ! -z "$line" ]; then
@@ -239,6 +245,7 @@ EOF
         fi
         cp -R ${GIT_ROOT}/python .
         cp -R ${GIT_ROOT}/VERSION.${plugin_type}.${plugin_name} ./python/fledge/plugins/${plugin_type}/${plugin_name}
+        echo ${pkg_name} > ./python/fledge/plugins/${plugin_type}/${plugin_name}/.Package
     else
         (cd ${GIT_ROOT};
         if [ -f requirements.sh ]; then
@@ -248,6 +255,7 @@ EOF
         echo ${version} > VERSION;
         mkdir -p build; cd build; cmake ..; make)
         mkdir -p "plugins/${plugin_type_install}/${plugin_install_dirname}"
+        echo ${pkg_name} > plugins/${plugin_type_install}/${plugin_install_dirname}/.Package
         if [ -f "${GIT_ROOT}/extras_install.sh" ]; then
             sed -i "s/sudo//" ${GIT_ROOT}/extras_install.sh
             cp -p ${GIT_ROOT}/extras_install.sh plugins/${plugin_type_install}/${plugin_install_dirname}/extras_install.sh
