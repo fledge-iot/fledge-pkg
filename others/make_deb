@@ -99,9 +99,12 @@ if [[ ${branch_name} != "main" ]] && [[ ! ${branch_name} =~ ^[0-9]+\.[0-9]+\.[0-
 if [ ! -d "${archive}/${architecture}" ]; then
     mkdir -p "${archive}/${architecture}"
 fi
+
 os_name=`(grep -o '^NAME=.*' /etc/os-release | cut -f2 -d\" | sed 's/"//g')`
 os_version=`(grep -o '^VERSION_ID=.*' /etc/os-release | cut -f2 -d\" | sed 's/"//g')`
-echo "Platform is ${os_name}, Version: ${os_version}"
+v_name=`(grep -o '^VERSION_CODENAME=.*' /etc/os-release | cut -f2 -d\" | sed 's/VERSION_CODENAME=//g')`
+echo "Platform is ${os_name}, Version: ${os_version}, Version code name: ${v_name}"
+
 # Print the summary of findings
 echo "Additional ${ADDITIONAL_LIB_NAME} Package version is : ${version}"
 echo "The Fledge required version is                       : ${fledge_version}"
@@ -128,7 +131,7 @@ if [[ ${branch_name} = "main" ]] || [[ ${branch_name} =~ ^[0-9]+\.[0-9]+\.[0-9]+
 mkdir -p usr/local/lib
 if [ "${ADDITIONAL_LIB_NAME}" == "mqtt" ];  then
     # For Raspberry Pi OS Bullseye
-    if [[ ${os_name} == *"Raspbian"* && ${os_version} == *"11"* ]]; then
+    if [[ ${v_name} == *"bullseye"* ]]; then # Verify Ubuntu20.04 aarch64
       if [[ ${architecture} == *"armv7l"* ]]; then
         cp -R --preserve=links /usr/local/lib/arm-linux-gnueabihf/libpaho* usr/local/lib
       else # aarch64
@@ -144,7 +147,8 @@ if [ "${ADDITIONAL_LIB_NAME}" == "gcp" ];  then
 fi
 if [ "${ADDITIONAL_LIB_NAME}" == "iec" ];  then
     # For Raspberry Pi OS Bullseye
-    if [[ ${os_name} == *"Raspbian"* && ${os_version} == *"11"* ]]; then
+    if [[ ${v_name} == *"bullseye"* ]]; then
+      # arch based check?
       cp -R --preserve=links /usr/local/lib/arm-linux-gnueabihf/libiec61850* usr/local/lib
     else
       cp -R --preserve=links /usr/local/lib/libiec61850* usr/local/lib
