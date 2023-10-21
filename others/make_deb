@@ -127,7 +127,7 @@ if [[ ${branch_name} = "main" ]] || [[ ${branch_name} =~ ^[0-9]+\.[0-9]+\.[0-9]+
 # Debian file structure
 mkdir -p usr/local/lib
 if [ "${ADDITIONAL_LIB_NAME}" == "mqtt" ];  then
-    # For Raspperry Pi OS Bullseye
+    # For Raspberry Pi OS Bullseye
     if [[ ${os_name} == *"Raspbian"* && ${os_version} == *"11"* ]]; then
       if [[ ${architecture} == *"armv7l"* ]]; then
         cp -R --preserve=links /usr/local/lib/arm-linux-gnueabihf/libpaho* usr/local/lib
@@ -143,7 +143,7 @@ if [ "${ADDITIONAL_LIB_NAME}" == "gcp" ];  then
     cp -R --preserve=links /usr/local/lib/libjansson* usr/local/lib
 fi
 if [ "${ADDITIONAL_LIB_NAME}" == "iec" ];  then
-    # For Raspperry Pi OS Bullseye
+    # For Raspberry Pi OS Bullseye
     if [[ ${os_name} == *"Raspbian"* && ${os_version} == *"11"* ]]; then
       cp -R --preserve=links /usr/local/lib/arm-linux-gnueabihf/libiec61850* usr/local/lib
     else
