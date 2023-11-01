@@ -53,6 +53,18 @@ git clone https://github.com/eclipse/paho.mqtt.c.git
 cd paho.mqtt.c
 mkdir build
 cd build
-cmake -DPAHO_BUILD_DOCUMENTATION=FALSE -DPAHO_WITH_SSL=FALSE ..
+cmake -DPAHO_BUILD_DOCUMENTATION=FALSE -DPAHO_WITH_SSL=TRUE ..
 make
 sudo make install
+
+cd ..
+cd ..
+
+rm -rf paho.mqtt.cpp
+git clone https://github.com/eclipse/paho.mqtt.cpp
+cd paho.mqtt.cpp
+cmake -Bbuild -H. -DPAHO_BUILD_STATIC=ON -DPAHO_WITH_SSL=ON -DPAHO_BUILD_DOCUMENTATION=FALSE -DPAHO_BUILD_SAMPLES=FALSE
+sudo cmake --build build/ --target install
+sudo ldconfig
+cd ..
+
