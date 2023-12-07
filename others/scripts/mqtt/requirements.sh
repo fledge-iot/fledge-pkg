@@ -65,7 +65,7 @@ git clone --depth 1 --branch v1.3.1 https://github.com/eclipse/paho.mqtt.cpp
 cd paho.mqtt.cpp
 cp ../scripts/mqtt/paho-mqtt-cpp.patch .
 git apply paho-mqtt-cpp.patch
-cmake -Bbuild -H. -DPAHO_BUILD_STATIC=ON -DPAHO_WITH_SSL=ON -DPAHO_BUILD_DOCUMENTATION=FALSE -DPAHO_BUILD_SAMPLES=FALSE
+cmake -Bbuild -H. -DPAHO_WITH_SSL=ON -DPAHO_BUILD_DOCUMENTATION=FALSE -DPAHO_BUILD_SAMPLES=FALSE
 sudo cmake --build build/ --target install
 sudo ldconfig
 cd ..
