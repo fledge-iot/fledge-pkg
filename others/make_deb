@@ -22,7 +22,7 @@
 set -e
 
 USAGE="$(basename "$0") [-h] [-a] ...
-This script is used to create the Debian package for to support other additional libraries as separately such as mqtt, gcp
+This script is used to create the Debian package for to support other additional libraries as separately such as mqtt, s2opcua etc.
 
 Arguments:
   -h	- Display this help text
@@ -140,10 +140,6 @@ if [ "${ADDITIONAL_LIB_NAME}" == "mqtt" ];  then
     else
       cp -R --preserve=links /usr/local/lib/libpaho* usr/local/lib
     fi
-fi
-if [ "${ADDITIONAL_LIB_NAME}" == "gcp" ];  then
-    cp -R --preserve=links /usr/local/lib/libjwt* usr/local/lib
-    cp -R --preserve=links /usr/local/lib/libjansson* usr/local/lib
 fi
 if [ "${ADDITIONAL_LIB_NAME}" == "iec" ];  then
     # For Raspberry Pi OS Bullseye
