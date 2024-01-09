@@ -49,10 +49,24 @@ else
 	  echo "Requirements are not supported for platform: ${os_name} and having version: ${os_version}"
 fi
 rm -rf paho.mqtt.c
-git clone https://github.com/eclipse/paho.mqtt.c.git
+git clone --depth 1 --branch v1.3.13 https://github.com/eclipse/paho.mqtt.c.git
 cd paho.mqtt.c
 mkdir build
 cd build
-cmake -DPAHO_BUILD_DOCUMENTATION=FALSE -DPAHO_WITH_SSL=FALSE ..
+cmake -DPAHO_BUILD_DOCUMENTATION=FALSE -DPAHO_WITH_SSL=TRUE ..
 make
 sudo make install
+
+cd ..
+cd ..
+
+rm -rf paho.mqtt.cpp
+git clone --depth 1 --branch v1.3.1 https://github.com/eclipse/paho.mqtt.cpp
+cd paho.mqtt.cpp
+cp ../scripts/mqtt/paho-mqtt-cpp.patch .
+git apply paho-mqtt-cpp.patch
+cmake -Bbuild -H. -DPAHO_WITH_SSL=ON -DPAHO_BUILD_DOCUMENTATION=FALSE -DPAHO_BUILD_SAMPLES=FALSE
+sudo cmake --build build/ --target install
+sudo ldconfig
+cd ..
+

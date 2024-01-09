@@ -19,6 +19,7 @@ others/S2OPC
 others/check-0.15.2.tar.gz
 others/check-0.15.2
 others/libexpat
+others/scripts/mqtt/paho.mqtt.c*
 
 # Archived packages
 plugins/archive

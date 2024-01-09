@@ -1,1 +1,0 @@
-libjwt which allows you to encode and decode JSON Web Tokens (JWT) and Jansson for encoding, decoding and manipulating JSON data are the additional libraries which will be used in GCP plugins.

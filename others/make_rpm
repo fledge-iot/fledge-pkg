@@ -148,11 +148,7 @@ mkdir -p usr/local/lib64
 if [ "${ADDITIONAL_LIB_NAME}" == "mqtt" ];  then
     cp -R --preserve=links /usr/local/lib64/libpaho* usr/local/lib64
 fi
-# TODO: FOGL-3632 - Blocked with its compilation
-#if [ "${ADDITIONAL_LIB_NAME}" == "gcp" ];  then
-#    cp -R --preserve=links /usr/local/lib64/libjwt* usr/local/lib64
-#    cp -R --preserve=links /usr/local/lib64/libjansson* usr/local/lib64
-#fi
+
 if [ "${ADDITIONAL_LIB_NAME}" == "iec" ];  then
     mkdir -p usr/local/lib
     cp -R --preserve=links /usr/local/lib/liblib60870* usr/local/lib
