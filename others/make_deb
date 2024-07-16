@@ -154,8 +154,6 @@ fi
 if [ "${ADDITIONAL_LIB_NAME}" == "s2opcua" ];  then
     cp -R --preserve=links /usr/local/lib/libs2opc_common.so usr/local/lib
     cp -R --preserve=links /usr/local/lib/libs2opc_clientserver.so usr/local/lib
-    cp -R --preserve=links /usr/local/lib/libs2opc_clientwrapper.so usr/local/lib
-    cp -R --preserve=links /usr/local/lib/libs2opc_commonwrapper.so usr/local/lib
     cp -R --preserve=links /usr/local/lib/libexpat.so.1 usr/local/lib
 fi
 echo "Done."
