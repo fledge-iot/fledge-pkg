@@ -154,7 +154,15 @@ fi
 if [ "${ADDITIONAL_LIB_NAME}" == "s2opcua" ];  then
     cp -R --preserve=links /usr/local/lib/libs2opc_common.so usr/local/lib
     cp -R --preserve=links /usr/local/lib/libs2opc_clientserver.so usr/local/lib
-    cp -R --preserve=links /usr/local/lib/libexpat.so.1 usr/local/lib
+    if [[ ${v_name} == *"bullseye"* ]]; then
+        if [[ ${architecture} == *"armv7l"* ]]; then
+            cp -R --preserve=links /usr/local/lib/arm-linux-gnueabihf/libexpat.so.1 usr/local/lib
+        else
+            cp -R --preserve=links /usr/local/lib/aarch64-linux-gnu/libexpat.so.1 usr/local/lib
+        fi
+    else
+        cp -R --preserve=links /usr/local/lib/libexpat.so.1 usr/local/lib
+    fi
 fi
 echo "Done."
 
