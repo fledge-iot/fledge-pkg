@@ -22,59 +22,73 @@
 
 set -e
 
-os_name=`(grep -o '^NAME=.*' /etc/os-release | cut -f2 -d\" | sed 's/"//g')`
-os_version=`(grep -o '^VERSION_ID=.*' /etc/os-release | cut -f2 -d\" | sed 's/"//g')`
+os_name=$(grep -o '^NAME=.*' /etc/os-release | cut -f2 -d\" | sed 's/"//g')
+os_version=$(grep -o '^VERSION_ID=.*' /etc/os-release | cut -f2 -d\" | sed 's/"//g')
 echo "Platform is ${os_name}, Version: ${os_version}"
+git_root=$(pwd)
 
 # mbedtls-dev:
+cd ${git_root}
+mbetls_version='2.28.7'
 if [[  $os_name == *"Red Hat"* || $os_name == *"CentOS"* ]]; then
     echo "RHEL/CentOS platform is not currently supported by this plugin."
     exit 1
 else
-    sudo apt-get install -y libmbedtls-dev
+    rm -rf v${mbetls_version}.tar.gz mbedtls-${mbetls_version}
+    wget "https://github.com/Mbed-TLS/mbedtls/archive/v${mbetls_version}.tar.gz"
+    tar xzvf v${mbetls_version}.tar.gz
+    cd mbedtls-${mbetls_version}
+    mkdir build
+    cd build
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DUSE_SHARED_MBEDTLS_LIBRARY=OFF ..
+    make
+    sudo make install
 fi
 
 # libexpat:
-rm -rf libexpat
-echo "Fetching an Expat, a C library for parsing XML..."
-git clone https://github.com/libexpat/libexpat.git
+cd ${git_root}
+libexpat_version="2.6.0"
+rm -rf expat-${libexpat_version}.tar.gz expat-${libexpat_version}
+wget https://github.com/libexpat/libexpat/releases/download/R_2_6_0/expat-${libexpat_version}.tar.gz
+tar xzvf expat-${libexpat_version}.tar.gz
 (
-	cd libexpat/expat
-	./buildconf.sh && \
-	./configure && \
-	make && \
+	cd expat-${libexpat_version}
+	mkdir build
+	cd build
+	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DEXPAT_SHARED_LIBS=ON ..
+	make
 	sudo make install
 )
 
 # libcheck:
-rm -rf check-0.15.2 check-0.15.2.tar.gz*
-wget https://github.com/libcheck/check/releases/download/0.15.2/check-0.15.2.tar.gz
-tar xf check-0.15.2.tar.gz
+cd ${git_root}
+lib_check_version="0.15.2"
+rm -rf check-${lib_check_version}.tar.gz check-${lib_check_version}
+wget https://github.com/libcheck/check/releases/download/${lib_check_version}/check-${lib_check_version}.tar.gz
+tar xf check-${lib_check_version}.tar.gz
 (
-	cd check-0.15.2
-	cp ../scripts/s2opcua/check-0.15.2_CMakeLists.txt.patch .
-	patch < check-0.15.2_CMakeLists.txt.patch  # update the CMakeLists.txt file
+	cd check-${lib_check_version}
+	cp ${git_root}/scripts/s2opcua/check-${lib_check_version}_CMakeLists.txt.patch .
+	patch < check-${lib_check_version}_CMakeLists.txt.patch  # update the CMakeLists.txt file
 	rm -f CMakeCache.txt
 	mkdir -p build
 	cd build
 	cmake .. && make -j4 && sudo make install
 )
 
-# S2OPC:
+# S2OPC
+cd ${git_root}
+s2opc_toolkit_version="1.5.0"
 rm -rf S2OPC
-echo "Fetching S2OPC OPC UA Toolkit libraries..."
-git clone --depth 1 -b S2OPC_Toolkit_1.4.1 https://gitlab.com/systerel/S2OPC.git
-
+git clone https://gitlab.com/systerel/S2OPC.git --branch S2OPC_Toolkit_${s2opc_toolkit_version} --depth 1
 (
 	cd S2OPC
-	cp ../scripts/s2opcua/S2OPC.patch .
-	git apply S2OPC.patch
-	BUILD_SHARED_LIBS=OFF
-	CMAKE_INSTALL_PREFIX=/usr/local
-	./build.sh
+	BUILD_SHARED_LIBS=1 CMAKE_INSTALL_PREFIX=/usr/local ./build.sh
 	echo
 	echo "BUILD done, INSTALLING..."
 	echo
 	cd build
 	sudo make install
+	sudo cp ../src/ClientServer/frontend/client_wrapper/libs2opc_client_config_custom.h /usr/local/include/s2opc/clientserver
 )
+
