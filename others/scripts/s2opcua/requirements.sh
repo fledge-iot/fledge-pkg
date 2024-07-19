@@ -47,17 +47,15 @@ fi
 
 # libexpat:
 cd ${git_root}
-libexpat_version="2.6.2"
+libexpat_version="2.6.0"
 libexpat_branch="R_${libexpat_version//./_}"
-rm -rf expat-${libexpat_version}.tar.gz expat-${libexpat_version}
-wget https://github.com/libexpat/libexpat/releases/download/${libexpat_branch}/expat-${libexpat_version}.tar.gz
-tar xzvf expat-${libexpat_version}.tar.gz
+rm -rf libexpat
+git clone https://github.com/libexpat/libexpat.git --branch ${libexpat_branch} --depth 1
 (
-	cd expat-${libexpat_version}
-	mkdir build
-	cd build
-	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DEXPAT_SHARED_LIBS=ON ..
-	make
+	cd libexpat/expat
+	./buildconf.sh && \
+	./configure && \
+	make && \
 	sudo make install
 )
 
