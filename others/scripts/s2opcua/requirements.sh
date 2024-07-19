@@ -47,9 +47,10 @@ fi
 
 # libexpat:
 cd ${git_root}
-libexpat_version="2.6.0"
+libexpat_version="2.6.2"
+libexpat_branch="R_${libexpat_version//./_}"
 rm -rf expat-${libexpat_version}.tar.gz expat-${libexpat_version}
-wget https://github.com/libexpat/libexpat/releases/download/R_2_6_0/expat-${libexpat_version}.tar.gz
+wget https://github.com/libexpat/libexpat/releases/download/${libexpat_branch}/expat-${libexpat_version}.tar.gz
 tar xzvf expat-${libexpat_version}.tar.gz
 (
 	cd expat-${libexpat_version}
