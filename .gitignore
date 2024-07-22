@@ -16,7 +16,7 @@ others/jansson
 others/lib60870
 others/libiec61850
 others/S2OPC
-others/expat-2.6.0
+others/libexpat
 others/check-0.15.2
 others/mbedtls-2.28.7
 others/*.tar.gz
