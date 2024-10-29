@@ -16,9 +16,10 @@ others/jansson
 others/lib60870
 others/libiec61850
 others/S2OPC
-others/check-0.15.2.tar.gz
-others/check-0.15.2
 others/libexpat
+others/check-0.15.2
+others/mbedtls-2.28.7
+others/*.tar.gz
 others/scripts/mqtt/paho.mqtt.c*
 
 # Archived packages
