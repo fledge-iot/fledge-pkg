@@ -129,7 +129,7 @@ fi
 # Install any Python dependencies
 if [ -f /usr/local/fledge/__INSTALL_DIR__/requirements.txt ]; then
     if [[ ${OS_VERSION} == *"7"* ]]; then source scl_source enable rh-python36 bash; fi
-    python3 -m pip install -Ir /usr/local/fledge/__INSTALL_DIR__/requirements.txt
+    python3 -m pip install -Ir /usr/local/fledge/__INSTALL_DIR__/requirements.txt --break-system-packages
 fi
 
 echo __PLUGIN_NAME__ __PLUGIN_TYPE__ plugin is installed.

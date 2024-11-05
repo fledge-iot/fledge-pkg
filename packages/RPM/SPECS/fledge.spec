@@ -407,8 +407,8 @@ install_pip3_packages () {
     if [[ ${OS_VERSION} == *"7"* ]]; then source scl_source enable rh-python36; fi
 
     # TODO: we may need with --no-cache-dir
-    python3 -m pip install -Ir /usr/local/fledge/python/requirements.txt
-    python3 -m pip install dbus-python numpy==1.19.5
+    python3 -m pip install -Ir /usr/local/fledge/python/requirements.txt --break-system-packages
+    python3 -m pip install dbus-python numpy==1.19.5 --break-system-packages
 
     set -e
 }
