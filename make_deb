@@ -22,56 +22,85 @@
 
 set -e
 
-usage="$(basename "$0") [help|clean|cleanall]
-This script is used to create the Debian package of Fledge
-Arguments:
- help	  - Display this help text
- clean    - Remove all the old versions saved in format .XXXX
- cleanall - Remove all the versions, including the last one"
+usage="$(basename "$0") [-h] [-c] [-a] [-s] [-b branch]
+This script is used to create the Debian package of Fledge.
+Options:
+  -h    - Display this help text
+  -c    - Clean old versions, removing packages saved in the format .XXXX (but keep the latest version)
+  -a    - Clean all versions, including the latest one (removes everything in the build directory)
+  -s    - Skip the build process (useful if the build is already done or needs to be skipped for testing)
+  -b    - Specify the branch name to use for the build (required argument following -b)"
 
-PKG_ROOT=`pwd`
-architecture=`arch`
+PKG_ROOT=$(pwd)
+architecture=$(arch)
 ARCH_NAME=$(dpkg --print-architecture)
 repo_name=fledge
 skip_build=0
 
-while getopts ":hcasb:" opt; do
-  case "$opt" in
-      clean)
-          if [ -d "${PKG_ROOT}/packages/Debian/build" ]; then
-            echo -n "Cleaning the build folder from older versions..."
-            find "${PKG_ROOT}/packages/Debian/build/${architecture}" -maxdepth 2 | grep '.*\.[0-9][0-9][0-9][0-9]' | xargs rm -rf
-            echo "Done."
-          else
-            echo "No build folder, skipping clean"
-          fi
-          exit 0
-          ;;
-      cleanall)
-          if [ -d "${PKG_ROOT}/packages/Debian/build" ]; then
-            echo -n "Cleaning the build folder..."
-            rm -rf ${PKG_ROOT}/packages/Debian/build
-            echo "Done."
-          else
-            echo "No build folder, skipping cleanall"
-          fi
-          exit 0
-          ;;
-      s)
-          skip_build=1
-          ;;
-      b)
-          branch=$OPTARG
-          ;;
-      help)
-          echo "${usage}"
-          exit 1
-          ;;
-      *)
-        echo "Unrecognized option: $i"
-        exit 1
-        ;;
+# Function to check if an option is valid
+is_valid_option() {
+  case "$1" in
+    -h | -c | -a | -s | -b) return 0 ;;  # Valid options
+    *) return 1 ;;  # Invalid option
   esac
+}
+
+# Parse the options
+while [[ $# -gt 0 ]]; do
+    # Check if the current option is valid using the is_valid_option function
+    if ! is_valid_option "$1"; then
+        echo "Unrecognized option: $1"
+        echo "$usage"
+        exit 1
+    fi
+
+    case "$1" in
+      -c)  # Option for 'clean'
+          if [ -d "${PKG_ROOT}/packages/Debian/build" ]; then
+              echo -n "Cleaning the build folder from older versions..."
+              find "${PKG_ROOT}/packages/Debian/build/${architecture}" -maxdepth 2 | grep '.*\.[0-9][0-9][0-9][0-9]' | xargs rm -rf
+              echo "Done."
+          else
+              echo "No build folder, skipping clean"
+          fi
+          exit 0
+          ;;
+      -a)  # Option for 'cleanall'
+          echo "Cleaning all..."
+          if [ -d "${PKG_ROOT}/packages/Debian/build" ]; then
+              echo -n "Cleaning the build folder..."
+              rm -rf ${PKG_ROOT}/packages/Debian/build
+              echo "Done."
+          else
+              echo "No build folder, skipping cleanall"
+          fi
+          exit 0
+          ;;
+      -s)  # Option for 'skip_build'
+          skip_build=1
+          shift
+          ;;
+      -b)  # Option for 'branch'
+          if [[ -z "$2" || "$2" =~ ^- ]]; then
+              echo "Option -b requires a branch argument."
+              echo "$usage"
+              exit 1
+          fi
+          branch=$2
+          shift 2
+          ;;
+      -h)  # Option for 'help'
+          echo "$usage"
+          exit 0
+          ;;
+      --)  # End of options
+          shift
+          break
+          ;;
+      *)  # Positional arguments (not options)
+          break
+          ;;
+    esac
 done
 
 #
