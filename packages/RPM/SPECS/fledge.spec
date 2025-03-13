@@ -375,6 +375,13 @@ generate_auth_certs () {
     else
         echo "User Certificate file already exists. Skipping generating new user certificate file."
     fi
+    if [ ! -f /usr/local/fledge/data/etc/certs/systemctl.cert ]; then
+        echo "Systemctl Certificate file does not exist. Generating new systemctl certificate file."
+        cd /usr/local/fledge
+        ./scripts/auth_certificates user systemctl ${SSL_DAYS}
+    else
+        echo "Systemctl Certificate file already exists. Skipping generating new systemctl certificate file."
+    fi
 }
 
 copy_new_data () {
