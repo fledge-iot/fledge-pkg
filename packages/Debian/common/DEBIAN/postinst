@@ -113,9 +113,21 @@ copy_new_data () {
 }
 
 install_pip3_packages () {
-    python3 -m pip install --upgrade pip
-    python3 -m pip install -r /usr/local/fledge/python/requirements.txt
+    PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
+    PYTHON_MAJOR=$(echo "$PYTHON_VERSION" | cut -d. -f1)
+    PYTHON_MINOR=$(echo "$PYTHON_VERSION" | cut -d. -f2)
+
+    FLAG=""
+    # Set the FLAG only for Python versions 3.11 or higher
+    if [ "$PYTHON_MAJOR" -gt 3 ] || { [ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -ge 11 ]; }; then
+        FLAG="--break-system-packages"
+    fi
+
+    # Install pip and packages with or without the flag
+    python3 -m pip install --upgrade pip $FLAG
+    python3 -m pip install -r /usr/local/fledge/python/requirements.txt $FLAG
 }
+
 
 # Call Fledge package update script
 # Any message will be written by called update script

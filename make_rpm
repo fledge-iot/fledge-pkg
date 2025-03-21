@@ -32,57 +32,80 @@ skip_build=0                 # 1=skip Git repo extraction and Fledge build
 os_name=$(grep -o '^NAME=.*' /etc/os-release | cut -f2 -d\" | sed 's/"//g')
 os_version=$(grep -o '^VERSION_ID=.*' /etc/os-release | cut -f2 -d\" | sed 's/"//g')
 
-usage="$(basename "$0") [-h] [-c] [-a] [-s] [-b <branch>]
-This script is used to create the RPM package of Fledge
+usage="$(basename "$0") [-h] [-c] [-a] [-s] [-b branch]
+This script is used to create the RPM package of Fledge.
+Options:
+  -h    - Display this help text
+  -c    - Clean old versions, removing packages saved in the format .XXXX (but keep the latest version)
+  -a    - Clean all versions, including the latest one (removes everything in the build directory)
+  -s    - Skip the build process (useful if the build is already done or needs to be skipped for testing)
+  -b    - Specify the branch name to use for the build (required argument following -b)"
 
-Arguments:
- -h - Display this help text
- -c - Remove all the old versions saved in format .XXXX
- -a - Remove all the versions, including the last one
- -s - Skip Fledge building using the binaries already available
- -b - Branch to base package on"
-
-while getopts ":hcasb:" opt; do
-  case "$opt" in
-    h)
-      echo "${usage}"
-      exit 0
-      ;;
-    c)
-      if [ -d "${GIT_ROOT}/packages/RPM/build" ]; then
-        echo -n "Cleaning the build folder from older versions..."
-        find "${PKG_ROOT}/packages/RPM/build/BUILDROOT" -maxdepth 1 | grep '.*\.[0-9][0-9][0-9][0-9]' | sudo xargs rm -rf
-        find "${PKG_ROOT}/packages/RPM/build/RPMS/${architecture}" -maxdepth 1 | grep '.*\.[0-9][0-9][0-9][0-9]' | sudo xargs rm -rf
-        echo "Done."
-      else
-          echo "No build folder, skipping clean old versions"
-      fi
-      exit 0
-      ;;
-    a)
-      if [ -d "${PKG_ROOT}/packages/RPM/build" ]; then
-        echo -n "Cleaning the build folder..."
-        sudo rm -rf ${PKG_ROOT}/packages/RPM/build/*
-        echo "Done."
-      else
-        echo "No build folder, skipping cleanall"
-      fi
-      exit 0
-      ;;
-    s)
-      skip_build=1
-      ;;
-    b)
-      branch=$OPTARG
-      ;;
-    \?)
-      echo "Invalid option -$OPTARG"
-      exit 1
-      ;;
-    :)
-      echo "-$OPTARG requires an argument"
-      exit 1
+# Function to check if an option is valid
+is_valid_option() {
+  case "$1" in
+    -h | -c | -a | -s | -b) return 0 ;;  # Valid options
+    *) return 1 ;;  # Invalid option
   esac
+}
+
+# Parse the options
+while [[ $# -gt 0 ]]; do
+    # Check if the current option is valid using the is_valid_option function
+    if ! is_valid_option "$1"; then
+        echo "Unrecognized option: $1"
+        echo "$usage"
+        exit 1
+    fi
+
+    case "$1" in
+      -c)  # Option for 'clean'
+          if [ -d "${GIT_ROOT}/packages/RPM/build" ]; then
+              echo -n "Cleaning the build folder from older versions..."
+              find "${PKG_ROOT}/packages/RPM/build/BUILDROOT" -maxdepth 1 | grep '.*\.[0-9][0-9][0-9][0-9]' | sudo xargs rm -rf
+              find "${PKG_ROOT}/packages/RPM/build/RPMS/${architecture}" -maxdepth 1 | grep '.*\.[0-9][0-9][0-9][0-9]' | sudo xargs rm -rf
+              echo "Done."
+          else
+              echo "No build folder, skipping clean old versions"
+          fi
+          exit 0
+          ;;
+      -a)  # Option for 'cleanall'
+          echo "Cleaning all..."
+          if [ -d "${PKG_ROOT}/packages/RPM/build" ]; then
+              echo -n "Cleaning the build folder..."
+              sudo rm -rf ${PKG_ROOT}/packages/RPM/build/*
+              echo "Done."
+          else
+              echo "No build folder, skipping cleanall"
+          fi
+          exit 0
+          ;;
+      -s)  # Option for 'skip_build'
+          skip_build=1
+          shift
+          ;;
+      -b)  # Option for 'branch'
+          if [[ -z "$2" || "$2" =~ ^- ]]; then
+              echo "Option -b requires a branch argument."
+              echo "$usage"
+              exit 1
+          fi
+          branch=$2
+          shift 2
+          ;;
+      -h)  # Option for 'help'
+          echo "$usage"
+          exit 0
+          ;;
+      --)  # End of options
+          shift
+          break
+          ;;
+      *)  # Positional arguments (not options)
+          break
+          ;;
+    esac
 done
 
 if [ ! -f packages/RPM/SPECS/fledge.spec ] ; then
@@ -211,7 +234,7 @@ if [ -d "${package_name}" ]; then
 fi
 mkdir "${package_name}"
 
-# Populate the package directory with Debian files
+# Populate the package directory with RPM files
 # First with files common to all pla
 echo -n "Populating the package and updating version in control file..."
 cd "${package_name}"
