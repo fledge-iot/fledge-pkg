@@ -21,13 +21,21 @@
 ## @prerm DEBIAN/prerm
 ## This script is used to execute before the removal of files associated with the package.
 ##
-## Author: Ivan Zoratti, Ashwin Gopalakrishnan
+## Author: Ivan Zoratti, Ashwin Gopalakrishnan, Ashish Jabble
 ##
 ##----------------------------------------------------------------------------------------
 
 set -e
 
 PKG_NAME="fledge"
+
+is_running_in_container() {
+    grep -qaE '/docker|/lxc|/kubepods|containerd' /proc/1/cgroup 2>/dev/null && return 0
+    grep -qa 'container=' /proc/1/environ 2>/dev/null && return 0
+    [ -f /.dockerenv ] && return 0
+    [ -f /run/.containerenv ] && return 0
+    return 1
+}
 
 get_fledge_script () {
     fledge_script=$(dpkg -L $PKG_NAME | grep 'fledge/bin/fledge$')
@@ -73,15 +81,19 @@ IS_FLEDGE_RUNNING=$(is_fledge_running)
 if [ "$IS_FLEDGE_RUNNING" -eq "1" ]
 then
     echo "Fledge is currently running."
-    echo "Stop Fledge service."
-    stop_fledge_service
+    if ! is_running_in_container; then
+        echo "Stop Fledge service."
+        stop_fledge_service
+    fi
     echo "Kill Fledge."
     kill_fledge
 fi
 
-echo "Disable Fledge service."
-disable_fledge_service
-echo "Remove Fledge service script"
-remove_fledge_service_file
-echo "Reset systemctl"
-reset_systemctl
+if ! is_running_in_container; then
+    echo "Disable Fledge service."
+    disable_fledge_service
+    echo "Remove Fledge service script"
+    remove_fledge_service_file
+    echo "Reset systemctl"
+    reset_systemctl
+fi
