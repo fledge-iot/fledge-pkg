@@ -179,10 +179,7 @@ copy_fledge_sudoer_file
 echo "Setting setuid bit of cmdutil"
 setuid_cmdutil
 
-if is_running_in_container; then
-    echo "INFO: Detected container environment — skipping service enable"
-    /usr/local/fledge/bin/fledge start
-else
+if ! is_running_in_container; then
     echo "Enabling Fledge service"
     enable_fledge_service
     echo "Starting Fledge service"
