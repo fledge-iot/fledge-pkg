@@ -41,18 +41,20 @@ if [ -f /usr/local/fledge/python/extras_install___PLUGIN_NAME__.sh ]; then
 fi
 # Install Python pip dependencies; if any
 if [ -f /usr/local/fledge/__INSTALL_DIR__/requirements.txt ]; then
+ 
     PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
-    PYTHON_MAJOR=$(echo "$PYTHON_VERSION" | cut -d. -f1)
-    PYTHON_MINOR=$(echo "$PYTHON_VERSION" | cut -d. -f2)
+    PYTHON_MAJOR=$(printf "%s" "$PYTHON_VERSION" | cut -d. -f1)
+    PYTHON_MINOR=$(printf "%s" "$PYTHON_VERSION" | cut -d. -f2)
+
+    FLAG=''
 
     if [ "$PYTHON_MAJOR" -eq 3 ]; then
         if [ "$PYTHON_MINOR" -ge 11 ] && [ "$PYTHON_MINOR" -lt 12 ]; then
-                FLAG="--break-system-packages"
+            FLAG='--break-system-packages'
         elif [ "$PYTHON_MINOR" -ge 12 ]; then
-                FLAG="--ignore-installed --break-system-packages"
+            FLAG='--ignore-installed --break-system-packages'
         else
-            # Default to empty flag
-            FLAG=""
+            FLAG=''
         fi
     fi
     python3 -m pip install -Ir /usr/local/fledge/__INSTALL_DIR__/requirements.txt $FLAG
