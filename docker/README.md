@@ -1,63 +1,41 @@
-## Installation 
-
-### macOS & Windows
-
-Install Docker CE for Mac and Windows (http://docker.com)
-
-### Ubuntu
-
-To install Docker CE follow the instructions given here:
-
-https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/
-
-### Red Hat Enterprise Linux (RHEL)
+### Build Fledge image
 
 ```
-	sudo yum install yum-utils
-	sudo yum-config-manager --enable rhui-REGION-rhel-server-extras
-	sudo yum install docker
-	sudo systemctl daemon-reload
-	sudo systemctl restart docker
-```
-### Build fledge image
-
-```
-    $ docker build --tag fledge:dev --build-arg FLEDGE_BRANCH=develop -f Dockerfile.ubuntu1804 .
+    $ docker build --no-cache --tag fledge:latest-ubuntu2004 -f Dockerfile .
 ```
 
-where name of the image is fledge, FLEDGE_BRANCH is the branch to build (develop, main, 1.5.2 ,etc)
+Default will be built with the latest stable release.
+
+```
+    $ docker build --tag fledge:nightly-ubuntu2004-aarch64 --build-arg version=20.04 --build-arg arch=aarch64 --build-arg package_version=nightly --build-arg packages="fledge-south-lathe fledge-south-sinusoid fledge-north-http-north" -f Dockerfile .
+```
+
+The image is referred to as fledge, and it is tagged as nightly-ubuntu2004-aarch64. The package_version denotes the version of the packages, such as latest, nightly, fixes/FOGL-XXXX.
+
+##### Build Arguments:
+
+a) **version** - The name of the Ubuntu version is either 18.04 or 20.04. By default, the version is 20.04.
+
+b) **arch** - The Ubuntu architecture is designated as either x86_64 or aarch64. The default architecture is x86_64.
+
+c) **package_version** - The package version can be either the latest, nightly, or fixes/FOGL-XXXX. By default, it is set to nightly.
+
+d) **packages** - A compilation of packages delineated by spaces. For instance, packages="fledge-south-lathesim fledge-south-sinusoid fledge-north-http-north".
+
+e) **USERNAME** - Name of the non-root user. By default, it is fledge.
+
 
 ### Run container
 
 
 ```
-    $ docker run -d -v ~/fledge-data:/usr/local/fledge/data --name fledge -p 8081:8081 -p 1995:1995 -p 8082:80 fledge:dev
+    $ docker run -d --name fledge -p 8081:8081 -p 1995:1995 -p 8082:80 fledge:nightly-ubuntu2004-aarch64
 ```
 
 	-d : run fledge container in detached mode
-	-v : maps host volume /fledge-data to container volume /usr/local/fledge/data
-	--name : name of the container (fledge)
-	-p : map the port of host machine (8081) and container (:8081)
-	fledge : name of the image created in earlier step
-
-> To attach to a running conatiner: `docker exec -it fledge bash`
-
-`--network host` mode makes the container use the host's network stack.
-
-### Stopping docker container
-```
-    $ docker stop fledge
-```
-
-> Note: The files in fledge-data directory are created by container which creates/runs them as root user. In order to read the fledge.db, you need to change the permission of fledge.db* files, sudo chmod 666 fledge.db*
-
-### notes...
-
-docker save -o fledge-dev.tar fledge:dev
+	-p : map the ports, e.g host machine (8081) to container (:8081)
 
 
-docker load < fledge-dev.tar.gz
-docker load --input fledge-dev.tar.gz
+To attach to a running container: `docker exec -it fledge bash`
 
-docker run -d -v ~/fledge-data:/usr/local/fledge/data --name fledge -p 8081:8081 -p 1995:1995 -p 8082:80 fledge:dev
-docker run -d --name fledge -p 8081:8081 -p 1995:1995 -p 8082:80 fledge:dev
+
