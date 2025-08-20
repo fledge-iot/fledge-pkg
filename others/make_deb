@@ -164,7 +164,7 @@ if [ "${ADDITIONAL_LIB_NAME}" == "s2opcua" ];  then
         cp -R --preserve=links /usr/local/lib/libexpat.so.1 usr/local/lib
     fi
 fi
-echo "Done."
+echo "Debian structure setup complete."
 
 # Build the package
 cd "${archive}/${architecture}"

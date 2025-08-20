@@ -21,7 +21,7 @@
 ## @postinst DEBIAN/postinst
 ## This script is used to execute post installation tasks.
 ##
-## Author: Ivan Zoratti, Massimiliano Pinto
+## Author: Ivan Zoratti, Massimiliano Pinto, Ashish Jabble
 ##
 ##--------------------------------------------------------------------
 
@@ -31,6 +31,14 @@ set -e
 SSL_NAME="fledge"
 SSL_DAYS="365"
 AUTH_NAME="ca"
+
+is_running_in_container() {
+    grep -qaE '/docker|/lxc|/kubepods|containerd' /proc/1/cgroup 2>/dev/null && return 0
+    grep -qa 'container=' /proc/1/environ 2>/dev/null && return 0
+    [ -f /.dockerenv ] && return 0
+    [ -f /run/.containerenv ] && return 0
+    return 1
+}
 
 link_update_task() {
     echo "Changing setuid of update_task.apt"
@@ -124,12 +132,14 @@ install_pip3_packages () {
     PYTHON_MAJOR=$(echo "$PYTHON_VERSION" | cut -d. -f1)
     PYTHON_MINOR=$(echo "$PYTHON_VERSION" | cut -d. -f2)
 
-    FLAG=""
-    # Set the FLAG only for Python versions 3.11 or higher
-    if [ "$PYTHON_MAJOR" -gt 3 ] || { [ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -ge 11 ]; }; then
+    if [ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -ge 11 ] && [ "$PYTHON_MINOR" -lt 12 ]; then
         FLAG="--break-system-packages"
+    elif [ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -ge 12 ]; then
+        FLAG="--ignore-installed --break-system-packages"
+    else
+        # Default to empty flag
+        FLAG=""
     fi
-
     # Install pip and packages with or without the flag
     python3 -m pip install --upgrade pip $FLAG
     python3 -m pip install -r /usr/local/fledge/python/requirements.txt $FLAG
@@ -175,7 +185,13 @@ echo "Copying sudoers file"
 copy_fledge_sudoer_file
 echo "Setting setuid bit of cmdutil"
 setuid_cmdutil
-echo "Enabling Fledge service"
-enable_fledge_service
-echo "Starting Fledge service"
-start_fledge_service
+
+if is_running_in_container; then
+    echo "INFO: Detected container environment — skipping service enable"
+    /usr/local/fledge/bin/fledge start
+else
+    echo "Enabling Fledge service"
+    enable_fledge_service
+    echo "Starting Fledge service"
+    start_fledge_service
+fi
