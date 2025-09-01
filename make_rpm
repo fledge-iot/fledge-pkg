@@ -179,7 +179,7 @@ if [[ $skip_build == 0 ]]; then
 	set -e
 
 	make
-	sudo make install
+	sudo make install STRIP_EXEC=1
 
 	# Restores FLEDGE_ROOT
 	export FLEDGE_ROOT=${FLEDGE_ROOT_BCK}

@@ -136,10 +136,10 @@ if [[ $skip_build == 0 ]]; then
   fi
   echo "install fledge"
   if [ "${ARCH_NAME}" = "armhf" ]; then
-      cd ${GIT_ROOT} && sudo make install USE_PIP_CACHE=yes && export FLEDGE_ROOT=/usr/local/fledge
+      cd ${GIT_ROOT} && sudo make install STRIP_EXEC=1 USE_PIP_CACHE=yes && export FLEDGE_ROOT=/usr/local/fledge
   else
       sudo ./requirements.sh
-      cd ${GIT_ROOT} && sudo make install && export FLEDGE_ROOT=/usr/local/fledge
+      cd ${GIT_ROOT} && sudo make install STRIP_EXEC=1 && export FLEDGE_ROOT=/usr/local/fledge
   fi
 fi
 
