@@ -201,6 +201,10 @@ do
         mkdir -p python/fledge/plugins/notificationRule
     fi
     mkdir -p ${install_dir}
+    matches=("${GIT_ROOT}"/C/scripts/*_c)
+    if [ -e "${matches[0]}" ]; then
+        cp "${matches[@]}" "${install_dir}/"
+    fi
     cp "${GIT_ROOT}/build/C/${install_dir}/${service_name}/${exec_name}" "${install_dir}/${exec_name}"
     echo "Done."
 
