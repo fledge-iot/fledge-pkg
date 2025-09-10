@@ -202,7 +202,7 @@ do
     fi
     mkdir -p ${install_dir}
     cp "${GIT_ROOT}/build/C/${install_dir}/${service_name}/${exec_name}" "${install_dir}/${exec_name}"
-    service_scripts_dir="/usr/local/fledge/scripts/services"
+    service_scripts_dir="scripts/services"
     mkdir -p ${service_scripts_dir}
     matches=("${GIT_ROOT}"/C/scripts/*_c)
     if [ -e "${matches[0]}" ]; then
