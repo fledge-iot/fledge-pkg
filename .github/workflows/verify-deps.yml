@@ -55,263 +55,27 @@ jobs:
           echo "✅ Control file found: $CONTROL_FILE"
 
       - name: Verify dependencies & generate report
+        env:
+          TARGET_OS: ${{ matrix.os }}
+          TARGET_ARCH: ${{ matrix.arch }}
+          TARGET_CODENAME: ${{ matrix.codename }}
         run: |
-          set -euo pipefail
+          # Run the dedicated dependency verification script with proper error handling
+          set -e  # Exit on any error
+          echo "🚀 Starting dependency verification..."
 
-          # Initialize report
-          cat > "$REPORT" << EOF
-          ## 📦 Dependency Verification Report
-
-          **Platform:** ${{ matrix.arch }} on ${{ matrix.os }} (${{ matrix.codename }})  
-          **Generated:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')  
-          **Workflow:** ${GITHUB_WORKFLOW} - Run #${GITHUB_RUN_NUMBER}
-
-          EOF
-
-          # Enhanced dependency extraction function
-          extract_deps() {
-            local field="$1"
-            awk -v field="$field" '
-              BEGIN { found=0; deps="" }
-              {
-                if ($0 ~ "^" field ":") {
-                  found=1
-                  gsub("^" field ":[[:space:]]*", "")
-                  deps = $0
-                } else if (found && $0 ~ "^[[:space:]]") {
-                  # Continuation line (starts with whitespace)
-                  gsub("^[[:space:]]*", "")
-                  if ($0 != "") {
-                    deps = deps " " $0
-                  }
-                } else if (found && $0 !~ "^[[:space:]]" && $0 != "") {
-                  # New field found, stop processing
-                  print deps
-                  exit
-                }
-              }
-              END { if (found && deps != "") print deps }
-            ' "$CONTROL_FILE" | \
-            tr ',' '\n' | \
-            sed -E 's/\([^)]*\)//g' | \
-            sed -E 's/\[[^]]*\]//g' | \
-            awk '{gsub(/^[[:space:]]+|[[:space:]]+$/, ""); if ($1 != "") print $1}' | \
-            sort -u
-          }
-
-          # Function to detect and resolve version placeholders
-          resolve_version_placeholders() {
-            local control_file="$1"
-            local temp_file=""
-
-            echo "🔍 Checking for version placeholders in $(basename "$control_file")..." >&2
-
-            # Check for BOOST_VER placeholder
-            if grep -q "{{BOOST_VER}}" "$control_file"; then
-              echo "📦 Found {{BOOST_VER}} placeholder, resolving Boost version..." >&2
-
-              local boost_version=""
-              local boost_suffix=""
-
-              # Method 1: Check installed libboost-dev package
-              if [ -z "$boost_version" ]; then
-                boost_version=$(dpkg -l 2>/dev/null | grep "libboost-dev" | awk '{print $3}' | grep -oP '^\d+\.\d+\.\d+' | head -1 || true)
-                [ -n "$boost_version" ] && echo "✅ Found installed Boost version: $boost_version" >&2
-              fi
-
-              # Method 2: Check available package version
-              if [ -z "$boost_version" ]; then
-                boost_version=$(apt-cache policy libboost-dev 2>/dev/null | grep "Candidate:" | awk '{print $2}' | grep -oP '^\d+\.\d+\.\d+' | head -1 || true)
-                [ -n "$boost_version" ] && echo "✅ Found available Boost version: $boost_version" >&2
-              fi
-
-              # Determine the correct Boost package suffix format
-              echo "🔍 Determining correct Boost package naming format..." >&2
-
-              local boost_major_minor=$(echo "$boost_version" | cut -d'.' -f1-2)
-              local boost_major_minor_no_dot=$(echo "$boost_major_minor" | tr -d '.')
-
-              # Test different naming conventions
-              if apt-cache show "libboost-system${boost_version}" >/dev/null 2>&1; then
-                boost_suffix="$boost_version"
-                echo "✅ Found format: libboost-system${boost_suffix}" >&2
-              elif apt-cache show "libboost-system${boost_major_minor}" >/dev/null 2>&1; then
-                boost_suffix="$boost_major_minor"
-                echo "✅ Found format: libboost-system${boost_suffix}" >&2
-              elif apt-cache show "libboost-system${boost_major_minor_no_dot}" >/dev/null 2>&1; then
-                boost_suffix="$boost_major_minor_no_dot"
-                echo "✅ Found format: libboost-system${boost_suffix}" >&2
-              else
-                # Fallback to the most common format
-                boost_suffix="$boost_major_minor"
-                echo "⚠️ Could not detect format, using default: libboost-system${boost_suffix}" >&2
-              fi
-
-              echo "🔢 Final Boost package suffix: $boost_suffix" >&2
-
-              # Create temporary file if not already created
-              if [ -z "$temp_file" ]; then
-                temp_file=$(mktemp)
-                cp "$control_file" "$temp_file"
-              fi
-
-              # Replace BOOST_VER placeholder
-              sed -i "s/{{BOOST_VER}}/${boost_suffix}/g" "$temp_file"
-              echo "✅ Resolved {{BOOST_VER}} to ${boost_suffix}" >&2
-
-              # Show resolved dependencies for verification
-              echo "🔍 Resolved Boost dependencies:" >&2
-              grep -E "libboost.*${boost_suffix}" "$temp_file" >&2 || true
-            fi
-
-            # TODO: Add more placeholder handlers here in the future
-            # Example for future use:
-            # if grep -q "{{PYTHON_VER}}" "$control_file"; then
-            #   echo "📦 Found {{PYTHON_VER}} placeholder, resolving Python version..."
-            #   # Add Python version detection logic here
-            # fi
-
-            # Return the path to the resolved file (or original if no changes)
-            if [ -n "$temp_file" ]; then
-              echo "📝 Using temporary control file with resolved placeholders: $temp_file" >&2
-              echo "$temp_file"
-            else
-              echo "ℹ️ No version placeholders found, using original file" >&2
-              echo "$control_file"
-            fi
-          }
-
-          # Resolve version placeholders in control file
-          RESOLVED_CONTROL_FILE=$(resolve_version_placeholders "$CONTROL_FILE")
-
-          # Store the temporary file path for cleanup later
-          if [ "$RESOLVED_CONTROL_FILE" != "$CONTROL_FILE" ]; then
-            TEMP_CONTROL_FILE="$RESOLVED_CONTROL_FILE"
-            echo "🔄 Using resolved control file: $TEMP_CONTROL_FILE"
-          else
-            echo "📄 Using original control file: $CONTROL_FILE"
-          fi
-
-          # Update CONTROL_FILE to point to the resolved file
-          CONTROL_FILE="$RESOLVED_CONTROL_FILE"
-
-          # Extract dependencies
-          echo "🔍 Extracting dependencies from control file..."
-          echo "📄 Using control file: $CONTROL_FILE"
-
-          BUILD_DEPS=$(extract_deps "Build-Depends")
-          RUNTIME_DEPS=$(extract_deps "Depends")
-          RECOMMENDS=$(extract_deps "Recommends")
-          SUGGESTS=$(extract_deps "Suggests")
-
-          # Validate extraction results
-          BUILD_COUNT=$(echo "$BUILD_DEPS" | wc -w)
-          RUNTIME_COUNT=$(echo "$RUNTIME_DEPS" | wc -w)
-
-          echo "📊 Extraction results:"
-          echo "  - Build dependencies: $BUILD_COUNT packages"
-          echo "  - Runtime dependencies: $RUNTIME_COUNT packages"
-          echo "  - Recommended packages: $(echo "$RECOMMENDS" | wc -w) packages"
-          echo "  - Suggested packages: $(echo "$SUGGESTS" | wc -w) packages"
-
-          if [ $BUILD_COUNT -eq 0 ] && [ $RUNTIME_COUNT -eq 0 ]; then
-            echo "❌ No dependencies extracted! This might indicate a parsing error."
-            echo "Control file content:"
-            head -20 "$CONTROL_FILE"
+          if ! ./scripts/verify-dependencies.sh \
+            "$CONTROL_FILE" \
+            "$REPORT" \
+            "$TARGET_OS" \
+            "$TARGET_ARCH" \
+            "$TARGET_CODENAME"; then
+            echo "❌ Dependency verification script failed with exit code $?"
+            echo "::error::Dependency verification failed for $TARGET_ARCH on $TARGET_OS ($TARGET_CODENAME)"
             exit 1
           fi
 
-          # Update package cache with retry
-          echo "📥 Updating package cache..."
-          for i in {1..3}; do
-            if sudo apt-get update -qq; then
-              break
-            elif [ $i -eq 3 ]; then
-              echo "❌ Failed to update package cache after 3 attempts"
-              exit 1
-            else
-              echo "⚠️ Package cache update failed, retrying in 10s..."
-              sleep 10
-            fi
-          done
-
-          # Enhanced dependency checking function
-          check_dependencies() {
-            local label="$1"
-            local pkgs="$2"
-            local is_critical="$3"
-            local fail=0
-            local total=0
-            local available=0
-
-            echo "" >> "$REPORT"
-            echo "## $label" >> "$REPORT"
-
-            if [ -z "$pkgs" ]; then
-              echo "- ℹ️ No $label specified" >> "$REPORT"
-              return 0
-            fi
-
-            for pkg in $pkgs; do
-              total=$((total + 1))
- 
-              # Skip empty package names
-              [ -z "$pkg" ] && continue
-
-              # Check if package is available
-              if apt-cache show "$pkg" > /dev/null 2>&1; then
-                # Get package version info
-                version=$(apt-cache policy "$pkg" 2>/dev/null | grep "Candidate:" | awk '{print $2}' || echo "unknown")
-                echo "- ✅ **$pkg** (version: $version)" >> "$REPORT"
-                available=$((available + 1))
-              else
-                echo "- ❌ **$pkg** - Package not found in repositories" >> "$REPORT"
-
-                # Try to find similar packages
-                similar=$(apt-cache search "^$pkg" 2>/dev/null | head -3 | cut -d' ' -f1 | tr '\n' ', ' | sed 's/,$//')
-                if [ -n "$similar" ]; then
-                  echo "  - 💡 Similar packages: $similar" >> "$REPORT"
-                fi
-
-                if [ "$is_critical" = "true" ]; then
-                  fail=1
-                fi
-              fi
-            done
-
-            # Add summary
-            echo "" >> "$REPORT"
-            echo "**Summary:** $available/$total packages available" >> "$REPORT"
-
-            if [ $fail -eq 1 ]; then
-              echo "⚠️ **Critical dependencies missing!**" >> "$REPORT"
-            fi
-
-            return $fail
-          }
-
-          # Check all dependency types
-          check_dependencies "🔨 Build Dependencies" "$BUILD_DEPS" "true" || exit 1
-          check_dependencies "🏃 Runtime Dependencies" "$RUNTIME_DEPS" "true" || exit 1
-          check_dependencies "💡 Recommended Packages" "$RECOMMENDS" "false" || true
-          check_dependencies "🔧 Suggested Packages" "$SUGGESTS" "false" || true
-
-          # Add final summary
-          cat >> "$REPORT" << EOF
-
-          ---
-
-          ## ✅ Verification Complete
-
-          All dependencies are accessible for ${{ matrix.arch }} on ${{ matrix.os }} (${{ matrix.codename }}).
-
-          EOF
-
-          # Cleanup temporary file if created
-          if [ -n "${TEMP_CONTROL_FILE:-}" ] && [ -f "$TEMP_CONTROL_FILE" ]; then
-            rm -f "$TEMP_CONTROL_FILE"
-            echo "🧹 Cleaned up temporary control file"
-          fi
+          echo "✅ Dependency verification completed successfully"
 
       - name: Validate report was generated
         run: |
@@ -339,4 +103,3 @@ jobs:
           echo "This indicates build or runtime dependencies are missing."
           echo "Please review the generated report and update the control file or repository configuration."
           exit 1
-
