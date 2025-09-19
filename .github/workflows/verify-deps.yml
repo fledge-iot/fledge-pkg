@@ -1,0 +1,105 @@
+name: 🧪 Verify Package Dependencies
+
+on:
+  push:
+    branches: ['*']
+
+env:
+  DEBIAN_FRONTEND: noninteractive
+
+jobs:
+  verify-dependencies:
+    name: 🛠️ ${{ matrix.os }}-${{ matrix.arch }}
+    runs-on: ${{ matrix.runs_on }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            arch: x86_64
+            runs_on: ubuntu-22.04
+            codename: jammy
+          - os: ubuntu-22.04
+            arch: aarch64
+            runs_on: ubuntu-22.04
+            codename: jammy
+          - os: ubuntu-24.04
+            arch: x86_64
+            runs_on: ubuntu-24.04
+            codename: noble
+          - os: ubuntu-24.04
+            arch: aarch64
+            runs_on: ubuntu-24.04
+            codename: noble
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up environment
+        run: |
+          echo "CONTROL_FILE=packages/Debian/${{ matrix.arch }}/DEBIAN/control" >> $GITHUB_ENV
+          echo "REPORT=dep_report_${{ matrix.os }}_${{ matrix.arch }}.md" >> $GITHUB_ENV
+
+      - name: Validate control file exists
+        run: |
+          if [ ! -f "$CONTROL_FILE" ]; then
+            echo "❌ Control file missing: $CONTROL_FILE"
+            echo "Available files in packages/Debian/:"
+            find packages/Debian/ -name "control" 2>/dev/null || echo "No control files found"
+            exit 1
+          fi
+          echo "✅ Control file found: $CONTROL_FILE"
+
+      - name: Verify dependencies & generate report
+        env:
+          TARGET_OS: ${{ matrix.os }}
+          TARGET_ARCH: ${{ matrix.arch }}
+          TARGET_CODENAME: ${{ matrix.codename }}
+        run: |
+          # Run the dedicated dependency verification script with proper error handling
+          set -e  # Exit on any error
+          echo "🚀 Starting dependency verification..."
+
+          if ! ./scripts/verify-dependencies.sh \
+            "$CONTROL_FILE" \
+            "$REPORT" \
+            "$TARGET_OS" \
+            "$TARGET_ARCH" \
+            "$TARGET_CODENAME"; then
+            echo "❌ Dependency verification script failed with exit code $?"
+            echo "::error::Dependency verification failed for $TARGET_ARCH on $TARGET_OS ($TARGET_CODENAME)"
+            exit 1
+          fi
+
+          echo "✅ Dependency verification completed successfully"
+
+      - name: Validate report was generated
+        run: |
+          if [ ! -f "$REPORT" ] || [ ! -s "$REPORT" ]; then
+            echo "❌ Report file is missing or empty"
+            exit 1
+          fi
+          echo "✅ Report generated successfully ($(wc -l < "$REPORT") lines)"
+
+      - name: Add summary to job
+        if: always()
+        run: |
+          echo "# 📦 Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f "$REPORT" ]; then
+            cat "$REPORT" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Report generation failed" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Check for failures
+        if: failure()
+        run: |
+          echo "❌ Dependency verification failed for ${{ matrix.os }} (${{ matrix.arch }})"
+          echo "This indicates build or runtime dependencies are missing."
+          echo "Please review the generated report and update the control file or repository configuration."
+          exit 1
